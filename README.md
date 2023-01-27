@@ -1,5 +1,17 @@
 # prettymapr
+
 Make beautiful maps based on OSM in R
+
+## Installation
+
+Simply install from github.
+
+```
+devtools::install_github("da-wi/prettymapr",upgrade = "never",INSTALL_opts=c("--no-multiarch") )
+library(prettymapr)
+```
+
+## Example
 
 Try to create a beautiful postcard.
 
