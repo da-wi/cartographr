@@ -12,7 +12,10 @@ magrittr::`%>%`
 #' @param circle If TRUE draw circle plot
 #' @return NULL
 #' @export
-plot_map = function(osm_object, color, scaling, circle) {
+plot_map = function(osm, color, scaling, circle) {
+  
+  # copy osm_object
+  osm_object = osm
   
   use_bcircle <- circle
   
@@ -22,27 +25,65 @@ plot_map = function(osm_object, color, scaling, circle) {
   # my_bcircle as background
   my_bcircle <- c()
   
+  
+  options(warn=-1)
+  sf::sf_use_s2(F)
+  # water
+  osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines
+  osm_object$x.water$osm_polygons1 <- osm_object$x.water$osm_polygons
+  osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons
+  osm_object$x.sea$osm_polygons1 <- osm_object$x.sea$osm_polygons
+  osm_object$x.sea$osm_multipolygons1 <- osm_object$x.sea$osm_multipolygons
+  
+  osm_object$water <- dplyr::bind_rows(list(osm_object$x.water$osm_lines1 %>% sf::st_make_valid(),
+                                            osm_object$x.water$osm_polygons1  %>% sf::st_make_valid(),
+                                     osm_object$x.water$osm_multipolygons1 %>% sf::st_make_valid(),
+                                     osm_object$x.sea$osm_multipolygons1 %>% sf::st_make_valid(),
+                                     osm_object$x.sea$osm_polygons1 %>% sf::st_make_valid()))
+  osm_object$water.dis  <- sf::st_union(osm_object$water)
+  
+  # buidlings
+
+  osm_object$buildings <- list( osm_object$x1$osm_polygons, osm_object$x1$osm_multipolygons)
+  osm_object$buildings <- osm_object$buildings[!sapply(osm_object$buildings,is.null)]
+  osm_object$buildings.dis <- NULL
+  if (length(osm_object$buildings) > 1) {
+    osm_object$buildings.dis <- dplyr::bind_rows(osm_object$buildings)
+  } else {
+    osm_object$buildings.dis <- osm_object$buildings[[1]]
+  }
+
+  #if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
+  #if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
+  
+  
   # circle 
   if (use_bcircle) {
+    
     my_bcircle <- get_circle(osm_object$center,osm_object$y_distance,osm_object$x_distance)
     
     # decrease margin for circle
-    scaling <- scaling/1.41
+    scaling <- scaling/sqrt(2)
     
       osm_object$my_bbox <- sf::st_bbox(my_bcircle)
       osm_object$my_bbox[c(1,2)] <- osm_object$my_bbox[c(1,2)]-(osm_object$my_bbox[c(3,4)]-osm_object$my_bbox[c(1,2)])*0.02
       osm_object$my_bbox[c(3,4)] <- osm_object$my_bbox[c(3,4)]+(osm_object$my_bbox[c(3,4)]-osm_object$my_bbox[c(1,2)])*0.02
 
+      # streets
       if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- osm_object$x$osm_lines %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
-      if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
-      if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
+     
+      # buildings
+      if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- osm_object$buildings.dis %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )
       
-      if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines <- osm_object$x.water$osm_lines %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
-      if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons <- osm_object$x.water$osm_multipolygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
-      if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon <-  osm_object$x.water$osm_polygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
+      # for some magical reason, one needs to create a copy for water polygons to make it work. No idea why. # TODO
+      #if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  %>%  sf::st_make_valid() 
+      #if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons %>% sf::st_intersection(., my_bcircle ) 
+      #if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon1 <-  osm_object$x.water$osm_polygons %>% sf::st_intersection(., my_bcircle ) 
       
-      if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons <-  osm_object$x.sea$osm_multipolygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
-      if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons <-  osm_object$x.sea$osm_polygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle ) 
+      #if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons1 <-  osm_object$x.sea$osm_multipolygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
+      #if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons1 <-  osm_object$x.sea$osm_polygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle ) 
+      
+      if(!is.null(osm_object$water.dis)) osm_object$water.dis <- osm_object$water.dis %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  %>%  sf::st_make_valid() 
       
       if(!is.null(osm_object$x.green$osm_multipolygons)) osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
       if(!is.null(osm_object$x.green$osm_polygons)) osm_object$x.green$osm_polygons <-  osm_object$x.green$osm_polygons %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )
@@ -54,9 +95,6 @@ plot_map = function(osm_object, color, scaling, circle) {
     
   }
   
-  
-  
-  
   # patterns for hatching
   df.point1 <- data.frame( x = seq(osm_object$my_bbox$xmin,osm_object$my_bbox$xmax,(osm_object$my_bbox$xmax-osm_object$my_bbox$xmin)/300),id = 1)
   df.point2 <-  data.frame( y = seq(osm_object$my_bbox$ymin,osm_object$my_bbox$ymax,(osm_object$my_bbox$ymax-osm_object$my_bbox$ymin)/300), id = 1)                       
@@ -65,34 +103,47 @@ plot_map = function(osm_object, color, scaling, circle) {
   df.point <- df.point %>% sf::st_as_sf(coords = c(1,2))
   sf::st_crs(df.point) <- 4326
   
-  ggplot2::ggplot(osm_object$x$osm_lines) +
+  #df.point[sf::st_intersects(df.point,osm_object$x.water$osm_multipolygons1) %>% lengths > 0,] %>% 
+  df.point.gg <- df.point[sf::st_intersects(df.point,osm_object$water.dis) %>% lengths > 0,] 
+  
+  # create a list of ggobjects for water
+  gg.water <- list(ggplot2::geom_sf(data =osm_object$x.water$osm_lines1, fill = color$water, color= color$water, size = 1),
+                   ggplot2::geom_sf(data =osm_object$x.water$osm_multipolygons1, fill = color$water, color =color$water),
+                   ggplot2::geom_sf(data =osm_object$x.water$osm_polygons1, fill = color$water, color =color$water),
+                   ggplot2::geom_sf(data =osm_object$x.sea$osm_polygons1, fill = color$water, color =color$water),
+                   ggplot2::geom_sf(data =osm_object$x.sea$osm_multipolygons1, fill = color$water, color =color$water))
+  
+  p <- ggplot2::ggplot() +
     # add background
     {if(use_bcircle) ggplot2::geom_sf(data=my_bcircle, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$my_bbox), fill=color$background,color=NA)} +
     
-    # add layers on top
-    {if(!is.null(osm_object$x.water$osm_lines)) ggplot2::geom_sf(data =osm_object$x.water$osm_lines, fill = color$water, color= color$water, size = 1)} +
-    {if(!is.null(osm_object$x.water$osm_multipolygons)) ggplot2::geom_sf(data =osm_object$x.water$osm_multipolygons, fill = color$water, color =color$water)} +
-    {if(!is.null(osm_object$x.water$osm_polygons)) ggplot2::geom_sf(data =osm_object$x.water$osm_polygons, fill = color$water, color =color$water)} +
-    {if(!is.null(osm_object$x.sea$osm_polygons)) ggplot2::geom_sf(data =osm_object$x.sea$osm_polygons, fill = color$water, color =color$water)} +
-    {if(!is.null(osm_object$x.sea$osm_multipolygons)) ggplot2::geom_sf(data =osm_object$x.sea$osm_multipolygons, fill = color$water, color =color$water)} +
+    
+    ### add layers on top
+    # water
+    # BEWARE: when using {if} the original osm_object is used (important, when cropped!)
+    # a list containing NULL will simply ignore NULL entries
+    ggplot2::geom_sf(data =osm_object$water.dis, fill = color$water, color= color$water) +
 
-    {if(!is.null(osm_object$x.water$osm_multipolygons) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_multipolygons) %>% lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
-    {if(!is.null(osm_object$x.water$osm_polygons) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_polygons) %>% lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
-    {if(!is.null(osm_object$x.sea$osm_multipolygons) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_multipolygons) %>% lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
-    {if(!is.null(osm_object$x.sea$osm_polygons) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_polygons) %>% lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
+    # water hatched
+    {if(!is.null(osm_object$x.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = 0.3, alpha=0.1 )}+
+    #{if(!is.null(osm_object$x.water$osm_multipolygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_multipolygons1) %>% lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
+    #{if(!is.null(osm_object$x.water$osm_polygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_polygons1) %>% lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
+    #{if(!is.null(osm_object$x.sea$osm_multipolygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_multipolygons1) %>% lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
+    #{if(!is.null(osm_object$x.sea$osm_polygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_polygons1) %>% lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
     
-    
+    # green, beach & parking
     ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) + # "#2F3737"
     ggplot2::geom_sf(data =osm_object$x.green$osm_polygons, fill = color$green, color= NA, linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.beach$osm_multipolygons, fill = color$beach, color= NA, linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.parking$osm_multipolygons, fill = color$parking, color= NA, linewidth=0.05) +
   
-    
+    # railway
     {if(!is.null(osm_object$x.railway$osm_lines))
       ggplot2::geom_sf(data =osm_object$x.railway$osm_lines %>% dplyr::filter(if (!is.null(osm_object$x.railway$osm_lines$tunnel)) is.na(osm_object$x.railway$osm_lines$tunnel) else rep(TRUE,dim(osm_object$x.railway$osm_lines)[1])),
                        linetype = "11",
                        color=color$railway, linewidth = 0.5)} +
     
+    # streets
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "primary") , color=color$street, linewidth=4*scale_factor) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "secondary") , color=color$street, linewidth=4*scale_factor) +
@@ -101,34 +152,42 @@ plot_map = function(osm_object, color, scaling, circle) {
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "residential") , color=color$street, linewidth=3*scale_factor) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "service") , color=color$street, linewidth=1*scale_factor) +
-    #geom_sf(data =x$osm_lines %>% filter(highway == "footway") , color=color$street, linewidth=0.5/color$scale) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "living_street") , color=color$street, linewidth=1*scale_factor) +
-    
-    ggplot2::geom_sf(data =osm_object$x1$osm_multipolygons, ggplot2::aes(fill = colors),show.legend = F, color= NA, linewidth = 0*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x1$osm_polygons, ggplot2::aes(fill = colors), show.legend = F,color= NA, linewidth =0*scale_factor)+ # "#2F3737"
+
+    # buildings
+    #ggplot2::geom_sf(data =osm_object$x1$osm_multipolygons, ggplot2::aes(fill = colors),show.legend = F, color= NA, linewidth = 0*scale_factor)+
+    #ggplot2::geom_sf(data =osm_object$x1$osm_polygons, ggplot2::aes(fill = colors), show.legend = F,color= NA, linewidth =0*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F,color= NA, linewidth =0*scale_factor)+
     ggplot2::scale_fill_manual(values=color$palette_building)+
-    
-    #labs(caption=center[3])+
+
+    # remove axes
     ggplot2::theme_void()+
     
+    # theme text and background
     ggplot2::theme(
       axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*2.845276, color="#292e28", family = color$font),
       panel.border = ggplot2::element_rect(colour = NA, fill=NA),#color$street 
-      panel.background = ggplot2::element_rect(fill="white", color=NA),
+      panel.background = ggplot2::element_rect(fill=NA, color=NA),
       plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28"),
-      plot.caption = ggplot2::element_text(size=scale_factor*40*2.845276,family = color$font ,face = "bold",hjust = 0.5,colour = "#292e28"),
+      plot.caption = ggplot2::element_text(size=scale_factor*30*2.845276,family = color$font ,face = "bold",hjust = 0.5,vjust=1,colour = "#292e28"),
       plot.subtitle = ggplot2::element_text(size=scale_factor*10*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28"),
       plot.margin = ggplot2::margin(t = 100*scaling[1], r = 80*scaling[2], b = 80*scaling[1], l = 80*scaling[2], unit = "mm")
       #plot.margin = ggplot2::margin(t = 0, r = 0, b = 0, l = 0, unit = "mm")
       )+
     
-    {if(use_bcircle) ggplot2::labs( caption = stringr::str_to_lower(center[3])) else ggplot2::labs( title=stringr::str_to_lower(center[3])) } +
-    ggplot2::labs(x = stringr::str_to_lower("artmaps::"))+
+    # add text
+    {if(use_bcircle) ggplot2::labs( caption = stringr::str_to_lower(paste0("\n\n",center[3]))) else ggplot2::labs( title=stringr::str_to_lower(center[3])) } +
+    # ggplot2::labs(x = stringr::str_to_lower("artmaps::"))+
     
+    # set coordinates 
     ggplot2::coord_sf(xlim = c(osm_object$my_bbox[1]+(osm_object$my_bbox[3]-osm_object$my_bbox[1])/20,
                                osm_object$my_bbox[3]-(osm_object$my_bbox[3]-osm_object$my_bbox[1])/20),
                       ylim = c(osm_object$my_bbox[2]+(osm_object$my_bbox[4]-osm_object$my_bbox[2])/20, 
                                osm_object$my_bbox[4]-(osm_object$my_bbox[4]-osm_object$my_bbox[2])/20))
+  
+    options(warn=0)
+    return(p)
+  
 }
 
 
@@ -241,9 +300,8 @@ get_osmdata <- function(center, y_distance, x_distance) {
   osm$x1$osm_polygons <- osm$x1$osm_polygons %>%
     {if (!is.null(osm$x1$osm_polygons$tunnel)) dplyr::filter( osm$x1$osm_polygons, is.na(tunnel) == TRUE) else .}
   
-  osm$x1$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_polygons)[1], replace = T)
-  osm$x1$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_multipolygons)[1], replace = T)
-  #x1$osm_polygons  <- x1$osm_polygons %>% filter(!grepl("Charles de Gaulle", name))
+  if(!is.null(osm$x1$osm_polygons)) osm$x1$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_polygons)[1], replace = T)
+  if(!is.null(osm$x1$osm_multipolygons)) osm$x1$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_multipolygons)[1], replace = T)
   
   cat("Fill in water..\n")
   osm$x.water <- q.water %>% osmdata::osmdata_sf()
