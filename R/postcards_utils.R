@@ -27,6 +27,7 @@ plot_map = function(osm, color, scaling, circle) {
   
   
   options(warn=-1)
+  
   sf::sf_use_s2(F)
   # water
   osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines
@@ -35,11 +36,11 @@ plot_map = function(osm, color, scaling, circle) {
   osm_object$x.sea$osm_polygons1 <- osm_object$x.sea$osm_polygons
   osm_object$x.sea$osm_multipolygons1 <- osm_object$x.sea$osm_multipolygons
   
-  osm_object$water <- dplyr::bind_rows(list(osm_object$x.water$osm_lines1 %>% sf::st_make_valid(),
-                                            osm_object$x.water$osm_polygons1  %>% sf::st_make_valid(),
-                                     osm_object$x.water$osm_multipolygons1 %>% sf::st_make_valid(),
-                                     osm_object$x.sea$osm_multipolygons1 %>% sf::st_make_valid(),
-                                     osm_object$x.sea$osm_polygons1 %>% sf::st_make_valid()))
+  osm_object$water <- dplyr::bind_rows(list(if (!is.null(osm_object$x.water$osm_lines1)) osm_object$x.water$osm_lines1 %>% sf::st_make_valid(),
+                                            if (!is.null(osm_object$x.water$osm_polygons1)) osm_object$x.water$osm_polygons1  %>% sf::st_make_valid(),
+                                            if (!is.null(osm_object$x.water$osm_multipolygons1)) osm_object$x.water$osm_multipolygons1 %>% sf::st_make_valid(),
+                                            if (!is.null(osm_object$x.sea$osm_multipolygons1)) osm_object$x.sea$osm_multipolygons1 %>% sf::st_make_valid(),
+                                            if (!is.null(osm_object$x.sea$osm_polygons1)) osm_object$x.sea$osm_polygons1 %>% sf::st_make_valid()))
   osm_object$water.dis  <- sf::st_union(osm_object$water)
   
   # buidlings
@@ -71,7 +72,9 @@ plot_map = function(osm, color, scaling, circle) {
 
       # streets
       if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- osm_object$x$osm_lines %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
-     
+      if(!is.null(osm_object$x$osm_points)) osm_object$x$osm_points <- osm_object$x$osm_points %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )  
+      
+      
       # buildings
       if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- osm_object$buildings.dis %>%  sf::st_make_valid() %>% sf::st_intersection(., my_bcircle )
       
@@ -125,7 +128,7 @@ plot_map = function(osm, color, scaling, circle) {
     ggplot2::geom_sf(data =osm_object$water.dis, fill = color$water, color= color$water) +
 
     # water hatched
-    {if(!is.null(osm_object$x.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = 0.3, alpha=0.1 )}+
+    {if(!is.null(osm_object$water.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = 0.3, alpha=0.1 )}+
     #{if(!is.null(osm_object$x.water$osm_multipolygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_multipolygons1) %>% lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
     #{if(!is.null(osm_object$x.water$osm_polygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_polygons1) %>% lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
     #{if(!is.null(osm_object$x.sea$osm_multipolygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_multipolygons1) %>% lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
@@ -153,7 +156,8 @@ plot_map = function(osm, color, scaling, circle) {
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "service") , color=color$street, linewidth=1*scale_factor) +
     ggplot2::geom_sf(data =osm_object$x$osm_lines %>% dplyr::filter(highway == "living_street") , color=color$street, linewidth=1*scale_factor) +
-
+    {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x$osm_points, color=color$lights, size=0.2*scale_factor)} +
+    
     # buildings
     #ggplot2::geom_sf(data =osm_object$x1$osm_multipolygons, ggplot2::aes(fill = colors),show.legend = F, color= NA, linewidth = 0*scale_factor)+
     #ggplot2::geom_sf(data =osm_object$x1$osm_polygons, ggplot2::aes(fill = colors), show.legend = F,color= NA, linewidth =0*scale_factor)+
@@ -168,7 +172,7 @@ plot_map = function(osm, color, scaling, circle) {
       axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*2.845276, color="#292e28", family = color$font),
       panel.border = ggplot2::element_rect(colour = NA, fill=NA),#color$street 
       panel.background = ggplot2::element_rect(fill=NA, color=NA),
-      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28"),
+      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28",margin=margin(0,0,30*scale_factor,0)),
       plot.caption = ggplot2::element_text(size=scale_factor*30*2.845276,family = color$font ,face = "bold",hjust = 0.5,vjust=1,colour = "#292e28"),
       plot.subtitle = ggplot2::element_text(size=scale_factor*10*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28"),
       plot.margin = ggplot2::margin(t = 100*scaling[1], r = 80*scaling[2], b = 80*scaling[1], l = 80*scaling[2], unit = "mm")
@@ -244,7 +248,7 @@ get_osmdata <- function(center, y_distance, x_distance) {
   my_bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
   
   q <- osmdata::opq(bbox = place) %>%
-    osmdata::add_osm_feature("highway", c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","footway", "pedestrian")) 
+    osmdata::add_osm_feature("highway", c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian")) 
   
   q1 <- osmdata::opq(bbox = place) %>%
     osmdata::add_osm_feature("building")
@@ -255,6 +259,7 @@ get_osmdata <- function(center, y_distance, x_distance) {
   q.sea <- osmdata::opq(bbox = place) %>%
     osmdata::add_osm_features(c(
       "\"natural\"=\"water\"",
+      "\"natural\"=\"strait\"",
       "\"natural\"=\"bay\""))
   
   q.green <- osmdata::opq(bbox = place) %>%
@@ -402,7 +407,7 @@ save_map <- function(p, outdir, osm_object, scaling, color, format) {
 #'
 #' This function creates a theme
 #'
-#' @param palette The color palette
+#' @param palette The color palette. Control appearance of street lamps by setting a color (= shown) or NULL (leave blank, = not shown)
 #' @return A color palette for plot_map()
 #' @export
 get_theme = function(palette, font) {
@@ -445,7 +450,7 @@ get_theme = function(palette, font) {
     color$water <- "#192058"
     color$green <- "#2B2F77"
     color$railway <- "#1b1b1b"
-    
+    color$lights <- "#F7E7C2" # "#f7f7c8"
     color$beach <- "#2F2352"
     color$parking <- "#2F2352"
     color$street <- "#1C1F31"
@@ -455,14 +460,14 @@ get_theme = function(palette, font) {
   
   # IMHOF
   if (palette == "imhof") {
-    color$palette_building = c("#423a40","#473F45", "#4F464D") 
-    color$railway <- "#A12B3F"
-    color$green <- "#cad8b5"
-    color$water <- "#2d796f" #"#97B2B9"
-    color$background <- "#97B2B9" # "#D3CCAF" #"#192058"
-    color$street <- "#97B2B9" # "#B4D3DB"
-    color$beach <- "#FCE19C"
-    color$parking <- "#F2F4CB"
+    color$palette_building = c("#73664d","#88754E", "#5A4925") 
+    color$railway <- "#bd4833"
+    color$green <- "#bdddb0"
+    color$water <- "#eefaee" #"#97B2B9"
+    color$background <- "#fef7d1" # "#D3CCAF" #"#192058"
+    color$street <- "#bdddb0" # "#B4D3DB"
+    color$beach <- "#fef7d1"
+    color$parking <- "#bdddb0"
     color$hatched <- FALSE
   }
   
@@ -493,7 +498,7 @@ get_theme = function(palette, font) {
   }
   
   # ABC
-  if (palette == "abc") {
+  if (palette == "amsterdam") {
     color$palette_building = c("#ED6012","#046D69", "#383922")
     color$railway <- "#1b1b1b"
     color$green <- "#7C6236"
@@ -505,54 +510,7 @@ get_theme = function(palette, font) {
     color$hatched <- FALSE
   }
   
-  if (palette == "bauhaus") {
-    color$palette_building = c("#b92c35","#b92c35", "#b92c35")
-    color$railway <- "#1b1b1b"
-    color$green <- "#f1b719"
-    color$water <- "#25628a" #"#97B2B9"
-    color$background <- "#f8ede3" # "#D3CCAF" #"#192058"
-    color$street <- "#f8ede3"
-    color$beach <- "#E5DBA9"
-    color$parking <- "#E5DBA9"
-    color$hatched <- FALSE
-  }
   
-  
-  if (palette == "ottowagner") {
-    color$palette_building = c("#E9E6D7","#F8F4E9", "#E9E6D7")
-    color$railway <- "#1b1b1b"
-    color$green <- "#fc6257"
-    color$water <- "#f4bf70" #"#97B2B9"
-    color$background <- "#f5f2ee" # "#D3CCAF" #"#192058"
-    color$street <- "#A4A8A4"
-    color$beach <- "#D1B488"
-    color$parking <- "#D1B488"
-    color$hatched <- FALSE
-  }
-  
-  if (palette == "corbusier") {
-    color$palette_building = c("#ff643d","#ff643d", "#ff643d")
-    color$railway <- "#1b1b1b"
-    color$green <- "#e8f7d1"
-    color$water <- "#a5c1cf" #"#97B2B9"
-    color$background <- "#e8f7d1" # "#D3CCAF" #"#192058"
-    color$street <- "#0f0f0e"
-    color$beach <- "#e8f7d1"
-    color$parking <- "#e8f7d1"
-    color$hatched <- FALSE
-  }
-  
-  if (palette == "wesanderson") {
-    color$palette_building = c("#dea286","#dea286", "#dea286")
-    color$railway <- "#1b1b1b"
-    color$green <- "#e8f7d1"
-    color$water <- "#a5c1cf" #"#97B2B9"
-    color$background <- "#e8f7d1" # "#D3CCAF" #"#192058"
-    color$street <- "#0f0f0e"
-    color$beach <- "#e8f7d1"
-    color$parking <- "#e8f7d1"
-    color$hatched <- FALSE
-  }
   
   if (palette == "berlin") {
     color$palette_building = c("#ff643d","#80321F", "#E65A37")
@@ -566,17 +524,18 @@ get_theme = function(palette, font) {
     color$hatched <- TRUE
   }
   
-  if (palette == "dreamy") {
-    color$palette_building = c("#cdb4db","#ffc8dd", "#ffc8dd")
-    color$railway <- "#ffafcc"
-    color$green <- "#ffafcc"
-    color$water <- "#a2d2ff" 
-    color$background <- "#bde0fe"
-    color$street <- "#bde0fe"
-    color$beach <- "#bde0fe"
-    color$parking <- "#bde0fe"
-    color$hatched <- FALSE
+  if (palette == "wesanderson") {
+    color$palette_building = c("#fdbcbc","#edf6e5", "#d4a19b")
+    color$railway <- "#3d504f"
+    color$green <- "#c1e4da"
+    color$water <- "#b2e2ea" #"#97B2B9"
+    color$background <- "#c1e4da" # "#D3CCAF" #"#192058"
+    color$street <- "#c1e4da"
+    color$beach <- "#c1e4da"
+    color$parking <- "#c1e4da"
+    color$hatched <- TRUE
   }
+  
   
   return(color)
 }
