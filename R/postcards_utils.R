@@ -41,7 +41,7 @@ plot_map = function(osm, color, scaling, circle) {
                                             if (!is.null(osm_object$x.water$osm_multipolygons1)) osm_object$x.water$osm_multipolygons1 %>% sf::st_make_valid(),
                                             if (!is.null(osm_object$x.sea$osm_multipolygons1)) osm_object$x.sea$osm_multipolygons1 %>% sf::st_make_valid(),
                                             if (!is.null(osm_object$x.sea$osm_polygons1)) osm_object$x.sea$osm_polygons1 %>% sf::st_make_valid()))
-  osm_object$water.dis  <- sf::st_union(osm_object$water)
+  osm_object$water.dis  <- sf::st_union(osm_object$water[1:dim(osm_object$water)[1],])
   
   # buidlings
 
@@ -172,7 +172,7 @@ plot_map = function(osm, color, scaling, circle) {
       axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*2.845276, color="#292e28", family = color$font),
       panel.border = ggplot2::element_rect(colour = NA, fill=NA),#color$street 
       panel.background = ggplot2::element_rect(fill=NA, color=NA),
-      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28",margin=margin(0,0,30*scale_factor,0)),
+      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28",margin=ggplot2::margin(0,0,30*scale_factor,0)),
       plot.caption = ggplot2::element_text(size=scale_factor*30*2.845276,family = color$font ,face = "bold",hjust = 0.5,vjust=1,colour = "#292e28"),
       plot.subtitle = ggplot2::element_text(size=scale_factor*10*2.845276,family = color$font ,face = "bold",hjust = 1,colour = "#292e28"),
       plot.margin = ggplot2::margin(t = 100*scaling[1], r = 80*scaling[2], b = 80*scaling[1], l = 80*scaling[2], unit = "mm")
@@ -180,7 +180,7 @@ plot_map = function(osm, color, scaling, circle) {
       )+
     
     # add text
-    {if(use_bcircle) ggplot2::labs( caption = stringr::str_to_lower(paste0("\n\n",center[3]))) else ggplot2::labs( title=stringr::str_to_lower(center[3])) } +
+    {if(use_bcircle) ggplot2::labs( caption = stringr::str_to_lower(paste0("\n\n",osm$center[3]))) else ggplot2::labs( title=stringr::str_to_lower(osm$center[3])) } +
     # ggplot2::labs(x = stringr::str_to_lower("artmaps::"))+
     
     # set coordinates 
@@ -258,6 +258,8 @@ get_osmdata <- function(center, y_distance, x_distance) {
   
   q.sea <- osmdata::opq(bbox = place) %>%
     osmdata::add_osm_features(c(
+      "\"place\"=\"sea\"",
+      "\"place\"=\"ocean\"",
       "\"natural\"=\"water\"",
       "\"natural\"=\"strait\"",
       "\"natural\"=\"bay\""))
@@ -267,6 +269,7 @@ get_osmdata <- function(center, y_distance, x_distance) {
       "\"landuse\"=\"forest\"",
       "\"landuse\"=\"grass\"",
       "\"landuse\"=\"orchard\"",
+      "\"landuse\"=\"recreation_ground\"",
       "\"leisure\"=\"park\"",
       "\"natural\"=\"island\"",
       "\"natural\"=\"wood\""
@@ -458,6 +461,20 @@ get_theme = function(palette, font) {
     color$hatched <- FALSE
   }
   
+  # NIGHT arkham
+  if (palette == "arkham") {
+    color$palette_building = c("#012840","#012033", "#012840")
+    color$water <- "#012033"
+    color$green <- "#035080"
+    color$railway <- "#025E73"
+    color$lights <- "#7ADB9B" #"#04D98B" # "#F28B0C" # "#f7f7c8"
+    color$beach <- "#025E73"
+    color$parking <- "#025E73"
+    color$street <- "#025E73"
+    color$background <- "#025E73"
+    color$hatched <- FALSE
+  }
+  
   # IMHOF
   if (palette == "imhof") {
     color$palette_building = c("#73664d","#88754E", "#5A4925") 
@@ -525,15 +542,15 @@ get_theme = function(palette, font) {
   }
   
   if (palette == "wesanderson") {
-    color$palette_building = c("#fdbcbc","#edf6e5", "#d4a19b")
-    color$railway <- "#3d504f"
-    color$green <- "#c1e4da"
-    color$water <- "#b2e2ea" #"#97B2B9"
-    color$background <- "#c1e4da" # "#D3CCAF" #"#192058"
-    color$street <- "#c1e4da"
-    color$beach <- "#c1e4da"
-    color$parking <- "#c1e4da"
-    color$hatched <- TRUE
+    color$palette_building = c("#b79ea8","#a393a2", "#8a7e8c")
+    color$railway <- "#3b3633"
+    color$green <- "#e98c8a"
+    color$water <- "#ddeef2" #"#97B2B9"
+    color$background <- "#fbe4e4" # "#D3CCAF" #"#192058"
+    color$street <- "#fbe4e4"
+    color$beach <- "#e98c8a"
+    color$parking <- "#fbe4e4"
+    color$hatched <- T
   }
   
   
