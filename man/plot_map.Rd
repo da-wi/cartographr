@@ -4,14 +4,21 @@
 \alias{plot_map}
 \title{Plot a map}
 \usage{
-plot_map(osm_object, color, scaling)
+plot_map(
+  osm,
+  theme = get_theme("imhof", "Poppins"),
+  scaling = get_scaling("A4"),
+  circle = FALSE
+)
 }
 \arguments{
-\item{osm_object}{OSM object to plot}
-
-\item{color}{Color theme applied to the plot}
+\item{osm}{OSM object to plot}
 
 \item{scaling}{scaling applied to the plot}
+
+\item{circle}{If TRUE draw circle plot}
+
+\item{color}{Color theme applied to the plot}
 }
 \description{
 This function plots a map

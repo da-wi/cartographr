@@ -1,22 +1,24 @@
 Package: prettymapr
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.1
+Title: Create print-ready prettymaps with R and ggplot2 based on OSM data. 
+Version: 0.1
 Authors@R: 
     person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre"))
 Description: Create prettymaps with R and ggplot2.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
 Imports:
 	osmdata,
 	ggplot2,
 	dplyr,
-	magrittr,
+	lwgeom,
 	showtext,
 	sysfonts,
 	sf,
 	stringr,
 	tibble
-
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

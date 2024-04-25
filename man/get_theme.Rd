@@ -4,10 +4,12 @@
 \alias{get_theme}
 \title{Create color theme}
 \usage{
-get_theme(palette)
+get_theme(palette, font = "Poppins")
 }
 \arguments{
-\item{palette}{The color palette}
+\item{palette}{The color palette. Control appearance of street lamps by setting a color (= shown) or NULL (leave blank, = not shown)}
+
+\item{font}{The font to be used. c("Poppins","Anton","Cinzel")}
 }
 \value{
 A color palette for plot_map()

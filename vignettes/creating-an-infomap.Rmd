@@ -1,0 +1,67 @@
+---
+title: "Creating an infomap"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating an infomap}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(prettymapr)
+```
+
+Setup the map parameters. `center` is a vector with longitude, latitude and a string as title. Furthermore, we define the extend of the OSM data in meters in `get_osmdata`.
+
+```{r define coordinates}
+center = c(52.51662838688512, 13.378704398130019, "BERLIN")
+osmdata::get_overpass_url()
+osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
+
+osm_object <- get_osmdata(center, 1200,1200*sqrt(2))
+```
+
+Load location of traffic accidents in Berlin for the year 2021. 
+
+```{r load accident locations, echo=F, message=F}
+df.accidents <- vroom::vroom("~/../Downloads/berlin_accidents.csv") |>
+  sf::st_as_sf(coords = c("XGCSWGS84", "YGCSWGS84"), crs=4326) |>
+  dplyr::mutate(i = dplyr::row_number()) |>
+  dplyr::filter(i <= 1000)
+```
+
+Plot the map
+
+```{r plot map, fig.dim=c(5.8,4.1), fig.dpi=72}
+p <- plot_map(osm_object, get_theme("bw"), get_scaling("A6"), F)  +
+  # add geom with coordinates of accidents
+  ggplot2::geom_sf(data = suppressMessages(sf::st_intersection(df.accidents, osm_object$my_bbox |> sf::st_as_sfc())), color="red")+
+  
+  # reset the boundary box after adding a new geom
+  adjust_display(osm_object) +
+  
+  # Set theme for labels
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(hjust = 0,face = "bold",colour = "#292e28"),
+    plot.margin = ggplot2::margin(t = 5, r = 5, b = 5, l = 5, unit = "mm"),
+    plot.caption = ggplot2::element_text(face="plain",size=8)
+  ) + 
+  
+  # Set labels
+  ggplot2::labs(title = "Traffic accidents in Berlin (2021)", caption="Dataset: govdata.de")
+
+p
+```
+
+Save map
+
+```{r save map}
+save_map(plot = p, filename=paste0("~/postcards/",osm_object$name,"_A3_",theme$name,".pdf"))
+```

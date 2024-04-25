@@ -1,0 +1,47 @@
+---
+title: "Creating a postcard"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating a postcard}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(prettymapr)
+```
+
+Setup the map parameters. `center` is a vector with longitude, latitude and a string as title. Furthermore, we define the extend of the OSM data in meters in `get_osmdata`.
+
+```{r define coordinates}
+center = c(53.54514883288921, 10.000039228206994, "HAMBURG")
+osmdata::get_overpass_url()
+osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
+
+osm_object_2 <- get_osmdata(center, 1200*sqrt(2),1200)
+scaling <- get_scaling("A6")
+theme <- get_theme("berlin", "Poppins")
+```
+
+Plot map
+
+```{r plot map, fig.dim=c(4.1,5.8), fig.dpi=72}
+p <- plot_map(osm_object_2, theme, scaling, F) +
+  theme_postcard_a6()+
+  ggplot2::theme(plot.background = ggplot2::element_rect(fill="#FFFFFE",color="#AAAAAA"))
+
+p
+```
+
+Save map
+
+```{r save map}
+save_map(plot = p, filename=paste0("~/postcards/",osm_object$name,"_A6_",theme$name,".pdf"))
+```

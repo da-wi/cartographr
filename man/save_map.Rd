@@ -4,20 +4,12 @@
 \alias{save_map}
 \title{Save map}
 \usage{
-save_map(p, outdir, osm_object, scaling, color, format)
+save_map(plot, filename)
 }
 \arguments{
-\item{p}{ggplot object}
+\item{plot}{ggplot object}
 
-\item{outdir}{output_filename}
-
-\item{osm_object}{osm_object}
-
-\item{scaling}{scaling}
-
-\item{color}{color}
-
-\item{format}{format}
+\item{filename}{filename}
 }
 \description{
 Save map on disk
