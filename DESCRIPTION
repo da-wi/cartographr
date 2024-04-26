@@ -22,3 +22,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://da-wi.github.io/cartographr/
