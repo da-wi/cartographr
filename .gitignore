@@ -2,3 +2,7 @@
 inst/doc
 docs
 .Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
