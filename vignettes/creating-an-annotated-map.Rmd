@@ -105,6 +105,6 @@ p
 
 `save_map()` can be used to store the print-ready plot object to the disk as a drawn object in `pdf` format. Default mode for storing the output is `portrait` mode. Here, we want `landscape` orientation and can do so using the `orientation` parameter. 
 
-```{r save map}
+```{r save map, eval=F}
 save_map(plot = p, filename=paste0("~/berlin_A3_bw.pdf"), orientation = "landscape")
 ```

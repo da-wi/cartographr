@@ -82,7 +82,7 @@ ggarrange(plotlist = df_coords$plot, ncol = 3)
 
 # Save map
 
-```{r save map}
+```{r save map, eval=F}
 df_coords |> 
     rowwise() |>
     mutate(res = save_map(plot = plot, filename=paste0("~/postcards/",name,"_A6_",color,".pdf")))
