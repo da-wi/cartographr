@@ -11,12 +11,12 @@ theme_postcard <- function(scaling = get_scaling("A4")) {
 
   return(ggplot2::theme_void()+
     ggplot2::theme(
-      axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*2.845276, color="#292e28", family = get_theme("imhof","Poppins")$font),
+      axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*2.845276, color="#292e28", family = get_color("imhof","Poppins")$font),
       panel.border = ggplot2::element_rect(colour = NA, fill=NA),
       panel.background = ggplot2::element_rect(fill=NA, color=NA),
-      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = get_theme("imhof","Poppins")$font ,face = "bold",hjust = 1,colour = "#292e28",margin=ggplot2::margin(0,0,30*scale_factor,0)),
-      plot.caption = ggplot2::element_text(size=scale_factor*30*2.845276,family = get_theme("imhof","Poppins")$font ,face = "bold",hjust = 0.5,vjust=1,colour = "#292e28"),
-      plot.subtitle = ggplot2::element_text(size=scale_factor*10*2.845276,family = get_theme("imhof","Poppins")$font ,face = "bold",hjust = 1,colour = "#292e28"),
+      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = get_color("imhof","Poppins")$font ,face = "bold",hjust = 1,colour = "#292e28",margin=ggplot2::margin(0,0,30*scale_factor,0)),
+      plot.caption = ggplot2::element_text(size=scale_factor*30*2.845276,family = get_color("imhof","Poppins")$font ,face = "bold",hjust = 0.5,vjust=1,colour = "#292e28"),
+      plot.subtitle = ggplot2::element_text(size=scale_factor*10*2.845276,family = get_color("imhof","Poppins")$font ,face = "bold",hjust = 1,colour = "#292e28"),
       plot.margin = ggplot2::margin(t = 100*scaling[1], r = 80*scaling[2], b = 80*scaling[1], l = 80*scaling[2], unit = "mm")
     ))
 }
@@ -269,15 +269,15 @@ get_border <- function(lat,lon,offlat,offlon) {
 }
 
 
-#' Retrieve OSM data
+#' Retrieve OSM data for urban environments
 #'
-#' This function retrieves OSM data
+#' This function retrieves OSM data with sensible defaults for cities
 #'
 #' @param lat Latitude WGS84
 #' @param lon Longitude WGS84
 #' @param y_distance Y distance in meters
 #' @param x_distance X distance in meters
-#' @return The shapefiles of buildings, streets, ..
+#' @return The shapefiles of buildings, streets, water, beaches, greens, ..
 #' @export
 get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
 
@@ -290,7 +290,7 @@ get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
 
   my_bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
 
-  q <- osmdata::opq(bbox = place) |>
+  q.street <- osmdata::opq(bbox = place) |>
     osmdata::add_osm_feature("highway", c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
 
   q1 <- osmdata::opq(bbox = place) |>
@@ -339,7 +339,7 @@ get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
   osm <- c()
 
   if(!quiet) cat("Creating street network..\n")
-  osm$x <- q |> osmdata::osmdata_sf()
+  osm$x <- q.street |> osmdata::osmdata_sf()
   osm$x$osm_lines <- osm$x$osm_lines |>
     dplyr::mutate(length = as.numeric(sf::st_length(osm$x$osm_lines))) |>
     dplyr::filter(length >= quantile(length,0.25))
@@ -453,7 +453,7 @@ save_map <- function(plot, filename, orientation = "portrait") {
 
 #' Create color theme
 #'
-#' This function creates a theme
+#' This function creates a color theme
 #'
 #' @param palette The color palette. Control appearance of street lamps by setting a color (= shown) or NULL (leave blank, = not shown)
 #' @param font The font to be used. c("Poppins","Anton","Cinzel")

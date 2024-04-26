@@ -23,7 +23,6 @@ In this vignette, you will learn how to add new information to a map. Here, we r
 ```{r setup}
 library(cartographr)
 library(ggplot2)
-library(vroom)
 library(dplyr)
 library(sf)
 library(osmdata)
@@ -33,13 +32,14 @@ First, we load the locations of traffic accidents in Berlin for the year 2021.
 
 
 ```{r load accident locations, echo=T, message=F}
-df.accidents <- vroom("~/../Downloads/berlin_accidents.csv") |>
+data("berlinaccidents") 
+
+df_accidents <- berlinaccidents |> 
  st_as_sf(coords = c("XGCSWGS84", "YGCSWGS84"), crs=4326, remove = F) |>
  slice_head(n = 500) |> 
  mutate(type = as.factor(ifelse(IstRad == 1, "Bike involved", "No bike involved")))
-  
 
-df.accidents |> head()
+df_accidents |> head()
 ```
 
 # Setup the map parameters
@@ -51,18 +51,18 @@ osmdata::get_overpass_url()
 osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
 
 
-df.berlin <- tibble(lat = c(52.516628),
+df_berlin <- tibble(lat = c(52.516628),
        lon = c(13.378704),
        y_distance = c(2400),
        x_distance = c(2400*sqrt(2)),
        name = c("berlin"))
 
-osm <- get_osmdata(df.berlin$lat, df.berlin$lon, df.berlin$y_distance,df.berlin$x_distance)
+osm <- get_osmdata(df_berlin$lat, df_berlin$lon, df_berlin$y_distance,df_berlin$x_distance)
 ```
 
 # Preprocess the osm data
 
-The function `preprocess_map()` prepares the osm data for printing and removes unnecessary props on the map. 
+The function `preprocess_map()` prepares the osm data by joining, preparing and removing props on the map. 
 
 ```{r preprocessing}
 osm_pps <- osm |> preprocess_map()
@@ -74,9 +74,9 @@ osm_pps <- osm |> preprocess_map()
 
 
 ```{r plot map, fig.dim=c(16.5,11.7), fig.dpi = 72, out.width="100%"}
-p <- osm_pps |> plot_map(theme = get_color("bwinv"),scaling = get_scaling("A3"))  +
+p <- osm_pps |> plot_map(color = get_color("bwinv"), scaling = get_scaling("A3"))  +
   # add geom with coordinates of accidents
-  geom_point(data = suppressMessages(sf::st_intersection(df.accidents,
+  geom_point(data = suppressMessages(sf::st_intersection(df_accidents,
                                                                osm_pps$my_bbox |> sf::st_as_sfc())),
              aes(x=XGCSWGS84,y=YGCSWGS84,color=type), size=5)+ # color="#FF474D")+
   

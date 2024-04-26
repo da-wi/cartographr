@@ -35,29 +35,29 @@ We have to provide `longitude`, `latitude`. Furthermore, we define the extend of
 osmdata::get_overpass_url()
 osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
 
-df.coords <- tibble(lat = c(53.54514883288921,47.374566535402685,48.873810503366016),
+df_coords <- tibble(lat = c(53.54514883288921,47.374566535402685,48.873810503366016),
        lon = c(10.000039228206994,8.538175481044222,2.2950207999211405),
        y_distance = rep(1200*sqrt(2), 3),
        x_distance = rep(1200,3),
        name = c("hamburg","zürich","paris"),
        color = c("berlin", "imhof","macau"))
 
-df.coords |> head()
+df_coords |> head()
 ```
 
 Having defined our input data, we can feed it into the `get_osmdata()` function. Afterwards, we directly preprocess the maps using `preprocess_map()` and store it in a new column called `osm_pps`. 
 
 ```{r retrieve data}
-df.coords <- df.coords |> 
+df_coords <- df_coords |> 
   rowwise() |>
   # 1. retrieve osm data
   mutate(osm = list(get_osmdata(lat, lon, y_distance, x_distance) )) |>
   # 2. preprocess data
-  mutate(osm_pps = list(preprocess_map(osm, circle = F))) |>
+  mutate(osm_pps = list(preprocess_map(osm))) |>
   # 3. remove rowwise() grouping
   ungroup()
 
-df.coords |> head()
+df_coords |> head()
 ```
 
 # Plot map
@@ -65,11 +65,11 @@ df.coords |> head()
 Now, we create ggplot2 objects for each prepocssed `osm_pps` object. 
 
 ```{r plot map, fig.dim=c(12,5.8), fig.dpi=72}
-df.coords <- df.coords |> 
+df_coords <- df_coords |> 
   rowwise() |>
   # Create ggplot2 objects
   mutate(plot = list(
-    plot_map(osm_pps, get_color(color), scaling = get_scaling("A6"))+
+    plot_map(osm_pps, color = get_color(color), scaling = get_scaling("A6"))+
     labs(title=name)+
     theme_postcard(get_scaling("A6"))+ 
     theme(plot.background =element_rect(fill="#FFFFFE",color="#AAAAAA"))
@@ -77,13 +77,13 @@ df.coords <- df.coords |>
   ) |>
   ungroup()
            
-ggarrange(plotlist = df.coords$plot, ncol = 3)
+ggarrange(plotlist = df_coords$plot, ncol = 3)
 ```
 
 # Save map
 
 ```{r save map}
-df.coords |> 
+df_coords |> 
     rowwise() |>
     mutate(res = save_map(plot = plot, filename=paste0("~/postcards/",name,"_A6_",color,".pdf")))
 ```
