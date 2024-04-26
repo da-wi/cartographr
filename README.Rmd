@@ -28,7 +28,7 @@ devtools::install_github("da-wi/cartographr",upgrade = "never",INSTALL_opts=c("-
 library(cartographr)
 ```
 
-## Getting stared
+## Getting started
 
 Try to create a beautiful poster.
 
