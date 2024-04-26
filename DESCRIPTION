@@ -11,12 +11,12 @@ RoxygenNote: 7.3.1
 Imports:
 	osmdata,
 	ggplot2,
+	ggpubr,
 	dplyr,
 	lwgeom,
 	showtext,
 	sysfonts,
 	sf,
-	stringr,
 	tibble
 Suggests: 
     knitr,
