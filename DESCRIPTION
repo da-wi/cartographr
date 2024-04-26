@@ -1,9 +1,9 @@
-Package: prettymapr
+Package: cartographr
 Title: Create print-ready prettymaps with R and ggplot2 based on OSM data. 
 Version: 0.1
 Authors@R: 
     person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre"))
-Description: Create prettymaps with R and ggplot2.
+Description: Create pretty maps with R and ggplot2.
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

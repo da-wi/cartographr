@@ -4,10 +4,12 @@
 \alias{get_circle}
 \title{Generate bounding circle}
 \usage{
-get_circle(center, y_distance, x_distance)
+get_circle(lat, lon, y_distance, x_distance)
 }
 \arguments{
-\item{center}{Center coordinate}
+\item{lat}{Latitude WGS84}
+
+\item{lon}{Longitude WGS84}
 
 \item{y_distance}{Y distance in meters}
 

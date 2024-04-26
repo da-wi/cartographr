@@ -4,12 +4,14 @@
 \alias{save_map}
 \title{Save map}
 \usage{
-save_map(plot, filename)
+save_map(plot, filename, orientation = "portrait")
 }
 \arguments{
 \item{plot}{ggplot object}
 
 \item{filename}{filename}
+
+\item{orientation}{'portrait' or 'landscape'}
 }
 \description{
 Save map on disk

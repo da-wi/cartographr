@@ -4,10 +4,12 @@
 \alias{get_osmdata}
 \title{Retrieve OSM data}
 \usage{
-get_osmdata(center, y_distance, x_distance)
+get_osmdata(lat, lon, y_distance, x_distance, quiet = F)
 }
 \arguments{
-\item{center}{Center coordinate}
+\item{lat}{Latitude WGS84}
+
+\item{lon}{Longitude WGS84}
 
 \item{y_distance}{Y distance in meters}
 

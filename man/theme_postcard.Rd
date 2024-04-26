@@ -4,7 +4,7 @@
 \alias{theme_postcard}
 \title{Postcard theme}
 \usage{
-theme_postcard(scale_factor)
+theme_postcard(scaling = get_scaling("A4"))
 }
 \arguments{
 \item{scale_factor}{The scale factor for output}
