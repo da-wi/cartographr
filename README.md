@@ -29,9 +29,7 @@ df_vienna <- tibble(lat = c(48.210),
 ```
 
 Next, we retrieve the osm data with `get_osmdata()` and clean the osm
-object using the `preprocess_map()` function. As this package is
-optimized for printing, the preprocessing step already includes the
-preferred output size.
+object using the `preprocess_map()` function. 
 
 ``` r
 osm <- get_osmdata(df_vienna$lat, df_vienna$lon, df_vienna$y_distance, df_vienna$x_distance) |>
