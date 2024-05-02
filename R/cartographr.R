@@ -30,10 +30,10 @@ theme_postcard <- function(scaling = get_scaling("A4")) {
 #' @return NULL
 #' @export
 adjust_display <- function(osm_object) {
-  return(ggplot2::coord_sf(xlim = c(osm_object$my_bbox[1]+(osm_object$my_bbox[3]-osm_object$my_bbox[1])/20,
-                           osm_object$my_bbox[3]-(osm_object$my_bbox[3]-osm_object$my_bbox[1])/20),
-                  ylim = c(osm_object$my_bbox[2]+(osm_object$my_bbox[4]-osm_object$my_bbox[2])/20,
-                           osm_object$my_bbox[4]-(osm_object$my_bbox[4]-osm_object$my_bbox[2])/20)))
+  return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1]+(osm_object$bbox[3]-osm_object$bbox[1])/20,
+                           osm_object$bbox[3]-(osm_object$bbox[3]-osm_object$bbox[1])/20),
+                  ylim = c(osm_object$bbox[2]+(osm_object$bbox[4]-osm_object$bbox[2])/20,
+                           osm_object$bbox[4]-(osm_object$bbox[4]-osm_object$bbox[2])/20)))
 }
 
 #' Preprocessing map
@@ -106,9 +106,9 @@ preprocess_map_circular = function(osm) {
   # decrease margin for circle
   # scaling <- scaling/sqrt(2)
 
-  osm_object$my_bbox <- sf::st_bbox(circle_extent)
-  osm_object$my_bbox[c(1,2)] <- osm_object$my_bbox[c(1,2)]-(osm_object$my_bbox[c(3,4)]-osm_object$my_bbox[c(1,2)])*0.02
-  osm_object$my_bbox[c(3,4)] <- osm_object$my_bbox[c(3,4)]+(osm_object$my_bbox[c(3,4)]-osm_object$my_bbox[c(1,2)])*0.02
+  osm_object$bbox <- sf::st_bbox(circle_extent)
+  osm_object$bbox[c(1,2)] <- osm_object$bbox[c(1,2)]-(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
+  osm_object$bbox[c(3,4)] <- osm_object$bbox[c(3,4)]+(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
 
   # streets
   if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- suppressMessages(osm_object$x$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
@@ -157,17 +157,20 @@ plot_map = function(osm, color = get_color("imhof", "Poppins"), scaling = get_sc
 
   osm_object <- osm
 
-  # patterns for hatching
-  df.point1 <- data.frame( x = seq(osm_object$my_bbox$xmin,osm_object$my_bbox$xmax,(osm_object$my_bbox$xmax-osm_object$my_bbox$xmin)/300),id = 1)
-  df.point2 <-  data.frame( y = seq(osm_object$my_bbox$ymin,osm_object$my_bbox$ymax,(osm_object$my_bbox$ymax-osm_object$my_bbox$ymin)/300), id = 1)
-  df.point <- dplyr::full_join(df.point1, df.point2, by = "id") |>
-    dplyr::select(-id)
-  df.point <- df.point |> sf::st_as_sf(coords = c(1,2))
-  sf::st_crs(df.point) <- 4326
+  if (color$hatched) {
+    # patterns for hatching
+    df.point <- merge(data.frame( x = seq(osm_object$bbox$xmin,osm_object$bbox$xmax,(osm_object$bbox$xmax-osm_object$bbox$xmin)/300)),
+          data.frame( y = seq(osm_object$bbox$ymin,osm_object$bbox$ymax,(osm_object$bbox$ymax-osm_object$bbox$ymin)/300)),all=TRUE)
+    df.point <- df.point |> sf::st_as_sf(coords = c(1,2))
+    sf::st_crs(df.point) <- 4326
 
-  #df.point[sf::st_intersects(df.point,osm_object$x.water$osm_multipolygons1) |> lengths > 0,] |>
-  suppressMessages(df.point.gg <- df.point[lengths(sf::st_intersects(df.point,osm_object$water.dis)) > 0,]) # %>% lengths > 0,]
+    # df.point[lengths(sf::st_intersects(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox))) > 0,])
 
+    # this is an expensive operation computationally
+    #suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
+    suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
+
+  }
     # create a list of ggobjects for water
   gg.water <- list(ggplot2::geom_sf(data =osm_object$x.water$osm_lines1, fill = color$water, color= color$water, size = 1),
                    ggplot2::geom_sf(data =osm_object$x.water$osm_multipolygons1, fill = color$water, color =color$water),
@@ -177,7 +180,7 @@ plot_map = function(osm, color = get_color("imhof", "Poppins"), scaling = get_sc
 
   p <- ggplot2::ggplot() +
     # add background
-    {if(osm_object$preprocessing == "circular") ggplot2::geom_sf(data=osm_object$circle_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$my_bbox), fill=color$background,color=NA)} +
+    {if(osm_object$preprocessing == "circular") ggplot2::geom_sf(data=osm_object$circle_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
 
 
     ### add layers on top
@@ -280,7 +283,7 @@ get_border <- function(lat,lon,offlat,offlon) {
 #' @return The shapefiles of buildings, streets, water, beaches, greens, ..
 #' @export
 get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
-
+#  cli::cli_progress_bar("Tasks", total = 5, type = "tasks")
 
   place <- get_border(as.numeric(lat),as.numeric(lon),y_distance,x_distance)
   coords_bbox <- as.numeric(stringr::str_split(osmdata::opq(bbox = place)$bbox,",")[[1]])
@@ -288,7 +291,7 @@ get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
   coords_bbox[4]-coords_bbox[2]
 
 
-  my_bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
+  bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
 
   q.street <- osmdata::opq(bbox = place) |>
     osmdata::add_osm_feature("highway", c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
@@ -334,17 +337,19 @@ get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
     ))
 
 
-  if(!quiet) cat("Getting data, be patient with requests failing..\n")
+  if(!quiet) cli::cli_alert_info("Retrieving data, be patient with requests failing.")
+  if(!quiet) cli::cli_alert_info(paste0("lat:",round(lat,2),", lon:",round(lon,2),", dy:",round(y_distance,2),", dx:", round(x_distance,2)))
 
   osm <- c()
 
-  if(!quiet) cat("Creating street network..\n")
+  if(!quiet) cli::cli_progress_step("Creating street network", spinner = T)
+
   osm$x <- q.street |> osmdata::osmdata_sf()
   osm$x$osm_lines <- osm$x$osm_lines |>
     dplyr::mutate(length = as.numeric(sf::st_length(osm$x$osm_lines))) |>
     dplyr::filter(length >= quantile(length,0.25))
 
-  if(!quiet) cat("Construct buildings..\n")
+  if(!quiet) cli::cli_progress_step("Constructing buildings", spinner = T)
   osm$x1 <- q1 |> osmdata::osmdata_sf()
   osm$x1$osm_polygons <- osm$x1$osm_polygons |>
     (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) dplyr::filter( osm$x1$osm_polygons, is.na(tunnel) == TRUE) else x)()
@@ -353,23 +358,28 @@ get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
   if(!is.null(osm$x1$osm_polygons)) osm$x1$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_polygons)[1], replace = T)
   if(!is.null(osm$x1$osm_multipolygons)) osm$x1$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_multipolygons)[1], replace = T)
 
-  if(!quiet) cat("Fill in water..\n")
+  if(!quiet) cli::cli_progress_step("Filling in water", spinner = T)
   osm$x.water <- q.water |> osmdata::osmdata_sf()
   osm$x.sea <- q.sea |> osmdata::osmdata_sf()
 
-  if(!quiet) cat("Plant trees..\n")
+  if(!quiet) cli::cli_progress_step("Planting trees", spinner = T)
   osm$x.green <- q.green |> osmdata::osmdata_sf()
 
-  if(!quiet) cat("Beach, parking..\n")
+
+  if(!quiet) cli::cli_progress_step("Creating parking spaces", spinner = T)
   osm$x.beach <- q.beach |> osmdata::osmdata_sf()
   osm$x.parking <- q.parking |> osmdata::osmdata_sf()
   osm$x.railway <- q.railway |> osmdata::osmdata_sf()
 
-  osm$my_bbox <- my_bbox
+  osm$bbox <- bbox
   osm$y_distance <- y_distance
   osm$x_distance <- x_distance
   osm$lat <- lat
   osm$lon <- lon
+  if(!quiet) cli::cli_progress_done()
+
+  if(!quiet) cli::cli_alert_success(crayon::blue("Complete."))
+
   return(osm)
 }
 
@@ -436,7 +446,7 @@ get_scaling <- function(format) {
 #' @export
 save_map <- function(plot, filename, orientation = "portrait") {
   if(!orientation %in% c('portrait','landscape'))
-    stop("Orientation not recognized. Try: 'portrait' or 'landscape'")
+    stop(rlang::format_error_bullets(x = c("Orientation not recognized. Try 'portrait' or 'landscape'")))
 
   w = ifelse (orientation == 'portrait', 594, 841)
   h = ifelse (orientation == 'portrait', 841, 594)
@@ -599,6 +609,44 @@ get_color = function(palette, font = "Poppins") {
     color$hatched <- T
   }
 
+  if (palette == "modern") {
+    color$palette_building <- c("#f2eeea","#dad2c6","#ded2c4")
+    color$water <- c("#5a95b8")
+    color$street <- c("#fefefe")
+    color$green <- c("#9bc2a6")
+    color$background <- c("#eceeec")
+    color$parking <- c("#f1f3f2")
+    color$railway <- c("#c2c2bf")
+    color$hatched <- FALSE
+    color$beach <- "#ded2c4"
+    color$parking <- "#fefefe"
+  }
+
+  if (palette == "bejing") {
+    color$palette_building <- c("#94adaa","#a0b3ad","#b4bbad")
+    color$water <- c("#353770")
+    color$street <- c("#4a3e88")
+    color$green <- c("#f5e0b3")
+    color$background <- c("#f5e0b3")
+    color$parking <- c("#f5e0b3")
+    color$railway <- c("#c2c2bf")
+    color$hatched <- FALSE
+    color$beach <- "#ded2c4"
+    color$parking <- "#fcf5d7"
+  }
+
+  if (palette == "darkmode") {
+    color$palette_building <- c("#1d2436","#283349","#1d2436")
+    color$water <- c("#06070b")
+    color$street <- c("#404b5d")
+    color$green <- c("#213d40")
+    color$background <- c("#283349")
+    color$parking <- c("#404b5d")
+    color$railway <- c("#c2c2bf")
+    color$hatched <- FALSE
+    color$beach <- "#283349"
+    color$parking <- "#283349"
+  }
 
   return(color)
 }

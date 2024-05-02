@@ -16,7 +16,8 @@ Imports:
 	showtext,
 	sysfonts,
 	sf,
-	tibble
+	tibble,
+	cli
 Suggests: 
     knitr,
     rmarkdown,

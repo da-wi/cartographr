@@ -1,6 +1,4 @@
 .onAttach <- function(libname, pkgname) {
-  # to show a startup message
-  packageStartupMessage("Loading fonts...")
   sysfonts::font_add("Poppins",
                      regular = system.file(package = "cartographr", "fonts","Poppins","Poppins-Regular.ttf", mustWork = T),
                      bold = system.file(package = "cartographr", "fonts","Poppins","Poppins-Bold.ttf", mustWork = T))
@@ -10,6 +8,5 @@
                      regular = system.file(package = "cartographr", "fonts","Cinzel","Cinzel-Regular.ttf", mustWork = T),
                      bold = system.file(package = "cartographr", "fonts","Cinzel","Cinzel-Regular.ttf", mustWork = T) )
   showtext::showtext_auto()
-  packageStartupMessage("Package ready.")
-
+  cli::cli_alert_success(paste0(crayon::blue("cartographr")," ready."), class = "packageStartupMessage",wrap = F)
 }
