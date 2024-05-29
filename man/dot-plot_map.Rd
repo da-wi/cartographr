@@ -16,4 +16,3 @@
 \description{
 This function plots a map
 }
-\keyword{internal}

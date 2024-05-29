@@ -164,11 +164,14 @@ preprocess_map = function(osm) {
 #' @return A preprocessed osm object
 #' @export
 cutout = function(osm, boundary = "rect") {
-  # scaling factor of output format for adjusting outer margins
-  # scale_factor <- mean(scaling[1],scaling[2])
+
   options(warn=-1)
 
-  osm_object = osm
+  osm_object <- osm
+
+  if (is.null(osm_object$preprocessed)) {
+    osm_object <- preprocess_map(osm_object)
+  }
   #osm = preprocess_map(osm) # should move to get_osmdata
 
   if (class(boundary) == "sf") {
@@ -225,6 +228,8 @@ cutout = function(osm, boundary = "rect") {
   if(!is.null(osm_object$x.railway$osm_lines))  suppressMessages(osm_object$x.railway$osm_lines <- osm_object$x.railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
 
   if (!is.null(cutout_extent)) osm_object$cutout_extent <- cutout_extent
+
+  options(warn=1)
   return(osm_object)
 }
 
@@ -272,6 +277,7 @@ plot_map <- function(osm, palette = "imhof") {
     ggnewscale::new_scale_fill()
 
   # Return a custom class object containing the plot and osm data
+  # for implicity adjusting the display
   structure(plot, class = c("cartographr_ggplot", class(plot)), osm = osm)
 }
 
@@ -283,10 +289,10 @@ plot_map <- function(osm, palette = "imhof") {
 #' @param palette Color theme applied to the plot
 #' @param circle If TRUE draw circle plot
 #' @return NULL
-#' @keywords internal
+#' @export
 .plot_map = function(osm, palette = "imhof") {
 
-  if (is.null(attr(osm,"preprocessed"))) {
+  if (is.null(osm$preprocessed)) {
     osm <- preprocess_map(osm)
   }
 
