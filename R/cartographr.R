@@ -1,24 +1,91 @@
+
 #' Postcard theme
+#'
+#' Description of the function
+#'
+#' @param font The font for output
+#' @return The theme
+theme_postcard <- function(font = "Poppins") {
+
+  scale_factor <- cartographr_env$scale_factor
+
+  return(ggplot2::theme_void()+
+    ggplot2::theme(
+      axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*.pt, color="#292e28", family = font),
+      panel.border = ggplot2::element_rect(colour = NA, fill=NA),
+      panel.background = ggplot2::element_rect(fill=NA, color=NA),
+      plot.title = ggplot2::element_text(size=scale_factor*40*.pt,family = font ,face = "bold",hjust = 1,colour = "#292e28",margin=ggplot2::margin(0,0,30*scale_factor,0)),
+      plot.caption = ggplot2::element_text(size=scale_factor*8*.pt,family = font ,face = "bold",hjust = 0.5,vjust=1,colour = "#cccccc"),
+      plot.subtitle = ggplot2::element_text(size=scale_factor*10*.pt,family = font ,face = "bold",hjust = 1,colour = "#292e28"),
+      plot.margin = ggplot2::margin(t = 100*scale_factor, r = 80*scale_factor, b = 80*scale_factor, l = 80*scale_factor, unit = "mm")
+    ))
+}
+
+#' Postcard theme
+#'
+#' Description of the function
+#'
+#' @return The theme
+#' @export
+theme_postcard_poppins <- function() {
+  return(theme_postcard(font = "Poppins"))
+}
+
+#' Postcard theme
+#'
+#' Description of the function
+#'
+#' @return The theme
+#' @export
+theme_postcard_anton <- function() {
+  return(theme_postcard(font = "Anton"))
+}
+
+
+theme_infomap <- function(font = "Poppins") {
+  if (!(font %in% c("Poppins","Anton","Cinzel"))) {
+    stop(cli::cli_abort("Font not found."))
+  }
+
+  #scale_factor <- mean(scaling[1],scaling[2])
+  scale_factor <- cartographr_env$scale_factor
+
+  return(ggplot2::theme_void()+
+           ggplot2::theme(
+             panel.border = ggplot2::element_rect(colour = NA, fill=NA),
+             panel.background = ggplot2::element_rect(fill=NA, color=NA),
+             plot.subtitle = ggplot2::element_text(size=scale_factor*10*.pt,family = font,face = "bold",hjust = 1,colour = "#292e28"),
+             plot.title = element_text(size = scale_factor*40*.pt,hjust = 0,face = "bold",family=font,colour = "#292e28"),
+             plot.margin = margin(t = 40*scale_factor, r = 10*scale_factor, b = 10*scale_factor, l = 10*scale_factor, unit = "mm"),
+             plot.caption = element_text(face="plain",size=scale_factor*8*.pt, hjust = 1,family=font,color="#CCCCCC"),
+             legend.position = "top",
+             legend.title = element_text(size = 10*scale_factor*.pt, family=font, color = "#292e28"),
+             legend.text = element_text(size = 10*scale_factor*.pt, family = font, color= "#292e28"),
+             legend.justification = c("right","top"),
+             legend.margin = margin(-18*scale_factor, 0, 0, 0, unit = "mm")
+           ))
+}
+
+#' Infomap theme with font Anton
 #'
 #' Description of the function
 #'
 #' @param scale_factor The scale factor for output
 #' @return The theme
 #' @export
-theme_postcard <- function(scaling = get_scaling("A4")) {
+theme_infomap_anton <- function() {
+  return(theme_infomap(font = "Anton"))
+}
 
-  scale_factor <- mean(scaling[1],scaling[2])
-
-  return(ggplot2::theme_void()+
-    ggplot2::theme(
-      axis.title.x = ggplot2::element_text(hjust=1, size=scale_factor*5*2.845276, color="#292e28", family = get_color("imhof","Poppins")$font),
-      panel.border = ggplot2::element_rect(colour = NA, fill=NA),
-      panel.background = ggplot2::element_rect(fill=NA, color=NA),
-      plot.title = ggplot2::element_text(size=scale_factor*40*2.845276,family = get_color("imhof","Poppins")$font ,face = "bold",hjust = 1,colour = "#292e28",margin=ggplot2::margin(0,0,30*scale_factor,0)),
-      plot.caption = ggplot2::element_text(size=scale_factor*30*2.845276,family = get_color("imhof","Poppins")$font ,face = "bold",hjust = 0.5,vjust=1,colour = "#292e28"),
-      plot.subtitle = ggplot2::element_text(size=scale_factor*10*2.845276,family = get_color("imhof","Poppins")$font ,face = "bold",hjust = 1,colour = "#292e28"),
-      plot.margin = ggplot2::margin(t = 100*scaling[1], r = 80*scaling[2], b = 80*scaling[1], l = 80*scaling[2], unit = "mm")
-    ))
+#' Infomap theme with font Anton
+#'
+#' Description of the function
+#'
+#' @param scale_factor The scale factor for output
+#' @return The theme
+#' @export
+theme_infomap_poppins <- function() {
+  return(theme_infomap(font = "Poppins"))
 }
 
 
@@ -78,12 +145,14 @@ preprocess_map = function(osm) {
     osm_object$buildings.dis <- osm_object$buildings[[1]]
   }
 
-  #if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., circle_extent )
-  #if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., circle_extent )
+  #if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
+  #if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
 
-  osm_object$preprocessing <- "rectangular"
+  #osm_object$preprocessing <- "rectangular"
+  osm_object$preprocessing <- "rect"
+  osm_object$preprocessed <- TRUE
+  # osm_object <- cutout(osm_object)
   return(osm_object)
-
 }
 
 
@@ -94,66 +163,137 @@ preprocess_map = function(osm) {
 #' @param osm The osm_object with stored bbox
 #' @return A preprocessed osm object
 #' @export
-preprocess_map_circular = function(osm) {
+cutout = function(osm, boundary = "rect") {
   # scaling factor of output format for adjusting outer margins
   # scale_factor <- mean(scaling[1],scaling[2])
-
   options(warn=-1)
-  osm_object = preprocess_map(osm)
 
-  circle_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
+  osm_object = osm
+  #osm = preprocess_map(osm) # should move to get_osmdata
+
+  if (class(boundary) == "sf") {
+    cutout_extent = cutout
+    osm_object$preprocessing <- "sf"
+  }
+
+  if (class(boundary) == "character") {
+    if (boundary == "circle") {
+      cutout_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
+      osm_object$preprocessing <- "circle"
+    }
+
+    if (boundary == "hex") {
+      cutout_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
+      osm_object$preprocessing <- "hex"
+    }
+
+    if (boundary == "rect") {
+      cutout_extent <- osm_object$bbox |> sf::st_as_sfc()
+    }
+  }
 
   # decrease margin for circle
   # scaling <- scaling/sqrt(2)
 
-  osm_object$bbox <- sf::st_bbox(circle_extent)
+  osm_object$bbox <- sf::st_bbox(cutout_extent)
   osm_object$bbox[c(1,2)] <- osm_object$bbox[c(1,2)]-(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
   osm_object$bbox[c(3,4)] <- osm_object$bbox[c(3,4)]+(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
 
   # streets
-  if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- suppressMessages(osm_object$x$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
-  if(!is.null(osm_object$x$osm_points)) osm_object$x$osm_points <- suppressMessages(osm_object$x$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
+  if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- suppressMessages(osm_object$x$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$x$osm_points)) osm_object$x$osm_points <- suppressMessages(osm_object$x$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
 
 
   # buildings
-  if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
+  if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
 
   # TODO
   # for some magical reason, one needs to create a copy for water polygons to make it work. No idea why.
-  #if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(., circle_extent )  |>  sf::st_make_valid()
-  #if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons |> sf::st_intersection(., circle_extent )
-  #if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon1 <-  osm_object$x.water$osm_polygons |> sf::st_intersection(., circle_extent )
-  #if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons1 <-  osm_object$x.sea$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., circle_extent )
-  #if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons1 <-  osm_object$x.sea$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., circle_extent )
+  #if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )  |>  sf::st_make_valid()
+  #if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons |> sf::st_intersection(., cutout_extent )
+  #if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon1 <-  osm_object$x.water$osm_polygons |> sf::st_intersection(., cutout_extent )
+  #if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons1 <-  osm_object$x.sea$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
+  #if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons1 <-  osm_object$x.sea$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
 
-  if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent )  |>  sf::st_make_valid())
-  if(!is.null(osm_object$x.green$osm_multipolygons)) suppressMessages(osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
-  if(!is.null(osm_object$x.green$osm_polygons)) suppressMessages(osm_object$x.green$osm_polygons <-  osm_object$x.green$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
+  if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent )  |>  sf::st_make_valid())
+  if(!is.null(osm_object$x.green$osm_multipolygons)) suppressMessages(osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$x.green$osm_polygons)) suppressMessages(osm_object$x.green$osm_polygons <-  osm_object$x.green$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
 
-  if(!is.null(osm_object$x.beach$osm_multipolygons)) suppressMessages(osm_object$x.beach$osm_multipolygons <-  osm_object$x.beach$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
-  if(!is.null(osm_object$x.parking$osm_multipolygons)) suppressMessages(osm_object$x.parking$osm_multipolygons <-  osm_object$x.parking$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
+  if(!is.null(osm_object$x.beach$osm_multipolygons)) suppressMessages(osm_object$x.beach$osm_multipolygons <-  osm_object$x.beach$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$x.parking$osm_multipolygons)) suppressMessages(osm_object$x.parking$osm_multipolygons <-  osm_object$x.parking$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
 
-  if(!is.null(osm_object$x.railway$osm_lines))  suppressMessages(osm_object$x.railway$osm_lines <- osm_object$x.railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, circle_extent ))
+  if(!is.null(osm_object$x.railway$osm_lines))  suppressMessages(osm_object$x.railway$osm_lines <- osm_object$x.railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
 
-  osm_object$preprocessing <- "circular"
-  if (!is.null(circle_extent)) osm_object$circle_extent <- circle_extent
+  if (!is.null(cutout_extent)) osm_object$cutout_extent <- cutout_extent
   return(osm_object)
 }
 
+
+
+#' Print Custom ggplot Object
+#'
+#' This function takes a custom ggplot object, extracts the ggplot object,
+#' retrieves the bounding box (bbox) from the associated osm data, and adjusts
+#' the display before printing the plot.
+#'
+#' @param x A custom ggplot object with an attribute "osm" containing osm data.
+#' @param ... Additional arguments passed to the print method.
+#'
+#' @return The function does not return a value but prints the ggplot object.
+#' @export
+print.cartographr_ggplot <- function(x, ...) {
+  # print(x)
+  # Extract the ggplot object from the custom class
+  plot <- x
+
+  # Get the bounding box (bbox) from the osm data
+  osm <- attr(x,"osm")
+
+  # Add coord_sf with the calculated limits
+  plot <- plot + adjust_display(osm)
+
+  plot(plot)
+}
+
+#' Wrapper function for plot_map
+#'
+#' This function plots a map
+#'
+#' @param osm OSM object to plot
+#' @param palette Color theme applied to the plot
+#' @param scaling scaling applied to the plot
+#' @param circle If TRUE draw circle plot
+#' @return NULL
+#' @export
+plot_map <- function(osm, palette = "imhof") {
+  # Call the original plot_map function
+  plot <- .plot_map(osm, palette) +
+    ggnewscale::new_scale_color()+
+    ggnewscale::new_scale_fill()
+
+  # Return a custom class object containing the plot and osm data
+  structure(plot, class = c("cartographr_ggplot", class(plot)), osm = osm)
+}
 
 #' Plot a map
 #'
 #' This function plots a map
 #'
 #' @param osm OSM object to plot
-#' @param color Color theme applied to the plot
-#' @param scaling scaling applied to the plot
+#' @param palette Color theme applied to the plot
 #' @param circle If TRUE draw circle plot
 #' @return NULL
-#' @export
-plot_map = function(osm, color = get_color("imhof", "Poppins"), scaling = get_scaling("A4")) {
+#' @keywords internal
+.plot_map = function(osm, palette = "imhof") {
 
-  scale_factor <- mean(scaling[1], scaling[2])
+  if (is.null(attr(osm,"preprocessed"))) {
+    osm <- preprocess_map(osm)
+  }
+
+  color = get_color(palette)
+
+  #scale_factor <- mean(scaling[1], scaling[2])
+  scale_factor <- cartographr_env$scale_factor
 
   osm_object <- osm
 
@@ -180,7 +320,7 @@ plot_map = function(osm, color = get_color("imhof", "Poppins"), scaling = get_sc
 
   p <- ggplot2::ggplot() +
     # add background
-    {if(osm_object$preprocessing == "circular") ggplot2::geom_sf(data=osm_object$circle_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
+    {if(osm_object$preprocessing == "circle") ggplot2::geom_sf(data=osm_object$cutout_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
 
 
     ### add layers on top
@@ -227,18 +367,16 @@ plot_map = function(osm, color = get_color("imhof", "Poppins"), scaling = get_sc
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes
-    ggplot2::theme_void()+
-
-    # add text
-    #
-    # {if(use_bcircle) ggplot2::labs( caption = stringr::str_to_lower(paste0("\n\n",osm$center[3]))) else ggplot2::labs( title=stringr::str_to_lower(osm$center[3])) } +
-
-    adjust_display(osm)
+    ggplot2::theme_void()
 
     options(warn=0)
-    p$scaling <- scaling
+    #p$scaling <- scaling
+
+    p$scale_factor <- scale_factor
     return(p)
 }
+
+
 
 #' Calculate rectengular border given the coordinates
 #'
@@ -380,6 +518,7 @@ get_osmdata <- function(lat, lon, y_distance, x_distance, quiet = F) {
 
   if(!quiet) cli::cli_alert_success(crayon::blue("Complete."))
 
+
   return(osm)
 }
 
@@ -401,39 +540,6 @@ get_circle <- function(lat,lon,y_distance,x_distance) {
     sf::st_transform(crs = 4326))
 }
 
-#' Get scaling for a paper format
-#'
-#' Retrieve correct scaling value based on size A1 = default
-#'
-#' @param format Paper format
-#' @return The scaling.
-#' @export
-get_scaling <- function(format) {
-  if (!format %in% c("A1","A2","A3","A4","A5","A6","small_poster","medium_poster","large_poster") )
-    stop("Format not recognized. Try: A1,A2,A3,A4,A5,A6,small_poster,medium_poster,large_poster")
-
-  scaling <- c()
-
-
-  if(format == "A1") scaling = c(1,1)
-  if(format == "A2") scaling = c(1/sqrt(2), 1/sqrt(2))
-  if(format == "A3") scaling = c(1/2, 1/2)
-  if(format == "A4") scaling = c(1/(sqrt(2)*2), 1/(sqrt(2)*2))
-  if(format == "A5") scaling = c(1/(2*2), 1/(2*2))
-  if(format == "A6") scaling = c(1/(4*sqrt(2)), 1/(4*sqrt(2)))
-
-  # 11 x 17in
-  if(format == "small_poster") scaling = c(1/(841/432),1/(594/279))
-
-  # 18 x 24in
-  if(format == "medium_poster") scaling = c(1/(841/609.6),1/(594/457.2))
-
-  # 24 x 36in
-  if(format == "large_poster") scaling = c(1/(841/914.4),1/(594/609.6))
-
-  return (scaling)
-}
-
 
 #' Save map
 #'
@@ -444,35 +550,32 @@ get_scaling <- function(format) {
 #' @param orientation 'portrait' or 'landscape'
 #' @return NULL
 #' @export
-save_map <- function(plot, filename, orientation = "portrait") {
-  if(!orientation %in% c('portrait','landscape'))
-    stop(rlang::format_error_bullets(x = c("Orientation not recognized. Try 'portrait' or 'landscape'")))
+save_map <- function(plot, filename) {
+  if(!cartographr_env$orientation %in% c('portrait','landscape'))
+    stop(cli::cli_abort("Orientation not recognized. Try 'portrait' or 'landscape'"))
 
-  w = ifelse (orientation == 'portrait', 594, 841)
-  h = ifelse (orientation == 'portrait', 841, 594)
+  # if scale factors do not match anymore, we have to redraw the plot
+  if (p$scale_factor != cartographr_env$scale_factor) {
+    cli::cli_alert_warning("`output_size` was changed after creating the plot, you might get unexpected results.")
+  }
 
-  ggplot2::ggsave(plot=plot,filename=filename,
+  ggplot2::ggsave(plot=plot,
+                  filename=filename,
                   device = grDevices::cairo_pdf,
-                  width = w*plot$scaling[2],
-                  height = h*plot$scaling[1],
+                  width = cartographr_env$output_size[1],
+                  height = cartographr_env$output_size[2],
                   units = "mm")
 }
-
-
-
 
 #' Create color theme
 #'
 #' This function creates a color theme
 #'
 #' @param palette The color palette. Control appearance of street lamps by setting a color (= shown) or NULL (leave blank, = not shown)
-#' @param font The font to be used. c("Poppins","Anton","Cinzel")
 #' @return A color palette for plot_map()
 #' @export
-get_color = function(palette, font = "Poppins") {
+get_color = function(palette) {
   color <- c()
-
-  color$font <- font
 
   color$name <- palette
 
@@ -650,5 +753,3 @@ get_color = function(palette, font = "Poppins") {
 
   return(color)
 }
-
-#' @import lwgeom

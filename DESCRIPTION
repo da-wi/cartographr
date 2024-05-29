@@ -9,15 +9,17 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Imports:
+	cli,
 	osmdata,
 	ggplot2,
+        ggnewscale,
+	grid,
 	dplyr,
 	lwgeom,
 	showtext,
 	sysfonts,
 	sf,
-	tibble,
-	cli
+	tibble
 Suggests: 
     knitr,
     rmarkdown,

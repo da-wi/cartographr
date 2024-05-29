@@ -4,7 +4,7 @@
 \alias{save_map}
 \title{Save map}
 \usage{
-save_map(plot, filename, orientation = "portrait")
+save_map(plot, filename)
 }
 \arguments{
 \item{plot}{ggplot object}
