@@ -1,5 +1,5 @@
 Package: cartographr
-Title: Create print-ready prettymaps with R and ggplot2 based on OSM data. 
+Title: Create print-ready prettymaps with R and ggplot2 based on OSM data
 Version: 0.1
 Authors@R: 
     person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre"))
@@ -10,16 +10,15 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Imports:
 	cli,
+        crayon,
 	osmdata,
 	ggplot2,
         ggnewscale,
 	grid,
-	dplyr,
 	lwgeom,
 	showtext,
 	sysfonts,
-	sf,
-	tibble
+	sf
 Suggests: 
     knitr,
     rmarkdown,

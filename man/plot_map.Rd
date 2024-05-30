@@ -10,10 +10,6 @@ plot_map(osm, palette = "imhof")
 \item{osm}{OSM object to plot}
 
 \item{palette}{Color theme applied to the plot}
-
-\item{scaling}{scaling applied to the plot}
-
-\item{circle}{If TRUE draw circle plot}
 }
 \description{
 This function plots a map

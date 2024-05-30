@@ -4,16 +4,25 @@
 \alias{get_osmdata}
 \title{Retrieve OSM data for urban environments}
 \usage{
-get_osmdata(lat, lon, y_distance, x_distance, quiet = F)
+get_osmdata(
+  lat,
+  lon,
+  x_distance = NULL,
+  y_distance = NULL,
+  aspect_ratio = NULL,
+  quiet = F
+)
 }
 \arguments{
 \item{lat}{Latitude WGS84}
 
 \item{lon}{Longitude WGS84}
 
+\item{x_distance}{X distance in meters}
+
 \item{y_distance}{Y distance in meters}
 
-\item{x_distance}{X distance in meters}
+\item{aspect_ratio}{aspect ratio between width and height}
 }
 \value{
 The shapefiles of buildings, streets, water, beaches, greens, ..

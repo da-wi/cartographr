@@ -10,8 +10,6 @@ save_map(plot, filename)
 \item{plot}{ggplot object}
 
 \item{filename}{filename}
-
-\item{orientation}{'portrait' or 'landscape'}
 }
 \description{
 Save map on disk

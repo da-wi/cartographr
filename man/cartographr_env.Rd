@@ -5,7 +5,7 @@
 \alias{cartographr_env}
 \title{Package Configuration Environment}
 \format{
-An object of class \code{environment} of length 3.
+An object of class \code{environment} of length 4.
 }
 \usage{
 cartographr_env
