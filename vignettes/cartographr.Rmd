@@ -32,7 +32,7 @@ Next, we retrieve the openstreet map data with `get_osmdata()`. Here, a width of
 osm <- get_osmdata(48.210, 16.371, x_distance = 1200)
 ```
 
-The `osm` object is a list with all our geometrical shapes stored in it (buildings, rivers, parks, ...). The map can be simply created using `plot_map()` function. Additionally, we can directly set the appearance of our map using themes. Here, we decide on making a poster of Vienna using the `theme_poster()`.
+The `osm` object is a list with all our geometrical shapes stored in it (buildings, rivers, parks, ...). The map can be simply created using `plot_map()` function. Additionally, we can directly set the appearance of our map using themes. Here, we decide on making a poster of Vienna using the `theme_poster()`. There are also different color palettes for the map, have a look at `get_palette()` to get an idea of which color palettes exist and how to create your own color palette.
 
 ```{r eval=FALSE}
 plot_vienna <- osm |> plot_map(palette = "barcelona") +

@@ -1,8 +1,8 @@
 ---
-title: "Creating postcards"
+title: "Creating multiple posters"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Creating postcards}
+  %\VignetteIndexEntry{Creating posters}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to create postcards (or also posters, when used with larger output formats).
+This vignette shows how to create _multiple_ posters (or also postcards, when used with larger output formats) at once.
 
 ```{r setup}
 library(cartographr)
@@ -29,14 +29,10 @@ library(dplyr)
 We have to provide `longitude`, `latitude`. Furthermore, we define the extend of the OSM data in meters in `get_osmdata`. Here, we will use a map width of 1200 _m_. Also, in this example we will create several instances for different maps (cities).
 
 ```{r define coordinates}
-osmdata::get_overpass_url()
-#osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
-osmdata::set_overpass_url("https://overpass-api.de/api/interpreter")
- 	
 cartographr::set_output_size("A6")
 
-df_coords <- tibble(lat = c(48.873810503366016, 53.54514883288921,47.374566535402685),
-       lon = c(2.2950207999211405,10.000039228206994,8.538175481044222),
+df_coords <- tibble(lat = c(48.873, 53.545,47.374),
+       lon = c(2.2950,10.000,8.538),
        x_distance = rep(1200,3),
        name = c("paris","hamburg","zürich"),
        color = c("tropical","autumn", "imhof"))
@@ -44,7 +40,7 @@ df_coords <- tibble(lat = c(48.873810503366016, 53.54514883288921,47.37456653540
 df_coords |> head()
 ```
 
-Having defined our input data, we can feed it into the `get_osmdata()` function. Afterwards, we directly preprocess the maps using `preprocess_map()` and store it in a new column called `osm_pps`. 
+Having defined our input data, we can feed it into the `get_osmdata()` function. 
 
 ```{r retrieve data}
 df_coords <- df_coords |> 
@@ -58,7 +54,7 @@ df_coords |> head()
 
 # Plot map
 
-Now, we create ggplot2 objects for each prepocssed `osm_pps` object. 
+Now, we create ggplot2 objects for each city with an `osm` list. 
 
 ```{r plot map}
 df_coords <- df_coords |> 
@@ -72,13 +68,19 @@ df_coords <- df_coords |>
   ) 
 ```
 
-```{r print a postcard, fig.dim=c(5,7), fig.dpi=72}
-df_coords$output
+```{r print a poster, fig.dim=c(5,7), fig.dpi=72}
+# Print out the first poster
+df_coords$output[[1]]
+# Print out the second poster
+df_coords$output[[2]]
+# Print out the third poster
+df_coords$output[[3]]
 ```
 
-# Save map
+# Save posters
 
 ```{r save map, eval=F}
 df_coords |> 
-    mutate(res = save_map(plot = output, filename=paste0("~/postcards/",name,"_A6_",color,".pdf")))
+    mutate(res = save_map(plot = output,
+                          filename = paste0("~/postcards/",name,"_A6_",color,".pdf")))
 ```
