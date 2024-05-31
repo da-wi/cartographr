@@ -18,6 +18,8 @@ A \code{ggplot} object representing the map with the chosen palette.
 This function takes an osmdata (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using \code{ggplot2} with the specified color palette.
 }
 \examples{
+\dontrun{
 # Assuming 'osm_data' is a preloaded OSM object
 plot_map(osm_data, palette = "imhof")
+}
 }

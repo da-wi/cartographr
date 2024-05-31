@@ -1,37 +1,49 @@
+---
+title: "Introduction to cartographr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to cartographr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-## Getting started
-
-Try to create a beautiful poster.
-
-1. Define the coordinates of the center, as well as the extend of the map in meters.
-
-```{r eval=FALSE}
-df_vienna <- tibble(lat = c(48.210),
-                    lon = c(16.371),
-                    y_distance = c(1200*sqrt(2)),
-                    x_distance = c(1200),
-                    name = c("vienna"))
+```{r, include = FALSE}
+library(stringr)
+knitr::opts_chunk$set(
+  comment = "#>", 
+  collapse = TRUE
+)
 ```
 
-Next, we retrieve the osm data with `get_osmdata()` and clean the osm object using the `preprocess_map()` function. As this package is optimized for printing, the preprocessing step already includes the preferred output size.
+
+## Basic workflow
+
+1. Define the [WGS84](https://de.wikipedia.org/wiki/World_Geodetic_System_1984) coordinates of the center, as well as the extend of the map in meters. As an example, we will create a plot of Vienna which has the geographical center of `latitude = 48.210` and `longitude = 16.371`. These coordinates can be found e.g. on the web. 
+
+2. Typically, you will then set the (globally defined) output size as the scaling of text and linewidth of geometries in your map will be scaled according to the final output size of your map. This ensures that printing in different output sizes always scales lines and text proportionally.
 
 ```{r eval=FALSE}
-osm <- get_osmdata(df_vienna$lat, df_vienna$lon, df_vienna$y_distance, df_vienna$x_distance) |>
-  preprocess_map()
+cartographr::set_output_size("A4")
 ```
 
-After cleaning the osm object from unwanted props, the map can be created using `plot_map()`. We use `theme_postcard()` as theme for the map, and tell the theme the preferred output size to adjust size of fonts, linewidths, etc.
+Next, we retrieve the openstreet map data with `get_osmdata()`. Here, a width of 1200 meters is set for the map with `x_distance` parameter. The height of the map is automatically calculated by the aspect ratio of the output size if it is omitted. 
 
 ```{r eval=FALSE}
-plot_vienna <- osm |> plot_map(color = get_color("barcelona"), scaling = get_scaling("A4")) +
-  theme_postcard(get_scaling("A4")) +
+osm <- get_osmdata(48.210, 16.371, x_distance = 1200)
+```
+
+The `osm` object is a list with all our geometrical shapes stored in it (buildings, rivers, parks, ...). The map can be simply created using `plot_map()` function. Additionally, we can directly set the appearance of our map using themes. Here, we decide on making a poster of Vienna using the `theme_poster()`.
+
+```{r eval=FALSE}
+plot_vienna <- osm |> plot_map(palette = "barcelona") +
+  theme_poster_poppins() +
   labs(title="vienna")
 
 plot_vienna
 ```
 
 ```{r echo=FALSE, fig.align='center', fig.cap='', out.width='100%'}
-knitr::include_graphics('man/figures/vienna_a4.png')
+knitr::include_graphics('vienna_a4.png')
 ```
 
 Lastly, we can save the map ready-to-print as pdf using `save_map()`.

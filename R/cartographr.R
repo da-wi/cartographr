@@ -163,10 +163,13 @@ print.cartographr_ggplot <- function(x, ...) {
 #' @param palette A character string specifying the name of the palette to use. The default is "imhof".
 #'
 #' @return A `ggplot` object representing the map with the chosen palette.
-#'
+
 #' @examples
+#' \dontrun{
 #' # Assuming 'osm_data' is a preloaded OSM object
 #' plot_map(osm_data, palette = "imhof")
+#' }
+#' @export
 plot_map <- function(osm, palette = "imhof") {
   # Call the original plot_map function
   plot <- .plot_map(osm, palette) +
