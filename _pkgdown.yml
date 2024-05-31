@@ -10,6 +10,7 @@ reference:
   - preprocess_map
   - get_border
   - get_circle
+  - get_hexagon
   - cutout
 
 - title: Map Plotting and Customization
