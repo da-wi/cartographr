@@ -21,6 +21,7 @@ Imports:
 	sysfonts,
 	sf
 Suggests:
+	dplyr,
 	knitr,
 	rmarkdown
 VignetteBuilder: 
