@@ -52,7 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/creating-an-annotated-map.html">Creating an annotated map</a>
-    <a class="dropdown-item" href="../articles/creating-postcards.html">Creating postcards</a>
+    <a class="dropdown-item" href="../articles/creating-posters.html">Creating multiple posters</a>
   </div>
 </li>
       </ul>
@@ -162,12 +162,9 @@ information to the map.</p>
 <h2 id="save-map">Save map<a class="anchor" aria-label="anchor" href="#save-map"></a>
 </h2>
 <p><code><a href="../reference/save_map.html">save_map()</a></code> can be used to store the print-ready plot
-object to the disk as a drawn object in <code>pdf</code> format. Default
-mode for storing the output is <code>portrait</code> mode. Here, we want
-<code>landscape</code> orientation and can do so using the
-<code>orientation</code> parameter.</p>
+object to the disk as a drawn object in <code>pdf</code> format.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">p</span>, filename<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"~/ny_crime.pdf"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">p</span>, filename <span class="op">=</span> <span class="st">"~/ny_crime.pdf"</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

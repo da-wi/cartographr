@@ -4,8 +4,8 @@ pkgdown_sha: ~
 articles:
   cartographr: cartographr.html
   creating-an-annotated-map: creating-an-annotated-map.html
-  creating-postcards: creating-postcards.html
-last_built: 2024-05-31T12:54Z
+  creating-posters: creating-posters.html
+last_built: 2024-05-31T13:31Z
 urls:
   reference: https://da-wi.github.io/cartographr/reference
   article: https://da-wi.github.io/cartographr/articles

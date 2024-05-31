@@ -52,7 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="articles/creating-an-annotated-map.html">Creating an annotated map</a>
-    <a class="dropdown-item" href="articles/creating-postcards.html">Creating postcards</a>
+    <a class="dropdown-item" href="articles/creating-posters.html">Creating multiple posters</a>
   </div>
 </li>
       </ul>
@@ -83,7 +83,7 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Make beautiful maps based on OSM in R</p>
+<p><em>cartographr</em> is designed to streamline the process of creating visually appealing, print-ready maps from OpenStreetMap data. It serves as a powerful tool for users looking to represent base maps and overlay additional information layers, much like the familiar ggplot2 syntax. The package simplifies the complex task of map-making by handling the intricacies of spatial data and cartographic aesthetics, allowing users to focus on the storytelling aspect of their maps. Whether for urban planning, environmental studies, or public presentations, this package offers a convenient and flexible way to transform raw geospatial data into informative, publication-quality visualizations, enhancing the communication of spatial information to a broad audience.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -95,6 +95,25 @@
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
+<p>The basic workflow consists of</p>
+<ol style="list-style-type: decimal">
+<li>Retrieving openstreet map data for a given area:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">osm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span>lat <span class="op">=</span>  <span class="fl">36.188</span>, lon <span class="op">=</span> <span class="op">-</span><span class="fl">115.176</span>, x_distance <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Plot the map</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/plot_map.html">plot_map</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Customize your map and explore visualization options</li>
+</ol>
+<p>With the <code><a href="reference/plot_map.html">plot_map()</a></code> function, you’re empowered to enhance your maps with additional layers of data using <code>ggplot2</code>, tailoring the final product to your specific needs. The function’s flexibility allows you to select from a variety of preset color palettes and themes to best suit your project’s requirements, or you can craft a unique aesthetic by creating your own. This adaptability makes it an ideal choice for anyone looking to present information on a map in a way that is both informative and visually engaging.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"arctic"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">location_tracking</span>, <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="reference/theme_infomap.html">theme_infomap</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data-licensing">Data licensing<a class="anchor" aria-label="anchor" href="#data-licensing"></a>

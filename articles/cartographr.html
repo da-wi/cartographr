@@ -52,7 +52,7 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/creating-an-annotated-map.html">Creating an annotated map</a>
-    <a class="dropdown-item" href="../articles/creating-postcards.html">Creating postcards</a>
+    <a class="dropdown-item" href="../articles/creating-posters.html">Creating multiple posters</a>
   </div>
 </li>
       </ul>
@@ -117,7 +117,10 @@ omitted.</p>
 stored in it (buildings, rivers, parks, …). The map can be simply
 created using <code><a href="../reference/plot_map.html">plot_map()</a></code> function. Additionally, we can
 directly set the appearance of our map using themes. Here, we decide on
-making a poster of Vienna using the <code><a href="../reference/theme_poster.html">theme_poster()</a></code>.</p>
+making a poster of Vienna using the <code><a href="../reference/theme_poster.html">theme_poster()</a></code>. There
+are also different color palettes for the map, have a look at
+<code><a href="../reference/get_palette.html">get_palette()</a></code> to get an idea of which color palettes exist
+and how to create your own color palette.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot_vienna</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"barcelona"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_poster_poppins.html">theme_poster_poppins</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
