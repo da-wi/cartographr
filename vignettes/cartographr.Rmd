@@ -49,7 +49,7 @@ knitr::include_graphics('vienna_a4.png')
 Lastly, we can save the map ready-to-print as pdf using `save_map()`.
 
 ```{r eval=FALSE}
-save_map(plot = plot.vienna, filename=paste0("~/vienna_a4.pdf"))
+save_map(plot = plot.vienna, filename=paste0("vienna_a4.pdf"))
 ```
 
 If you prefer a bitmap format, you can also directly call `ggsave()` from the `ggplot2()` package.
