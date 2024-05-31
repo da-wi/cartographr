@@ -77,3 +77,57 @@ get_circle <- function(lat,lon,y_distance,x_distance) {
            sf::st_buffer(dist = min(y_distance,x_distance)) |>
            sf::st_transform(crs = 4326))
 }
+
+#' Generate bounding hexagon
+#'
+#' This function generates a bounding hexagon
+#'
+#' @param lat Latitude WGS84
+#' @param lon Longitude WGS84
+#' @param y_distance Y distance in meters
+#' @param x_distance X distance in meters
+#' @return The hexagon
+#' @export
+get_hexagon <- function(lat, lon, y_distance, x_distance) {
+  n_sides <- 6
+  radius <- min(y_distance, x_distance)
+  earth_radius <- 6371000
+
+  lat_rad <- lat * (pi / 180)
+  lon_rad <- lon * (pi / 180)
+
+  angles <- seq(0, 2 * pi, length.out = n_sides + 1)
+
+  lat_hex <- numeric(n_sides)
+  lon_hex <- numeric(n_sides)
+
+  # Calculate the coordinates of the hexagon vertices using the haversine formula
+  for (i in 1:n_sides) {
+    bearing <- angles[i]
+
+    lat_hex[i] <- asin(sin(lat_rad) * cos(radius / earth_radius) +
+                         cos(lat_rad) * sin(radius / earth_radius) * cos(bearing))
+
+    lon_hex[i] <- lon_rad + atan2(sin(bearing) * sin(radius / earth_radius) * cos(lat_rad),
+                                  cos(radius / earth_radius) - sin(lat_rad) * sin(lat_hex[i]))
+
+    # Convert the radians back to degrees
+    lat_hex[i] <- lat_hex[i] * (180 / pi)
+    lon_hex[i] <- lon_hex[i] * (180 / pi)
+  }
+
+  # Create a data frame of the hexagon vertices
+  hex_coords <- data.frame(lat = lat_hex, lon = lon_hex)
+  #print(hex_coords)
+  # Convert the hexagon vertices into an sf object and set the CRS
+  #return(hex_coords)
+  hex_sf <- sf::st_as_sf(hex_coords, coords = c("lon", "lat"), crs = 4326)
+
+  # Combine the geometries (vertices) into a single polygon
+  combined_polygon <- sf::st_combine(hex_sf$geometry)
+
+  # Cast the combined geometry to a POLYGON
+  hex_polygon <- sf::st_cast(combined_polygon, "POLYGON")
+
+  return(hex_polygon)
+}

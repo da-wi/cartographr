@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this vignette, you will learn how to add new information to a map. Here, we retrieve a map for Berlin and get data for traffic accidents from _govdata.de_. 
+In this vignette, you will learn how to add new information to a map. Here, we retrieve a map of Manhattan, NYC. 
 
 
 ```{r setup}
@@ -25,78 +25,51 @@ library(cartographr)
 library(ggplot2)
 library(dplyr)
 library(sf)
-library(osmdata)
 ```
 
-First, we load the locations of traffic accidents in Berlin for the year 2021. 
+First, we load the locations of crimes in Manhattan. 
 
 
-```{r load accident locations, echo=T, message=F}
-data("berlinaccidents") 
-
-df_accidents <- berlinaccidents |> 
- st_as_sf(coords = c("XGCSWGS84", "YGCSWGS84"), crs=4326, remove = F) |>
- slice_head(n = 500) |> 
- mutate(type = as.factor(ifelse(IstRad == 1, "Bike involved", "No bike involved")))
-
-df_accidents |> head()
+```{r load crime locations, echo=T, message=F}
+data("crime") 
 ```
+
+# Convert longitude / latitude into a `sf`
+
+To add the crime locations in the dataset to our map, we harness the `sf` (simple features) package, which includes a lot of useful tools for working with geo data. To this end, we convert the dataset into a `sf` object using latitude and longitude.  
+
+```{r convert to sf}
+df_crime <- crime |> 
+ st_as_sf(coords = c("longitude", "latitude"), crs=4326, remove = F) |>
+ filter(date >= "2023-01-01" & date < "2024-01-01")
+
+df_crime |> head()
+```
+
+This can be achieved with the function `sf::st_as_sf()` using the coordinates from the dataset. 
 
 # Setup the map parameters
 
-We have to provide `longitude`, `latitude`. Furthermore, we define the extend of the OSM data in meters in `get_osmdata()`. 
+We have to provide `longitude`, `latitude` and `x_distance` (i.e., the width of the map in meters). Furthermore, we define the extend of the OSM data in meters in `get_osmdata()`. `y_distance` is calculated automatically using the output size aspect ratio. 
 
 ```{r define coordinates}
-osmdata::get_overpass_url()
-osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
-
-
-df_berlin <- tibble(lat = c(52.516628),
-       lon = c(13.378704),
-       y_distance = c(2400),
-       x_distance = c(2400*sqrt(2)),
-       name = c("berlin"))
-
-osm <- get_osmdata(df_berlin$lat, df_berlin$lon, df_berlin$y_distance,df_berlin$x_distance)
-```
-
-# Preprocess the osm data
-
-The function `preprocess_map()` prepares the osm data by joining, preparing and removing props on the map. 
-
-```{r preprocessing}
-osm_pps <- osm |> preprocess_map()
+set_output_size("A3", orientation = "portrait")
+osm <- get_osmdata(lat = 40.711, lon =-74.009, x_distance =  1300)
 ```
 
 # Plot the map
 
-`plot_map()` generates a `ggplot2` object using the color theme set as parameter. That means that we can easily adjust the plot using `ggplot2` commands and also add new information to the map. Note, that when adding a new `geom`, the coordinate system is reset, thus we need to reset the boundaries of the map using `adjust_display()`.
+`plot_map()` generates a `ggplot2` object using the color theme set as parameter. That means that we can easily adjust the plot using `ggplot2` commands and also add new information to the map.
 
-
-```{r plot map, fig.dim=c(16.5,11.7), fig.dpi = 72, out.width="100%"}
-p <- osm_pps |> plot_map(color = get_color("bwinv"), scaling = get_scaling("A3"))  +
-  # add geom with coordinates of accidents
-  geom_point(data = suppressMessages(sf::st_intersection(df_accidents,
-                                                               osm_pps$my_bbox |> sf::st_as_sfc())),
-             aes(x=XGCSWGS84,y=YGCSWGS84,color=type), size=5)+ # color="#FF474D")+
-  
-  # reset the boundary box after adding a new geom
-  adjust_display(osm_pps) +
-  
-  # Set theme for labels
-  theme(
-    plot.title = element_text(size = 24,hjust = 0,face = "bold",colour = "#292e28"),
-    plot.margin = margin(t = 5, r = 5, b = 5, l = 5, unit = "mm"),
-    plot.caption = element_text(face="plain",size=10),
-    legend.position = "top",
-    legend.justification = c("right","top"),
-    legend.margin = margin(-8, 0, 0, 0, unit = "mm")
-  ) + 
-  
+```{r plot map, fig.dim=c(11.7,16.5), fig.dpi = 72, out.width="100%"}
+p <- osm |> plot_map(palette = "metropolitan")  +
+  # add geom with crimes
+  geom_point(data = suppressMessages(sf::st_intersection(df_crime, osm$bbox |> sf::st_as_sfc())),
+             aes(x = longitude, y = latitude, shape = type), color="#222424", size=2) + 
+  theme_infomap_barlow() + 
   # Set labels
-  labs(title = "Traffic accidents in Berlin (2021)",
-       color = "Type",
-       caption="Dataset: govdata.de\n© Stadt Berlin (2024)")
+  labs(title = "NEW YORK CRIME (2023)",
+       shape = "TYPE")
 
 p
 ```
@@ -106,5 +79,5 @@ p
 `save_map()` can be used to store the print-ready plot object to the disk as a drawn object in `pdf` format. Default mode for storing the output is `portrait` mode. Here, we want `landscape` orientation and can do so using the `orientation` parameter. 
 
 ```{r save map, eval=F}
-save_map(plot = p, filename=paste0("~/berlin_A3_bw.pdf"), orientation = "landscape")
+save_map(plot = p, filename=paste0("~/ny_crime.pdf"))
 ```

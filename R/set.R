@@ -22,9 +22,10 @@ cartographr_env$acks <- TRUE
 #' @return If size is NULL, returns the current output size as a numeric vector. If a size is specified, the function sets the output size..
 #'
 #' @examples
+#' \dontrun{
 #' set_output_size("A3") # Sets the output size to A3 dimensions
 #' set_output_size(c(300, 200)) # Sets a custom output size
-#'
+#' }
 #' @export
 set_output_size <- function(size = NULL, orientation = "portrait") {
   if(!orientation %in% c('portrait','landscape'))
@@ -91,6 +92,23 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
   invisible()
 }
 
+#' Set or Get Acknowledgments Setting
+#'
+#' This function sets a new value for the acknowledgments setting in the cartographr environment or retrieves the current setting if no argument is provided.
+#'
+#' @param ack A logical value to set the acknowledgments setting. If `NULL`, the current setting is returned. The default is `NULL`.
+#'
+#' @return If `ack` is `NULL`, returns the current acknowledgments setting. If `ack` is a logical value, the function will set the acknowledgments setting to that value and return invisibly.
+#'
+#' @examples
+#' \dontrun{
+#' # To get the current acknowledgments setting
+#' set_acknowledgments()
+#'
+#' # To set the acknowledgments setting to TRUE
+#' set_acknowledgments(TRUE)
+#' }
+#'
 #' @export
 set_acknowledgments <- function(ack = NULL) {
   if (is.null(ack))

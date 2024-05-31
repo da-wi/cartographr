@@ -84,7 +84,7 @@ cutout = function(osm, boundary = "rect") {
     }
 
     if (boundary == "hex") {
-      cutout_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
+      cutout_extent <- get_hexagon(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
       osm_object$preprocessing <- "hex"
     }
 
@@ -133,7 +133,7 @@ cutout = function(osm, boundary = "rect") {
 
 
 
-#' Print Custom ggplot Object
+#' Plot Custom ggplot Object
 #'
 #' This function takes a custom ggplot object, extracts the ggplot object,
 #' retrieves the bounding box (bbox) from the associated osm data, and adjusts
@@ -143,29 +143,30 @@ cutout = function(osm, boundary = "rect") {
 #' @param ... Additional arguments passed to the print method.
 #'
 #' @return The function does not return a value but prints the ggplot object.
-#' @export
-print.cartographr_ggplot <- function(x, ...) {
-  # print(x)
-  # Extract the ggplot object from the custom class
-  plot <- x
-
-  # Get the bounding box (bbox) from the osm data
-  osm <- attr(x,"osm")
-
-  # Add coord_sf with the calculated limits
-  plot <- plot + adjust_display(osm)  + add_acknowledgments()
-
-  plot(plot)
+#' @keywords internal
+plot.cartographr_ggplot <- function(x, ...) {
+  ggplot2:::print.ggplot(x +
+                           adjust_display(attr(x, "osm")) +
+                           add_acknowledgments())
 }
 
-#' Wrapper function for plot_map
-#'
-#' This function plots a map
-#'
-#' @param osm OSM object to plot
-#' @param palette Color theme applied to the plot
-#' @return NULL
 #' @export
+print.cartographr_ggplot <- function(x, ...) {
+  plot(x)
+}
+
+#' Plot a Map with custom palette
+#'
+#' This function takes an osmdata (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using `ggplot2` with the specified color palette.
+#'
+#' @param osm A list retrieved from osmdata containing map data.
+#' @param palette A character string specifying the name of the palette to use. The default is "imhof".
+#'
+#' @return A `ggplot` object representing the map with the chosen palette.
+#'
+#' @examples
+#' # Assuming 'osm_data' is a preloaded OSM object
+#' plot_map(osm_data, palette = "imhof")
 plot_map <- function(osm, palette = "imhof") {
   # Call the original plot_map function
   plot <- .plot_map(osm, palette) +
@@ -184,7 +185,7 @@ plot_map <- function(osm, palette = "imhof") {
 #' @param osm OSM object to plot
 #' @param palette Color theme applied to the plot
 #' @return NULL
-#' @export
+#' @keywords internal
 .plot_map = function(osm, palette = "imhof") {
 
   if (is.null(osm$preprocessed)) {
@@ -219,9 +220,15 @@ plot_map <- function(osm, palette = "imhof") {
                    ggplot2::geom_sf(data =osm_object$x.sea$osm_polygons1, fill = color$water, color =color$water),
                    ggplot2::geom_sf(data =osm_object$x.sea$osm_multipolygons1, fill = color$water, color =color$water))
 
+  # building border color
+  if (!is.null(color$building_border))
+    borderc = color$building_border
+  else
+    borderc = NA
+
   p <- ggplot2::ggplot() +
     # add background
-    {if(osm_object$preprocessing == "circle") ggplot2::geom_sf(data=osm_object$cutout_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
+    {if(osm_object$preprocessing %in% c("circle","hex","sf")) ggplot2::geom_sf(data=osm_object$cutout_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
 
 
     ### add layers on top
@@ -265,7 +272,7 @@ plot_map <- function(osm, palette = "imhof") {
     #ggplot2::geom_sf(data =osm_object$x1$osm_multipolygons, ggplot2::aes(fill = colors),show.legend = F, color= NA, linewidth = 0*scale_factor)+
     #ggplot2::geom_sf(data =osm_object$x1$osm_polygons, ggplot2::aes(fill = colors), show.legend = F,color= NA, linewidth =0*scale_factor)+
 
-    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= ifelse(!is.null(color$building_border),color$building_border,NA), linewidth =0.001*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= borderc, linewidth =0.01*scale_factor)+
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes
@@ -396,9 +403,12 @@ get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_r
 
   if(!quiet) cli::cli_progress_step("Constructing buildings", spinner = T)
   osm$x1 <- q1 |> osmdata::osmdata_sf()
+  #osm$x1$osm_polygons <- osm$x1$osm_polygons |>
+  ##  (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) dplyr::filter( osm$x1$osm_polygons, is.na(tunnel) == TRUE) else x)()
+  #  (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) subset(is.na(tunnel)) else x)()
+
   osm$x1$osm_polygons <- osm$x1$osm_polygons |>
-  #  (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) dplyr::filter( osm$x1$osm_polygons, is.na(tunnel) == TRUE) else x)()
-    (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) subset(is.na(tunnel)) else x)()
+    (\(x) if(!is.null(x$tunnel)) x[is.na(x$tunnel), ] else x)()
 
   if(!is.null(osm$x1$osm_polygons)) osm$x1$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_polygons)[1], replace = T)
   if(!is.null(osm$x1$osm_multipolygons)) osm$x1$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_multipolygons)[1], replace = T)
@@ -431,13 +441,21 @@ get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_r
 
 
 
-#' Save map
+#' Save a Map to File
 #'
-#' Save map on disk
+#' This function saves a ggplot object to a file using the specified filename. It checks for the orientation setting and warns if the scale factor has changed after the plot was created.
 #'
-#' @param plot ggplot object
-#' @param filename filename
-#' @return NULL
+#' @param plot A ggplot object representing the map to be saved.
+#' @param filename A character string specifying the path and name of the file to save the plot to.
+#'
+#' @return The function saves the plot to a file and does not return anything.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'map_plot' is a ggplot object and 'map.pdf' is the desired filename
+#' save_map(map_plot, "map.pdf")
+#' }
+#'
 #' @export
 save_map <- function(plot, filename) {
   if(!cartographr_env$orientation %in% c('portrait','landscape'))

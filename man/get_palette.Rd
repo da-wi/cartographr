@@ -8,9 +8,7 @@ get_palette(palette)
 }
 \arguments{
 \item{palette}{The color palette to use.
-Can be one of "macau", "barcelona", "night", "arkham", "imhof",
-"bw", "bwinv", "amsterdam", "berlin", "wesanderson",
-"modern", "terraqua", "bejing", "darkmode", or a named list for a custom palette.
+Can be one of "gray", "swiss", "evening", "midnight", "lines", "minimal", "bw", "arctic", "autumn", "autumn-muted", "desert", "metropolitan", "imhof", "alphabet", "tropical", "iberia", or a named list for a custom palette.
 If a named list is provided, it should contain color hex codes for each map element.
 If \code{NULL} or an unrecognized name is provided, the function will throw an error.}
 }
@@ -20,7 +18,29 @@ A list containing color settings for the map elements.
 \description{
 This function creates a color theme to be used with \code{plot_map()}. It can accept a predefined palette name or a custom palette provided as a named list.
 }
+\details{
+The color moods for the predefined palettes are as follows:
+\itemize{
+\item \strong{Gray}: A neutral and balanced palette that conveys a sense of calm and sophistication.
+\item \strong{Swiss}: A clean and orderly palette reflecting the precision and clarity of Swiss design.
+\item \strong{Evening}: A deep and moody palette that captures the tranquil and reflective moments of the evening.
+\item \strong{Midnight}: A dark and mysterious palette, perfect for conveying the stillness and depth of the night.
+\item \strong{Lines (BW)}: A stark and classic black and white palette, offering a timeless and elegant look.
+\item \strong{Minimal}: A minimalist palette with a focus on simplicity and clarity, using mostly white and subtle grays.
+\item \strong{BW}: A black and white palette with a warm undertone, providing a vintage and nostalgic feel.
+\item \strong{Arctic}: A cool and refreshing palette that evokes the crisp and pristine landscapes of the Arctic.
+\item \strong{Autumn}: A warm and inviting palette that captures the rich and vibrant colors of the fall season.
+\item \strong{Autumn Muted}: A softer take on the autumn palette, with muted tones that create a cozy atmosphere.
+\item \strong{Desert}: A warm and earthy palette inspired by the natural colors of the desert landscape.
+\item \strong{Metropolitan}: A sophisticated urban palette with muted tones and refined elegance.
+\item \strong{Imhof}: A palette inspired by the renowned cartographer Eduard Imhof, featuring earthy tones for a natural look.
+\item \strong{Alphabet}: A playful and modern palette with a clean and approachable aesthetic.
+\item \strong{Tropical}: A vibrant and lively palette that brings the energetic and colorful vibe of tropical regions.
+\item \strong{Iberia}: A palette inspired by the warm and rich colors of the Iberian Peninsula, full of life and energy.
+}
+}
 \examples{
+\dontrun{
 # Standard usage with a character argument for a predefined palette
 plot_map(osm, palette = 'tropical')
 
@@ -37,4 +57,5 @@ custom_palette <- list(
   hatched = TRUE
 )
 plot_map(osm, palette = custom_palette)
+}
 }

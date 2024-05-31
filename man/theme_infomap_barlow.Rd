@@ -2,13 +2,19 @@
 % Please edit documentation in R/theme.R
 \name{theme_infomap_barlow}
 \alias{theme_infomap_barlow}
-\title{Infomap theme with font Barlow}
+\title{Apply infomap Theme with Barlow Font}
 \usage{
 theme_infomap_barlow()
 }
 \value{
-The theme
+A ggplot2 theme object with the infomap theme settings applied and 'Barlow' font set.
 }
 \description{
-Description of the function
+This function applies the infomap theme using the 'Barlow' font.
+}
+\examples{
+\dontrun{
+# Apply the infomap theme with Barlow font to a ggplot object
+ggplot_object + theme_poster_barlow()
+}
 }

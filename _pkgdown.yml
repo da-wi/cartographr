@@ -1,5 +1,45 @@
 url: https://da-wi.github.io/cartographr/
 template:
   bootstrap: 5
-  bootswatch: pulse
 
+reference:
+- title: Data Retrieval and Preprocessing
+  desc: Functions for obtaining and preparing OpenStreetMap data for urban environments.
+  contents:
+  - get_osmdata
+  - preprocess_map
+  - get_border
+  - get_circle
+  - cutout
+
+- title: Map Plotting and Customization
+  desc: Functions to plot maps with custom themes and save the output.
+  contents:
+  - plot_map
+  - save_map
+  - get_palette
+
+- title: Configuration and Settings
+  desc: Functions to configure the cartography package settings and output.
+  contents:
+  - set_output_size
+  - set_acknowledgments
+  - add_acknowledgments
+  - print_config
+  - adjust_display
+
+- title: Theming and Aesthetics
+  desc: Functions to apply custom themes and fonts to enhance the visual appeal of maps.
+  contents:
+  - theme_infomap
+  - theme_infomap_anton
+  - theme_infomap_barlow
+  - theme_infomap_poppins
+  - theme_poster
+  - theme_poster_anton
+  - theme_poster_poppins
+
+- title: Datasets
+  desc: Included datasets for demonstration and testing purposes.
+  contents:
+  - crime

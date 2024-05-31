@@ -1,13 +1,14 @@
 Package: cartographr
-Title: Create print-ready prettymaps with R and ggplot2 based on OSM data
+Title: Create print-ready maps with R and ggplot2 based on OSM data
 Version: 0.1
 Authors@R: 
-    person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre"))
+    person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre", "cph"))
 Description: Create pretty maps with R and ggplot2.
 License: CC BY 4.0
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+URL: https://da-wi.github.io/cartographr, https://github.com/da-wi/cartographr
+BugReports: https://github.com/da-wi/cartographr/issues
+Depends: 
+    R (>= 3.6)
 Imports:
 	cli,
         crayon,
@@ -19,9 +20,12 @@ Imports:
 	showtext,
 	sysfonts,
 	sf
-Suggests: 
-    knitr,
-    rmarkdown,
-    ggpubr
-VignetteBuilder: knitr
-URL: https://da-wi.github.io/cartographr/
+Suggests:
+	knitr,
+	rmarkdown
+VignetteBuilder: 
+	knitr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1

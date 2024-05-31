@@ -2,16 +2,19 @@
 % Please edit documentation in R/theme.R
 \name{theme_infomap_poppins}
 \alias{theme_infomap_poppins}
-\title{Infomap theme with font Anton}
+\title{Apply infomap Theme with Poppins Font}
 \usage{
 theme_infomap_poppins()
 }
-\arguments{
-\item{scale_factor}{The scale factor for output}
-}
 \value{
-The theme
+A ggplot2 theme object with the infomap theme settings applied and 'Poppins' font set.
 }
 \description{
-Description of the function
+This function applies the infomap theme using the 'Poppins' font.
+}
+\examples{
+\dontrun{
+# Apply the infomap theme with Poppins font to a ggplot object
+ggplot_object + theme_poster_poppins()
+}
 }

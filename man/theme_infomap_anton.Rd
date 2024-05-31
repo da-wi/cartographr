@@ -2,16 +2,19 @@
 % Please edit documentation in R/theme.R
 \name{theme_infomap_anton}
 \alias{theme_infomap_anton}
-\title{Infomap theme with font Anton}
+\title{Apply infomap Theme with Anton Font}
 \usage{
 theme_infomap_anton()
 }
-\arguments{
-\item{scale_factor}{The scale factor for output}
-}
 \value{
-The theme
+A ggplot2 theme object with the infomap theme settings applied and 'Anton' font set.
 }
 \description{
-Description of the function
+This function applies the infomap theme using the 'Anton' font.
+}
+\examples{
+\dontrun{
+# Apply the infomap theme with Anton font to a ggplot object
+ggplot_object + theme_poster_anton()
+}
 }

@@ -1,5 +1,5 @@
-#' Berlin accidents dataset for 2021
+#' Manhattan crime dataset
 #'
-#' #' This dataset was produced from the Amt für Statistik Berlin-Brandenburg data available from
-#' \url{https://www.govdata.de/web/guest/daten/-/details/strassenverkehrsunfalle-nach-unfallort-in-berlin-2021}.
-"berlinaccidents"
+#' This dataset includes all valid felony, misdemeanor, and violation crimes reported to the New York City Police Department (NYPD) for Manhattan from 2004.
+#' \url{https://catalog.data.gov/}.
+"crime"

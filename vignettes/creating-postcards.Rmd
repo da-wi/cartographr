@@ -21,10 +21,7 @@ This vignette shows how to create postcards (or also posters, when used with lar
 
 ```{r setup}
 library(cartographr)
-library(ggplot2)
 library(dplyr)
-library(ggpubr)
-library(osmdata)
 ```
 
 # Setup the map parameters.
@@ -33,14 +30,16 @@ We have to provide `longitude`, `latitude`. Furthermore, we define the extend of
 
 ```{r define coordinates}
 osmdata::get_overpass_url()
-osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
+#osmdata::set_overpass_url("https://overpass.kumi.systems/api/interpreter")
+osmdata::set_overpass_url("https://overpass-api.de/api/interpreter")
+ 	
+cartographr::set_output_size("A6")
 
-df_coords <- tibble(lat = c(53.54514883288921,47.374566535402685,48.873810503366016),
-       lon = c(10.000039228206994,8.538175481044222,2.2950207999211405),
-       y_distance = rep(1200*sqrt(2), 3),
+df_coords <- tibble(lat = c(48.873810503366016, 53.54514883288921,47.374566535402685),
+       lon = c(2.2950207999211405,10.000039228206994,8.538175481044222),
        x_distance = rep(1200,3),
-       name = c("hamburg","zürich","paris"),
-       color = c("berlin", "imhof","macau"))
+       name = c("paris","hamburg","zürich"),
+       color = c("tropical","autumn", "imhof"))
 
 df_coords |> head()
 ```
@@ -49,13 +48,10 @@ Having defined our input data, we can feed it into the `get_osmdata()` function.
 
 ```{r retrieve data}
 df_coords <- df_coords |> 
+  # create rowwise() grouping
   rowwise() |>
-  # 1. retrieve osm data
-  mutate(osm = list(get_osmdata(lat, lon, y_distance, x_distance) )) |>
-  # 2. preprocess data
-  mutate(osm_pps = list(preprocess_map(osm))) |>
-  # 3. remove rowwise() grouping
-  ungroup()
+  # retrieve osm data
+  mutate(osm = list(get_osmdata(lat, lon, x_distance)))
 
 df_coords |> head()
 ```
@@ -64,26 +60,25 @@ df_coords |> head()
 
 Now, we create ggplot2 objects for each prepocssed `osm_pps` object. 
 
-```{r plot map, fig.dim=c(12,5.8), fig.dpi=72}
+```{r plot map}
 df_coords <- df_coords |> 
-  rowwise() |>
-  # Create ggplot2 objects
-  mutate(plot = list(
-    plot_map(osm_pps, color = get_color(color), scaling = get_scaling("A6"))+
-    labs(title=name)+
-    theme_postcard(get_scaling("A6"))+ 
-    theme(plot.background =element_rect(fill="#FFFFFE",color="#AAAAAA"))
+  mutate(output = list(
+    plot_map(osm, palette = color)+
+    theme_poster_poppins()+ 
+    ggplot2::theme(plot.background = ggplot2::element_rect(fill="#FFFFFE", 
+                                                  color="#AAAAAA"))+
+    ggplot2::labs(title = name)
     )
-  ) |>
-  ungroup()
-           
-ggarrange(plotlist = df_coords$plot, ncol = 3)
+  ) 
+```
+
+```{r print a postcard, fig.dim=c(5,7), fig.dpi=72}
+df_coords$output
 ```
 
 # Save map
 
 ```{r save map, eval=F}
 df_coords |> 
-    rowwise() |>
-    mutate(res = save_map(plot = plot, filename=paste0("~/postcards/",name,"_A6_",color,".pdf")))
+    mutate(res = save_map(plot = output, filename=paste0("~/postcards/",name,"_A6_",color,".pdf")))
 ```
