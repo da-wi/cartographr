@@ -4,7 +4,7 @@ Version: 0.1
 Authors@R: 
     person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre", "cph"))
 Description: Create pretty maps with R and ggplot2.
-License: CC BY 4.0
+License: GPL (>= 3)
 URL: https://da-wi.github.io/cartographr, https://github.com/da-wi/cartographr
 BugReports: https://github.com/da-wi/cartographr/issues
 Depends: 
@@ -16,7 +16,6 @@ Imports:
 	ggplot2,
         ggnewscale,
 	grid,
-	lwgeom,
 	showtext,
 	sysfonts,
 	sf

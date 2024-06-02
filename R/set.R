@@ -10,7 +10,7 @@ cartographr_env <- new.env(parent = emptyenv())
 cartographr_env$output_size <- c(210,297)
 cartographr_env$scale_factor <- 0.2497607
 cartographr_env$orientation <- "portrait"
-cartographr_env$acks <- TRUE
+cartographr_env$attribution <- TRUE
 
 
 #' Set Output Size for cartography
@@ -92,31 +92,31 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
   invisible()
 }
 
-#' Set or Get Acknowledgments Setting
+#' Set or Get Attribution Setting
 #'
-#' This function sets a new value for the acknowledgments setting in the cartographr environment or retrieves the current setting if no argument is provided.
+#' This function sets a new value for the attribution setting in the cartographr environment or retrieves the current setting if no argument is provided.
 #'
-#' @param ack A logical value to set the acknowledgments setting. If `NULL`, the current setting is returned. The default is `NULL`.
+#' @param attribution A logical value to set the acknowledgments setting. If `NULL`, the current setting is returned. The default is `NULL`.
 #'
-#' @return If `ack` is `NULL`, returns the current acknowledgments setting. If `ack` is a logical value, the function will set the acknowledgments setting to that value and return invisibly.
+#' @return If `attribution` is `NULL`, returns the current acknowledgments setting. If `attribution` is a logical value, the function will set the acknowledgments setting to that value and return invisibly.
 #'
 #' @examples
 #' \dontrun{
 #' # To get the current acknowledgments setting
-#' set_acknowledgments()
+#' set_attribution()
 #'
 #' # To set the acknowledgments setting to TRUE
-#' set_acknowledgments(TRUE)
+#' set_attribution(TRUE)
 #' }
 #'
 #' @export
-set_acknowledgments <- function(ack = NULL) {
-  if (is.null(ack))
-    return(cartographr_env$acks)
-  if (!is.logical(ack)) {
+set_attribution <- function(attribution = NULL) {
+  if (is.null(attribution))
+    return(cartographr_env$attribution)
+  if (!is.logical(attribution)) {
     stop(cli::cli_abort("Argument must be type `logical`."))
   }
-  cartographr_env$acks <- ack
+  cartographr_env$attribution <- attribution
   invisible()
 }
 

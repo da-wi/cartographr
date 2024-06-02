@@ -7,9 +7,9 @@
 #' @return A ggplot2 theme object that can be added to ggplot2 plotting calls.
 #' @export
 theme_poster <- function(font = "Poppins") {
-  if (!(font %in% c("Poppins","Anton","Cinzel","Barlow"))) {
-    stop(cli::cli_abort("Font not found."))
-  }
+  #if (!(font %in% c("Poppins","Anton","Cinzel","Barlow"))) {
+  #  stop(cli::cli_abort("Font not found."))
+  #}
 
   scale_factor <- cartographr_env$scale_factor
 
@@ -76,9 +76,9 @@ theme_poster_anton <- function() {
 #'
 #' @export
 theme_infomap <- function(font = "Poppins") {
-  if (!(font %in% c("Poppins","Anton","Cinzel","Barlow"))) {
-    stop(cli::cli_abort("Font not found."))
-  }
+  #if (!(font %in% c("Poppins","Anton","Cinzel","Barlow"))) {
+  #  stop(cli::cli_abort("Font not found."))
+  #}
 
   scale_factor <- cartographr_env$scale_factor
 
@@ -95,7 +95,7 @@ theme_infomap <- function(font = "Poppins") {
              legend.text = ggplot2::element_text(size = 10*scale_factor*2.845276, family = font, color= "#292e28"),
              legend.justification = c("right","top"),
              legend.margin = ggplot2::margin(-18*scale_factor, 0, 0, 0, unit = "mm"),
-             legend.key.spacing = unit(0,"mm")
+             legend.key.spacing = grid::unit(0,"mm")
            ))
 }
 

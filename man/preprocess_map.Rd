@@ -2,17 +2,25 @@
 % Please edit documentation in R/cartographr.R
 \name{preprocess_map}
 \alias{preprocess_map}
-\title{Preprocessing map}
+\title{Preprocess OpenStreetMap Data}
 \usage{
 preprocess_map(osm)
 }
 \arguments{
-\item{osm}{The osm_object with stored bbox}
+\item{osm}{A list object containing OSM data elements to be preprocessed.}
 }
 \value{
-A preprocessed osm object
+The preprocessed OSM object with validated and unified water bodies and buildings,
+and with additional preprocessing information.
 }
 \description{
-This function uses sensible defaults to remove unnecessary data from the osm object
-and sets the output size for printing.
+This function performs preprocessing on OpenStreetMap (OSM) data. It validates and
+unifies various OSM elements such as water lines, polygons, and multipolygons, as well
+as building polygons and multipolygons.
+}
+\examples{
+\dontrun{
+# Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
+preprocessed_osm <- preprocess_map(osm_data)
+}
 }

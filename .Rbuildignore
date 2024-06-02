@@ -1,4 +1,4 @@
-^mypostcard\.Rproj$
+^cartographr\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
 ^docs$
@@ -6,3 +6,4 @@
 ^LICENSE\.md$
 ^data-raw$
 ^\.github$
+^README.Rmd

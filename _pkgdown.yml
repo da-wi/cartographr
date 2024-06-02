@@ -8,10 +8,7 @@ reference:
   contents:
   - get_osmdata
   - preprocess_map
-  - get_border
-  - get_circle
-  - get_hexagon
-  - cutout
+  - crop
 
 - title: Map Plotting and Customization
   desc: Functions to plot maps with custom themes and save the output.
@@ -24,10 +21,10 @@ reference:
   desc: Functions to configure the cartography package settings and output.
   contents:
   - set_output_size
-  - set_acknowledgments
-  - add_acknowledgments
+  - set_attribution
+  - add_attribution
   - print_config
-  - adjust_display
+  - adjust_viewport
 
 - title: Theming and Aesthetics
   desc: Functions to apply custom themes and fonts to enhance the visual appeal of maps.
@@ -39,6 +36,13 @@ reference:
   - theme_poster
   - theme_poster_anton
   - theme_poster_poppins
+
+- title: Utils
+  desc: Helper functions for handling and processing osm data
+  contents:
+  - get_border
+  - get_circle
+  - get_hexagon
 
 - title: Datasets
   desc: Included datasets for demonstration and testing purposes.

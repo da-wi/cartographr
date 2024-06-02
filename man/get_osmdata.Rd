@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{get_osmdata}
 \alias{get_osmdata}
-\title{Retrieve OSM data for urban environments}
+\title{Retrieve OpenStreetMap Data for a Specified Location}
 \usage{
 get_osmdata(
   lat,
@@ -14,19 +14,37 @@ get_osmdata(
 )
 }
 \arguments{
-\item{lat}{Latitude WGS84}
+\item{lat}{Numeric, the latitude of the center point for the OSM data retrieval.}
 
-\item{lon}{Longitude WGS84}
+\item{lon}{Numeric, the longitude of the center point for the OSM data retrieval.}
 
-\item{x_distance}{X distance in meters}
+\item{x_distance}{Optional numeric, the distance in meters from the center point
+to the edge of the area in the x direction (longitude). Default is NULL.}
 
-\item{y_distance}{Y distance in meters}
+\item{y_distance}{Optional numeric, the distance in meters from the center point
+to the edge of the area in the y direction (latitude). Default is NULL.}
 
-\item{aspect_ratio}{aspect ratio between width and height}
+\item{aspect_ratio}{Optional numeric, the ratio of x_distance to y_distance.
+Default is NULL.}
+
+\item{quiet}{Logical, whether to suppress informational messages during execution.
+Default is FALSE.}
 }
 \value{
-The shapefiles of buildings, streets, water, beaches, greens, ..
+A list containing various elements of the OSM data, including street networks,
+buildings, water bodies, green areas, beaches, parking areas, railways, and the
+bounding box of the retrieved area.
 }
 \description{
-This function retrieves OSM data with sensible defaults for cities
+This function fetches OpenStreetMap (OSM) data for a specified latitude and longitude,
+within a given distance range. It allows the user to specify distances in the x and y
+directions, an aspect ratio, or a combination of these to define the area for which
+OSM data is retrieved. The function ensures that only two of the three parameters
+(x_distance, y_distance, aspect_ratio) are provided to define the area.
+}
+\examples{
+\dontrun{
+osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
+osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, y_distance = 1000, aspect_ratio = 1.41)
+}
 }

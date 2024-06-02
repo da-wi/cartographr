@@ -2,14 +2,17 @@
 % Please edit documentation in R/cartographr.R
 \name{plot_map}
 \alias{plot_map}
-\title{Plot a Map with custom palette}
+\title{Plot a Map with custom Palette}
 \usage{
-plot_map(osm, palette = "imhof")
+plot_map(...)
 }
 \arguments{
-\item{osm}{A list retrieved from osmdata containing map data.}
-
-\item{palette}{A character string specifying the name of the palette to use. The default is "imhof".}
+\item{...}{Variable argument list:
+\itemize{
+\item \code{osm}: A list retrieved from osmdata containing map data.
+\item \code{palette}: A character string specifying the name of the palette to use. The default is "imhof".
+Additional arguments are passed on to the preprocessing and plotting functions.
+}}
 }
 \value{
 A \code{ggplot} object representing the map with the chosen palette.
@@ -20,6 +23,6 @@ This function takes an osmdata (osm) object and a palette name, preprocesses the
 \examples{
 \dontrun{
 # Assuming 'osm_data' is a preloaded OSM object
-plot_map(osm_data, palette = "imhof")
+  plot_map(osm_data, palette = "imhof")
 }
 }

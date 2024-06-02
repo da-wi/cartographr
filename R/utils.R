@@ -1,12 +1,18 @@
-
-#' Adjust display
+#' Adjust the Viewport for Map Visualization
 #'
-#' This function adjust displays and should be called last after adding geoms
+#' This internal function adjusts the viewport for map visualization using ggplot2.
+#' It modifies the x and y limits based on the bounding box (bbox) of the OpenStreetMap (OSM) object.
 #'
-#' @param osm_object The osm_object with stored bbox
-#' @return NULL
+#' @param osm_object An OSM object containing a bbox attribute.
+#'
+#' @return A ggplot2 coordinate (coord_sf) object with adjusted x and y limits.
+#'
+#' @details
+#' The function calculates new x and y limits by adding and subtracting a twentieth of the bbox's width and height
+#' from the respective minimum and maximum x and y values. This creates a margin around the map, enhancing visibility.
+#'
 #' @export
-adjust_display <- function(osm_object) {
+adjust_viewport <- function(osm_object) {
   # TODO make this function internal
 
   return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1]+(osm_object$bbox[3]-osm_object$bbox[1])/20,
@@ -15,14 +21,18 @@ adjust_display <- function(osm_object) {
                                     osm_object$bbox[4]-(osm_object$bbox[4]-osm_object$bbox[2])/20)))
 }
 
-#' Add acknowledgments
+#' Add Attribution Caption to Plots
 #'
-#' Add acknowledgments
+#' This function checks if acknowledgments are enabled in the
+#' environment and, if so, adds an attribution caption to the plot using ggplot2.
+#' If attributions are not enabled, it returns `NULL`.
 #'
-#' @return labs
-add_acknowledgments <- function() {
-  if (cartographr_env$acks) {
-    return(ggplot2::labs(caption = "CARTOGRAPHR   ·   OPEN STREET MAP"))
+#' @return A ggplot2 `labs` object with a caption attribute if acknowledgments
+#' are enabled; otherwise, `NULL`.
+#' @export
+add_attribution <- function() {
+  if (cartographr_env$attribution) {
+    return(ggplot2::labs(caption = "CARTOGRAPHR   .   OPEN STREET MAP"))
   }
   else {
     return(NULL)

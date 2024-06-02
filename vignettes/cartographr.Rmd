@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-library(stringr)
+library(cartographr)
 knitr::opts_chunk$set(
   comment = "#>", 
   collapse = TRUE
@@ -35,9 +35,9 @@ osm <- get_osmdata(48.210, 16.371, x_distance = 1200)
 The `osm` object is a list with all our geometrical shapes stored in it (buildings, rivers, parks, ...). The map can be simply created using `plot_map()` function. Additionally, we can directly set the appearance of our map using themes. Here, we decide on making a poster of Vienna using the `theme_poster()`. There are also different color palettes for the map, have a look at `get_palette()` to get an idea of which color palettes exist and how to create your own color palette.
 
 ```{r eval=FALSE}
-plot_vienna <- osm |> plot_map(palette = "barcelona") +
+plot_vienna <- osm |> plot_map(palette = "iberia") +
   theme_poster_poppins() +
-  labs(title="vienna")
+  ggplot2::labs(title="vienna")
 
 plot_vienna
 ```
@@ -49,18 +49,18 @@ knitr::include_graphics('vienna_a4.png')
 Lastly, we can save the map ready-to-print as pdf using `save_map()`.
 
 ```{r eval=FALSE}
-save_map(plot = plot.vienna, filename=paste0("vienna_a4.pdf"))
+save_map(plot = plot_vienna, filename=paste0("vienna_a4.pdf"))
 ```
 
 If you prefer a bitmap format, you can also directly call `ggsave()` from the `ggplot2()` package.
-
+-
 ```{r eval=FALSE}
 ggsave(paste0("~/vienna_a4.png"),
-       plot = plot.vienna,
+       plot = plot_vienna,
        bg = "white",
        device = "png",
        dpi = 96,
-       width = 210,
-       height = 297,
+       width = 148,
+       height = 210,
        units = "mm")
 ```

@@ -2,13 +2,13 @@
 % Please edit documentation in R/palette.R
 \name{get_palette}
 \alias{get_palette}
-\title{Create a color theme for maps}
+\title{Create a Color Theme for Maps}
 \usage{
 get_palette(palette)
 }
 \arguments{
 \item{palette}{The color palette to use.
-Can be one of "gray", "swiss", "evening", "midnight", "lines", "minimal", "bw", "arctic", "autumn", "autumn-muted", "desert", "metropolitan", "imhof", "alphabet", "tropical", "iberia", or a named list for a custom palette.
+Can be one of "alphabet", "arctic", "autumn", "autumn-muted", "bw", "desert", "evening", "gray", "iberia", "imhof", "lines", "metropolitan", "midnight", "minimal", "swiss", "tropical", or a named list for a custom palette.
 If a named list is provided, it should contain color hex codes for each map element.
 If \code{NULL} or an unrecognized name is provided, the function will throw an error.}
 }
@@ -19,24 +19,24 @@ A list containing color settings for the map elements.
 This function creates a color theme to be used with \code{plot_map()}. It can accept a predefined palette name or a custom palette provided as a named list.
 }
 \details{
-The color moods for the predefined palettes are as follows:
+The color moods for the predefined palettes are described as follows:
 \itemize{
-\item \strong{Gray}: A neutral and balanced palette that conveys a sense of calm and sophistication.
-\item \strong{Swiss}: A clean and orderly palette reflecting the precision and clarity of Swiss design.
-\item \strong{Evening}: A deep and moody palette that captures the tranquil and reflective moments of the evening.
-\item \strong{Midnight}: A dark and mysterious palette, perfect for conveying the stillness and depth of the night.
-\item \strong{Lines (BW)}: A stark and classic black and white palette, offering a timeless and elegant look.
-\item \strong{Minimal}: A minimalist palette with a focus on simplicity and clarity, using mostly white and subtle grays.
-\item \strong{BW}: A black and white palette with a warm undertone, providing a vintage and nostalgic feel.
-\item \strong{Arctic}: A cool and refreshing palette that evokes the crisp and pristine landscapes of the Arctic.
-\item \strong{Autumn}: A warm and inviting palette that captures the rich and vibrant colors of the fall season.
-\item \strong{Autumn Muted}: A softer take on the autumn palette, with muted tones that create a cozy atmosphere.
-\item \strong{Desert}: A warm and earthy palette inspired by the natural colors of the desert landscape.
-\item \strong{Metropolitan}: A sophisticated urban palette with muted tones and refined elegance.
-\item \strong{Imhof}: A palette inspired by the renowned cartographer Eduard Imhof, featuring earthy tones for a natural look.
-\item \strong{Alphabet}: A playful and modern palette with a clean and approachable aesthetic.
-\item \strong{Tropical}: A vibrant and lively palette that brings the energetic and colorful vibe of tropical regions.
-\item \strong{Iberia}: A palette inspired by the warm and rich colors of the Iberian Peninsula, full of life and energy.
+\item \strong{Alphabet}: A modern palette with a straightforward aesthetic.
+\item \strong{Arctic}: A palette that reflects the clear and bright qualities of Arctic landscapes.
+\item \strong{Autumn}: A palette with the warm and varied hues typical of the fall season.
+\item \strong{Autumn Muted}: A subdued version of the autumn palette, offering a gentle and warm atmosphere.
+\item \strong{BW}: A classic black and white palette with a hint of warmth for a traditional feel.
+\item \strong{Desert}: A palette that captures the earthy and natural tones found in desert environments.
+\item \strong{Evening}: A palette that embodies the quiet and contemplative nature of dusk.
+\item \strong{Gray}: A balanced palette that provides a composed and refined look.
+\item \strong{Iberia}: A palette that reflects the warm and diverse tones associated with the Iberian landscape.
+\item \strong{Imhof}: A palette with natural and subdued tones, inspired by the work of cartographer Eduard Imhof.
+\item \strong{Lines (BW)}: A contrasting black and white palette for a clear and defined appearance.
+\item \strong{Metropolitan}: A palette with understated tones that suggest urban sophistication.
+\item \strong{Midnight}: A palette that conveys the depth and tranquility of the night.
+\item \strong{Minimal}: A palette focused on minimalism, utilizing primarily whites and light grays.
+\item \strong{Swiss}: A palette that emphasizes cleanliness and precision, reminiscent of Swiss design.
+\item \strong{Tropical}: A lively palette with the bright and bold colors characteristic of tropical areas.
 }
 }
 \examples{

@@ -1,17 +1,24 @@
-#' Preprocessing map
+#' Preprocess OpenStreetMap Data
 #'
-#' This function uses sensible defaults to remove unnecessary data from the osm object
-#' and sets the output size for printing.
+#' This function performs preprocessing on OpenStreetMap (OSM) data. It validates and
+#' unifies various OSM elements such as water lines, polygons, and multipolygons, as well
+#' as building polygons and multipolygons.
 #'
-#' @param osm The osm_object with stored bbox
-#' @return A preprocessed osm object
+#' @param osm A list object containing OSM data elements to be preprocessed.
+#'
+#' @return The preprocessed OSM object with validated and unified water bodies and buildings,
+#'         and with additional preprocessing information.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
+#' preprocessed_osm <- preprocess_map(osm_data)
+#' }
 #' @export
 preprocess_map = function(osm) {
   # copy osm_object
   osm_object = osm
 
-  # scaling factor of output format for adjusting outer margins
-  # scale_factor <- mean(scaling[1],scaling[2])
   options(warn=-1)
 
   sf::sf_use_s2(F)
@@ -43,25 +50,50 @@ preprocess_map = function(osm) {
     osm_object$buildings.dis <- osm_object$buildings[[1]]
   }
 
-  #if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
-  #if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
+  #if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
 
-  #osm_object$preprocessing <- "rectangular"
   osm_object$preprocessing <- "rect"
   osm_object$preprocessed <- TRUE
-  # osm_object <- cutout(osm_object)
   return(osm_object)
 }
 
 
-#' Preprocessing of a circular map
+#' Crop a Preprocessed OpenStreetMap
 #'
-#' This function uses sensible defaults to remove unnecessary data from the osm object
+#' This function crops an OpenStreetMap (OSM) object that has been preprocessed.
+#' It supports different types of geometric boundaries such as rectangles, circles, and hexagons,
+#' or a custom boundary provided as an 'sf' object.
 #'
-#' @param osm The osm_object with stored bbox
-#' @return A preprocessed osm object
+#' @param osm A preprocessed OSM object to which the crop will be applied.
+#' @param boundary The type of geometric boundary to apply to the OSM data.
+#'   Can be "rect" for a rectangular boundary, "circle" for a circular boundary,
+#'   "hex" for a hexagonal boundary, or an 'sf' object for a custom boundary.
+#'   Default is "rect".
+#'
+#' @return The OSM object with the specified geometric crop applied.
+#'
+#' @details
+#' If the OSM object has not been preprocessed, the function will call `preprocess_map()`
+#' to preprocess the data before applying the cropping. The function sets global warning options
+#' to suppress warnings during processing. The type of preprocessing applied is stored in the
+#' OSM object's metadata.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
+#' # Apply a circular crop
+#' osm_data <- crop(osm_data, boundary = "circle")
+#'
+#' # Apply a hexagonal crop
+#' osm_data <- crop(osm_data, boundary = "hex")
+#'
+#' # Apply a custom 'sf' boundary crop
+#' custom_boundary <- sf::st_as_sf(...) # Define custom 'sf' boundary
+#' osm_data <- crop(osm_data, boundary = custom_boundary)
+#' }
 #' @export
-cutout = function(osm, boundary = "rect") {
+crop = function(osm, boundary = "rect") {
 
   options(warn=-1)
 
@@ -72,113 +104,97 @@ cutout = function(osm, boundary = "rect") {
   }
   #osm = preprocess_map(osm) # should move to get_osmdata
 
-  if (class(boundary) == "sf") {
-    cutout_extent = cutout
+  if (inherits(boundary, "sf")) {
+    crop_extent = crop
     osm_object$preprocessing <- "sf"
   }
 
-  if (class(boundary) == "character") {
+  if (is.character(boundary)) {
     if (boundary == "circle") {
-      cutout_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
+      crop_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
       osm_object$preprocessing <- "circle"
     }
 
     if (boundary == "hex") {
-      cutout_extent <- get_hexagon(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
+      crop_extent <- get_hexagon(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
       osm_object$preprocessing <- "hex"
     }
 
     if (boundary == "rect") {
-      cutout_extent <- osm_object$bbox |> sf::st_as_sfc()
+      crop_extent <- osm_object$bbox |> sf::st_as_sfc()
     }
   }
 
   # decrease margin for circle
   # scaling <- scaling/sqrt(2)
 
-  osm_object$bbox <- sf::st_bbox(cutout_extent)
+  osm_object$bbox <- sf::st_bbox(crop_extent)
   osm_object$bbox[c(1,2)] <- osm_object$bbox[c(1,2)]-(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
   osm_object$bbox[c(3,4)] <- osm_object$bbox[c(3,4)]+(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
 
   # streets
-  if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- suppressMessages(osm_object$x$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
-  if(!is.null(osm_object$x$osm_points)) osm_object$x$osm_points <- suppressMessages(osm_object$x$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- suppressMessages(osm_object$x$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm_object$x$osm_points)) osm_object$x$osm_points <- suppressMessages(osm_object$x$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
 
   # buildings
-  if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
   # TODO
   # for some magical reason, one needs to create a copy for water polygons to make it work. No idea why.
-  #if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )  |>  sf::st_make_valid()
-  #if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons |> sf::st_intersection(., cutout_extent )
-  #if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon1 <-  osm_object$x.water$osm_polygons |> sf::st_intersection(., cutout_extent )
-  #if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons1 <-  osm_object$x.sea$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
-  #if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons1 <-  osm_object$x.sea$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., cutout_extent )
+  #if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )  |>  sf::st_make_valid()
+  #if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon1 <-  osm_object$x.water$osm_polygons |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons1 <-  osm_object$x.sea$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons1 <-  osm_object$x.sea$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
 
-  if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent )  |>  sf::st_make_valid())
-  if(!is.null(osm_object$x.green$osm_multipolygons)) suppressMessages(osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
-  if(!is.null(osm_object$x.green$osm_polygons)) suppressMessages(osm_object$x.green$osm_polygons <-  osm_object$x.green$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent )  |>  sf::st_make_valid())
+  if(!is.null(osm_object$x.green$osm_multipolygons)) suppressMessages(osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm_object$x.green$osm_polygons)) suppressMessages(osm_object$x.green$osm_polygons <-  osm_object$x.green$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if(!is.null(osm_object$x.beach$osm_multipolygons)) suppressMessages(osm_object$x.beach$osm_multipolygons <-  osm_object$x.beach$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
-  if(!is.null(osm_object$x.parking$osm_multipolygons)) suppressMessages(osm_object$x.parking$osm_multipolygons <-  osm_object$x.parking$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$x.beach$osm_multipolygons)) suppressMessages(osm_object$x.beach$osm_multipolygons <-  osm_object$x.beach$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm_object$x.parking$osm_multipolygons)) suppressMessages(osm_object$x.parking$osm_multipolygons <-  osm_object$x.parking$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if(!is.null(osm_object$x.railway$osm_lines))  suppressMessages(osm_object$x.railway$osm_lines <- osm_object$x.railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, cutout_extent ))
+  if(!is.null(osm_object$x.railway$osm_lines))  suppressMessages(osm_object$x.railway$osm_lines <- osm_object$x.railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if (!is.null(cutout_extent)) osm_object$cutout_extent <- cutout_extent
+  if (!is.null(crop_extent)) osm_object$crop_extent <- crop_extent
 
   options(warn=1)
   return(osm_object)
 }
 
 
-
-#' Plot Custom ggplot Object
-#'
-#' This function takes a custom ggplot object, extracts the ggplot object,
-#' retrieves the bounding box (bbox) from the associated osm data, and adjusts
-#' the display before printing the plot.
-#'
-#' @param x A custom ggplot object with an attribute "osm" containing osm data.
-#' @param ... Additional arguments passed to the print method.
-#'
-#' @return The function does not return a value but prints the ggplot object.
-#' @keywords internal
-plot.cartographr_ggplot <- function(x, ...) {
-  ggplot2:::print.ggplot(x +
-                           adjust_display(attr(x, "osm")) +
-                           add_acknowledgments())
-}
-
-#' @export
-print.cartographr_ggplot <- function(x, ...) {
-  plot(x)
-}
-
-#' Plot a Map with custom palette
+#' Plot a Map with custom Palette
 #'
 #' This function takes an osmdata (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using `ggplot2` with the specified color palette.
 #'
-#' @param osm A list retrieved from osmdata containing map data.
-#' @param palette A character string specifying the name of the palette to use. The default is "imhof".
+#' @param ... Variable argument list:
+#'   - `osm`: A list retrieved from osmdata containing map data.
+#'   - `palette`: A character string specifying the name of the palette to use. The default is "imhof".
+#'   Additional arguments are passed on to the preprocessing and plotting functions.
 #'
 #' @return A `ggplot` object representing the map with the chosen palette.
-
 #' @examples
 #' \dontrun{
 #' # Assuming 'osm_data' is a preloaded OSM object
-#' plot_map(osm_data, palette = "imhof")
+#'   plot_map(osm_data, palette = "imhof")
 #' }
 #' @export
-plot_map <- function(osm, palette = "imhof") {
+plot_map <- function(...) {
   # Call the original plot_map function
-  plot <- .plot_map(osm, palette) +
-    ggnewscale::new_scale_color()+
-    ggnewscale::new_scale_fill()
+  args <- list(...)
+  if ("osm" %in% names(args)) {
+    osm <- args[["osm"]]
+  } else if (is.list(args[[1]])) {
+    osm <- args[[1]]
+  } else {
+    stop(cli::cli_abort("Input should be a list or contain a named argument 'osm'."))
+  }
 
-  # Return a custom class object containing the plot and osm data
-  # for implicity adjusting the display
-  structure(plot, class = c("cartographr_ggplot", class(plot)), osm = osm)
+  list(...)$osm
+  plot <- .plot_map(...)
+
+  plot + adjust_viewport(osm) + add_attribution()
 }
 
 #' Plot a map
@@ -231,21 +247,17 @@ plot_map <- function(osm, palette = "imhof") {
 
   p <- ggplot2::ggplot() +
     # add background
-    {if(osm_object$preprocessing %in% c("circle","hex","sf")) ggplot2::geom_sf(data=osm_object$cutout_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
+    {if(osm_object$preprocessing %in% c("circle","hex","sf")) ggplot2::geom_sf(data=osm_object$crop_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
 
 
     ### add layers on top
     # water
-    # BEWARE: when using {if} the original osm_object is used (important, when cropped!)
+    # ATTENTION: when using {if} the original osm_object is used (important, when cropped!)
     # a list containing NULL will simply ignore NULL entries
     ggplot2::geom_sf(data =osm_object$water.dis, fill = color$water, color= color$water) +
 
     # water hatched
     {if(!is.null(osm_object$water.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = 0.3, alpha=0.1 )}+
-    #{if(!is.null(osm_object$x.water$osm_multipolygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_multipolygons1) |> lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
-    #{if(!is.null(osm_object$x.water$osm_polygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.water$osm_polygons1) |> lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
-    #{if(!is.null(osm_object$x.sea$osm_multipolygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_multipolygons1) |> lengths > 0,], shape=18,fill="black", size = 0.3, alpha=0.1 )} +
-    #{if(!is.null(osm_object$x.sea$osm_polygons1) && color$hatched == TRUE) ggplot2::geom_sf( data=df.point[sf::st_intersects(df.point,osm_object$x.sea$osm_polygons1) |> lengths > 0,], shape=18, fill="black",size = 0.3, alpha=0.1 )} +
 
     # green, beach & parking
     ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) + # "#2F3737"
@@ -260,26 +272,27 @@ plot_map <- function(osm, palette = "imhof") {
                        color=color$railway, linewidth = 0.5)} +
 
     # streets
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "primary") , color=color$street, linewidth=4*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "secondary") , color=color$street, linewidth=4*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "tertiary") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "unclassified") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "residential") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "service") , color=color$street, linewidth=1*scale_factor) +
-    ggplot2::geom_sf(data =osm_object$x$osm_lines |> subset(highway == "living_street") , color=color$street, linewidth=1*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "primary") , color=color$street, linewidth=4*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "secondary") , color=color$street, linewidth=4*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "tertiary") , color=color$street, linewidth=3*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "unclassified") , color=color$street, linewidth=3*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "residential") , color=color$street, linewidth=3*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "service") , color=color$street, linewidth=1*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "living_street"), color=color$street, linewidth=1*scale_factor) +
     {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x$osm_points, color=color$lights, size=0.2*scale_factor)} +
 
     # buildings
-    #ggplot2::geom_sf(data =osm_object$x1$osm_multipolygons, ggplot2::aes(fill = colors),show.legend = F, color= NA, linewidth = 0*scale_factor)+
-    #ggplot2::geom_sf(data =osm_object$x1$osm_polygons, ggplot2::aes(fill = colors), show.legend = F,color= NA, linewidth =0*scale_factor)+
-
     ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= borderc, linewidth =0.01*scale_factor)+
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes
-    ggplot2::theme_void()
+    ggplot2::theme_void()+
+
+    # add new scales
+    ggnewscale::new_scale_color()+
+    ggnewscale::new_scale_fill()
 
     options(warn=0)
     #p$scaling <- scaling
@@ -288,18 +301,37 @@ plot_map <- function(osm, palette = "imhof") {
     return(p)
 }
 
-#' Retrieve OSM data for urban environments
+#' Retrieve OpenStreetMap Data for a Specified Location
 #'
-#' This function retrieves OSM data with sensible defaults for cities
+#' This function fetches OpenStreetMap (OSM) data for a specified latitude and longitude,
+#' within a given distance range. It allows the user to specify distances in the x and y
+#' directions, an aspect ratio, or a combination of these to define the area for which
+#' OSM data is retrieved. The function ensures that only two of the three parameters
+#' (x_distance, y_distance, aspect_ratio) are provided to define the area.
 #'
-#' @param lat Latitude WGS84
-#' @param lon Longitude WGS84
-#' @param x_distance X distance in meters
-#' @param y_distance Y distance in meters
-#' @param aspect_ratio aspect ratio between width and height
-#' @return The shapefiles of buildings, streets, water, beaches, greens, ..
+#' @param lat Numeric, the latitude of the center point for the OSM data retrieval.
+#' @param lon Numeric, the longitude of the center point for the OSM data retrieval.
+#' @param x_distance Optional numeric, the distance in meters from the center point
+#'   to the edge of the area in the x direction (longitude). Default is NULL.
+#' @param y_distance Optional numeric, the distance in meters from the center point
+#'   to the edge of the area in the y direction (latitude). Default is NULL.
+#' @param aspect_ratio Optional numeric, the ratio of x_distance to y_distance.
+#'   Default is NULL.
+#' @param quiet Logical, whether to suppress informational messages during execution.
+#'   Default is FALSE.
+#'
+#' @return A list containing various elements of the OSM data, including street networks,
+#'   buildings, water bodies, green areas, beaches, parking areas, railways, and the
+#'   bounding box of the retrieved area.
+#'
+#' @examples
+#' \dontrun{
+#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
+#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, y_distance = 1000, aspect_ratio = 1.41)
+#' }
 #' @export
 get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, quiet = F) {
+
   # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
   num_args_provided <- sum(!is.null(c(y_distance, x_distance, aspect_ratio)))
 
@@ -338,7 +370,8 @@ get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_r
   }
 
   place <- get_border(as.numeric(lat),as.numeric(lon),y_distance,x_distance)
-  coords_bbox <- as.numeric(stringr::str_split(osmdata::opq(bbox = place)$bbox,",")[[1]])
+  #coords_bbox <- as.numeric(stringr::str_split(osmdata::opq(bbox = place)$bbox,",")[[1]])
+  coords_bbox <- as.numeric(strsplit(osmdata::opq(bbox = place)$bbox, split = ",")[[1]])
   coords_bbox[3]-coords_bbox[1]
   coords_bbox[4]-coords_bbox[2]
 
