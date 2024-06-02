@@ -25,10 +25,10 @@
     <loc>https://da-wi.github.io/cartographr/index.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/add_acknowledgments.html</loc>
+    <loc>https://da-wi.github.io/cartographr/reference/add_attribution.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/adjust_display.html</loc>
+    <loc>https://da-wi.github.io/cartographr/reference/adjust_viewport.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/cartographr_env.html</loc>
@@ -37,7 +37,7 @@
     <loc>https://da-wi.github.io/cartographr/reference/crime.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/cutout.html</loc>
+    <loc>https://da-wi.github.io/cartographr/reference/crop.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/dot-plot_map.html</loc>
@@ -61,9 +61,6 @@
     <loc>https://da-wi.github.io/cartographr/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/plot.cartographr_ggplot.html</loc>
-  </url>
-  <url>
     <loc>https://da-wi.github.io/cartographr/reference/plot_map.html</loc>
   </url>
   <url>
@@ -76,7 +73,7 @@
     <loc>https://da-wi.github.io/cartographr/reference/save_map.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/set_acknowledgments.html</loc>
+    <loc>https://da-wi.github.io/cartographr/reference/set_attribution.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/set_output_size.html</loc>

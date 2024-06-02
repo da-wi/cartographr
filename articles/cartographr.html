@@ -122,29 +122,33 @@ are also different color palettes for the map, have a look at
 <code><a href="../reference/get_palette.html">get_palette()</a></code> to get an idea of which color palettes exist
 and how to create your own color palette.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">plot_vienna</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"barcelona"</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="va">plot_vienna</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"iberia"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_poster_poppins.html">theme_poster_poppins</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>title<span class="op">=</span><span class="st">"vienna"</span><span class="op">)</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title<span class="op">=</span><span class="st">"vienna"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plot_vienna</span></span></code></pre></div>
 <p><img src="vienna_a4.png" width="100%" style="display: block; margin: auto;"></p>
 <p>Lastly, we can save the map ready-to-print as pdf using
 <code><a href="../reference/save_map.html">save_map()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot.vienna</span>, filename<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"vienna_a4.pdf"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>If you prefer a bitmap format, you can also directly call
-<code>ggsave()</code> from the <code>ggplot2()</code> package.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot_vienna</span>, filename<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"vienna_a4.pdf"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="if-you-prefer-a-bitmap-format-you-can-also-directly-call-ggsave-from-the-ggplot2-package-">If you prefer a bitmap format, you can also directly call
+<code>ggsave()</code> from the <code>ggplot2()</code> package.<a class="anchor" aria-label="anchor" href="#if-you-prefer-a-bitmap-format-you-can-also-directly-call-ggsave-from-the-ggplot2-package-"></a>
+</h2>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"~/vienna_a4.png"</span><span class="op">)</span>,</span>
-<span>       plot <span class="op">=</span> <span class="va">plot.vienna</span>,</span>
+<span>       plot <span class="op">=</span> <span class="va">plot_vienna</span>,</span>
 <span>       bg <span class="op">=</span> <span class="st">"white"</span>,</span>
 <span>       device <span class="op">=</span> <span class="st">"png"</span>,</span>
 <span>       dpi <span class="op">=</span> <span class="fl">96</span>,</span>
-<span>       width <span class="op">=</span> <span class="fl">210</span>,</span>
-<span>       height <span class="op">=</span> <span class="fl">297</span>,</span>
+<span>       width <span class="op">=</span> <span class="fl">148</span>,</span>
+<span>       height <span class="op">=</span> <span class="fl">210</span>,</span>
 <span>       units <span class="op">=</span> <span class="st">"mm"</span><span class="op">)</span></span></code></pre></div>
 </div>
-  </main>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
