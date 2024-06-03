@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{plot_map}
 \alias{plot_map}
-\title{Plot a Map with custom Palette}
+\title{Plot a map with custom palette}
 \usage{
 plot_map(...)
 }
@@ -18,11 +18,11 @@ Additional arguments are passed on to the preprocessing and plotting functions.
 A \code{ggplot} object representing the map with the chosen palette.
 }
 \description{
-This function takes an osmdata (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using \code{ggplot2} with the specified color palette.
+This function takes an 'osmdata' (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using 'ggplot2' with the specified color palette.
 }
 \examples{
-\dontrun{
-# Assuming 'osm_data' is a preloaded OSM object
-  plot_map(osm_data, palette = "imhof")
-}
+data("osm")
+osm |> plot_map()
+osm |> plot_map(palette = 'gray')
+
 }

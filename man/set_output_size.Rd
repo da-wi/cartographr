@@ -2,7 +2,7 @@
 % Please edit documentation in R/set.R
 \name{set_output_size}
 \alias{set_output_size}
-\title{Set Output Size for cartography}
+\title{Set output size for maps}
 \usage{
 set_output_size(size = NULL, orientation = "portrait")
 }
@@ -18,8 +18,6 @@ If size is NULL, returns the current output size as a numeric vector. If a size 
 This function sets the output size for cartographic displays. It allows the user to specify a standard paper size or custom dimensions. If no size is specified, it returns the current output size.
 }
 \examples{
-\dontrun{
 set_output_size("A3") # Sets the output size to A3 dimensions
 set_output_size(c(300, 200)) # Sets a custom output size
-}
 }

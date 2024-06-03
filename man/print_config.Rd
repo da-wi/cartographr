@@ -14,9 +14,6 @@ This function prints the configuration details stored in the current environment
 It iterates through the variables in the environment and displays their names and values.
 }
 \examples{
-\dontrun{
-# Example usage:
 print_config()
-}
 
 }

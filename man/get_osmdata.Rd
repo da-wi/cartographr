@@ -2,21 +2,23 @@
 % Please edit documentation in R/cartographr.R
 \name{get_osmdata}
 \alias{get_osmdata}
-\title{Retrieve OpenStreetMap Data for a Specified Location}
+\title{Retrieve OpenStreetMap data for a specified location}
 \usage{
 get_osmdata(
-  lat,
-  lon,
+  lat = NULL,
+  lon = NULL,
   x_distance = NULL,
   y_distance = NULL,
   aspect_ratio = NULL,
+  bbox = NULL,
+  sf = NULL,
   quiet = F
 )
 }
 \arguments{
-\item{lat}{Numeric, the latitude of the center point for the OSM data retrieval.}
+\item{lat}{Optional numeric, the latitude of the center point for the OSM data retrieval.}
 
-\item{lon}{Numeric, the longitude of the center point for the OSM data retrieval.}
+\item{lon}{Optional numeric, the longitude of the center point for the OSM data retrieval.}
 
 \item{x_distance}{Optional numeric, the distance in meters from the center point
 to the edge of the area in the x direction (longitude). Default is NULL.}
@@ -25,6 +27,12 @@ to the edge of the area in the x direction (longitude). Default is NULL.}
 to the edge of the area in the y direction (latitude). Default is NULL.}
 
 \item{aspect_ratio}{Optional numeric, the ratio of x_distance to y_distance.
+Default is NULL.}
+
+\item{bbox}{Optional bbox of the map boundary.
+Default is NULL.}
+
+\item{sf}{Optional sf of the map boundary.
 Default is NULL.}
 
 \item{quiet}{Logical, whether to suppress informational messages during execution.
@@ -43,8 +51,10 @@ OSM data is retrieved. The function ensures that only two of the three parameter
 (x_distance, y_distance, aspect_ratio) are provided to define the area.
 }
 \examples{
-\dontrun{
+\donttest{
+data("soho_boundary")
 osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
 osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, y_distance = 1000, aspect_ratio = 1.41)
+osm_data <- get_osmdata(sf = soho_boundary)
 }
 }

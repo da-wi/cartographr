@@ -1,4 +1,4 @@
-#' Create a Color Theme for Maps
+#' Create a color theme for maps
 #'
 #' This function creates a color theme to be used with `plot_map()`. It can accept a predefined palette name or a custom palette provided as a named list.
 #'

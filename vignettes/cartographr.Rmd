@@ -53,7 +53,7 @@ save_map(plot = plot_vienna, filename=paste0("vienna_a4.pdf"))
 ```
 
 If you prefer a bitmap format, you can also directly call `ggsave()` from the `ggplot2()` package.
--
+
 ```{r eval=FALSE}
 ggsave(paste0("~/vienna_a4.png"),
        plot = plot_vienna,

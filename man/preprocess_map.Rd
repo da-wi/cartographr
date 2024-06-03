@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{preprocess_map}
 \alias{preprocess_map}
-\title{Preprocess OpenStreetMap Data}
+\title{Preprocess OpenStreetMap data}
 \usage{
 preprocess_map(osm)
 }
@@ -19,8 +19,7 @@ unifies various OSM elements such as water lines, polygons, and multipolygons, a
 as building polygons and multipolygons.
 }
 \examples{
-\dontrun{
-# Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
-preprocessed_osm <- preprocess_map(osm_data)
-}
+data("osm")
+preprocessed_osm <- preprocess_map(osm)
+
 }

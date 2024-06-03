@@ -7,7 +7,7 @@
 theme_infomap_poppins()
 }
 \value{
-A ggplot2 theme object with the infomap theme settings applied and 'Poppins' font set.
+A 'ggplot2' theme object with the infomap theme settings applied and 'Poppins' font set.
 }
 \description{
 This function applies the infomap theme using the 'Poppins' font.

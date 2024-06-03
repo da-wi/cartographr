@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{save_map}
 \alias{save_map}
-\title{Save a Map to File}
+\title{Save a map to a file}
 \usage{
 save_map(plot, filename)
 }
@@ -18,9 +18,10 @@ The function saves the plot to a file and does not return anything.
 This function saves a ggplot object to a file using the specified filename. It checks for the orientation setting and warns if the scale factor has changed after the plot was created.
 }
 \examples{
-\dontrun{
-# Assuming 'map_plot' is a ggplot object and 'map.pdf' is the desired filename
-save_map(map_plot, "map.pdf")
-}
+data("osm")
+map_plot <- osm |> plot_map()
+filename <- tempfile(fileext =  ".pdf")
+save_map(map_plot, filename)
+unlink(filename)
 
 }

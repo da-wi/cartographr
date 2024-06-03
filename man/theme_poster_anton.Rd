@@ -2,19 +2,19 @@
 % Please edit documentation in R/theme.R
 \name{theme_poster_anton}
 \alias{theme_poster_anton}
-\title{Apply poster Theme with Anton Font}
+\title{Apply poster theme with Anton font}
 \usage{
 theme_poster_anton()
 }
 \value{
-A ggplot2 theme object with the poster theme settings applied and 'Anton' font set.
+A 'ggplot2' theme object with the poster theme settings applied and 'Anton' font set.
 }
 \description{
 This function applies the poster theme using the 'Anton' font.
 }
 \examples{
-\dontrun{
-# Apply the poster theme with Anton font to a ggplot object
-ggplot_object + theme_poster_anton()
-}
+data("osm")
+osm |> plot_map() +
+ theme_poster_anton()
+
 }

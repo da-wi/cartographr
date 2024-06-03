@@ -32,6 +32,7 @@ First, we load the locations of crimes in Manhattan.
 
 ```{r load crime locations, echo=T, message=F}
 data("crime") 
+data("soho_boundary") 
 ```
 
 # Convert longitude / latitude into a `sf`
@@ -52,9 +53,9 @@ This can be achieved with the function `sf::st_as_sf()` using the coordinates fr
 
 We have to provide `longitude`, `latitude` and `x_distance` (i.e., the width of the map in meters). Furthermore, we define the extend of the OSM data in meters in `get_osmdata()`. `y_distance` is calculated automatically using the output size aspect ratio. 
 
-```{r define coordinates}
-set_output_size("A3", orientation = "portrait")
-osm <- get_osmdata(lat = 40.711, lon =-74.009, x_distance =  1300)
+```{r define bbox}
+set_output_size("A4", orientation = "portrait")
+osm <- get_osmdata(sf = soho_boundary)
 ```
 
 # Plot the map
@@ -62,13 +63,15 @@ osm <- get_osmdata(lat = 40.711, lon =-74.009, x_distance =  1300)
 `plot_map()` generates a `ggplot2` object using the color theme set as parameter. That means that we can easily adjust the plot using `ggplot2` commands and also add new information to the map.
 
 ```{r plot map, fig.dim=c(11.7,16.5), fig.dpi = 72, out.width="100%"}
-p <- osm |> plot_map(palette = "metropolitan")  +
+p <- osm |> 
+  crop(soho_boundary) |> 
+  plot_map(palette = "gray") +
   # add geom with crimes
-  geom_point(data = suppressMessages(sf::st_intersection(df_crime, osm$bbox |> sf::st_as_sfc())),
+  geom_point(data = suppressMessages(sf::st_intersection(df_crime, soho_boundary)),
              aes(x = longitude, y = latitude, shape = type), color="#222424", size=2) + 
   theme_infomap_barlow() + 
   # Set labels
-  labs(title = "NEW YORK CRIME (2023)",
+  labs(title = "CRIME IN SOHO (2023)",
        shape = "TYPE")
 
 p

@@ -2,19 +2,19 @@
 % Please edit documentation in R/theme.R
 \name{theme_poster_poppins}
 \alias{theme_poster_poppins}
-\title{Apply poster Theme with Poppins Font}
+\title{Apply poster theme with Poppins font}
 \usage{
 theme_poster_poppins()
 }
 \value{
-A ggplot2 theme object with the poster theme settings applied and 'Poppins' font set.
+A 'ggplot2' theme object with the poster theme settings applied and 'Poppins' font set.
 }
 \description{
 This function applies the poster theme using the 'Poppins' font.
 }
 \examples{
-\dontrun{
-# Apply the poster theme with Poppins font to a ggplot object
-ggplot_object + theme_poster_poppins()
-}
+data("osm")
+osm |> plot_map() +
+ theme_poster_poppins()
+
 }

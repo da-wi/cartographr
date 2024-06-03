@@ -1,4 +1,4 @@
-#' Package Configuration Environment
+#' Package configuration environment
 #'
 #' This environment stores configuration settings for the package.
 #' It is initialized when the package is loaded and can be modified
@@ -13,7 +13,7 @@ cartographr_env$orientation <- "portrait"
 cartographr_env$attribution <- TRUE
 
 
-#' Set Output Size for cartography
+#' Set output size for maps
 #'
 #' This function sets the output size for cartographic displays. It allows the user to specify a standard paper size or custom dimensions. If no size is specified, it returns the current output size.
 #'
@@ -22,10 +22,8 @@ cartographr_env$attribution <- TRUE
 #' @return If size is NULL, returns the current output size as a numeric vector. If a size is specified, the function sets the output size..
 #'
 #' @examples
-#' \dontrun{
 #' set_output_size("A3") # Sets the output size to A3 dimensions
 #' set_output_size(c(300, 200)) # Sets a custom output size
-#' }
 #' @export
 set_output_size <- function(size = NULL, orientation = "portrait") {
   if(!orientation %in% c('portrait','landscape'))
@@ -92,7 +90,7 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
   invisible()
 }
 
-#' Set or Get Attribution Setting
+#' Set or get attribution setting
 #'
 #' This function sets a new value for the attribution setting in the cartographr environment or retrieves the current setting if no argument is provided.
 #'
@@ -101,13 +99,11 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
 #' @return If `attribution` is `NULL`, returns the current acknowledgments setting. If `attribution` is a logical value, the function will set the acknowledgments setting to that value and return invisibly.
 #'
 #' @examples
-#' \dontrun{
 #' # To get the current acknowledgments setting
 #' set_attribution()
 #'
 #' # To set the acknowledgments setting to TRUE
 #' set_attribution(TRUE)
-#' }
 #'
 #' @export
 set_attribution <- function(attribution = NULL) {
@@ -128,10 +124,7 @@ set_attribution <- function(attribution = NULL) {
 #' @return This function does not return any value; it only prints the configuration details.
 #'
 #' @examples
-#' \dontrun{
-#' # Example usage:
 #' print_config()
-#' }
 #'
 #' @export
 print_config <- function() {

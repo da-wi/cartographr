@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{crop}
 \alias{crop}
-\title{Crop a Preprocessed OpenStreetMap}
+\title{Crop a preprocessed OpenStreetMap}
 \usage{
 crop(osm, boundary = "rect")
 }
@@ -29,16 +29,15 @@ to suppress warnings during processing. The type of preprocessing applied is sto
 OSM object's metadata.
 }
 \examples{
-\dontrun{
-# Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
+data("osm")
 # Apply a circular crop
-osm_data <- crop(osm_data, boundary = "circle")
+osm_circle_cropped <- osm |> crop(boundary = "circle")
 
 # Apply a hexagonal crop
-osm_data <- crop(osm_data, boundary = "hex")
+osm_hex_cropped <- osm |> crop(boundary = "hex")
 
 # Apply a custom 'sf' boundary crop
-custom_boundary <- sf::st_as_sf(...) # Define custom 'sf' boundary
-osm_data <- crop(osm_data, boundary = custom_boundary)
-}
+data("soho_boundary")
+osm_sf_cropped <- osm |> crop(boundary = soho_boundary)
+
 }

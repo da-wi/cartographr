@@ -3,7 +3,7 @@
 \docType{data}
 \name{cartographr_env}
 \alias{cartographr_env}
-\title{Package Configuration Environment}
+\title{Package configuration environment}
 \format{
 An object of class \code{environment} of length 4.
 }

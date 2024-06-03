@@ -3,30 +3,28 @@ template:
   bootstrap: 5
 
 reference:
-- title: Data Retrieval and Preprocessing
+- title: Data retrieval and map preprocessing
   desc: Functions for obtaining and preparing OpenStreetMap data for urban environments.
   contents:
   - get_osmdata
   - preprocess_map
   - crop
 
-- title: Map Plotting and Customization
+- title: Plotting and customization
   desc: Functions to plot maps with custom themes and save the output.
   contents:
   - plot_map
   - save_map
   - get_palette
 
-- title: Configuration and Settings
+- title: Configuration and settings
   desc: Functions to configure the cartography package settings and output.
   contents:
-  - set_output_size
-  - set_attribution
-  - add_attribution
   - print_config
-  - adjust_viewport
+  - set_attribution
+  - set_output_size
 
-- title: Theming and Aesthetics
+- title: Theming and aesthetics
   desc: Functions to apply custom themes and fonts to enhance the visual appeal of maps.
   contents:
   - theme_infomap
@@ -37,14 +35,9 @@ reference:
   - theme_poster_anton
   - theme_poster_poppins
 
-- title: Utils
-  desc: Helper functions for handling and processing osm data
-  contents:
-  - get_border
-  - get_circle
-  - get_hexagon
-
 - title: Datasets
   desc: Included datasets for demonstration and testing purposes.
   contents:
   - crime
+  - osm
+  - soho_boundary

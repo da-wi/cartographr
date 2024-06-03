@@ -2,7 +2,7 @@
 % Please edit documentation in R/set.R
 \name{set_attribution}
 \alias{set_attribution}
-\title{Set or Get Attribution Setting}
+\title{Set or get attribution setting}
 \usage{
 set_attribution(attribution = NULL)
 }
@@ -16,12 +16,10 @@ If \code{attribution} is \code{NULL}, returns the current acknowledgments settin
 This function sets a new value for the attribution setting in the cartographr environment or retrieves the current setting if no argument is provided.
 }
 \examples{
-\dontrun{
 # To get the current acknowledgments setting
 set_attribution()
 
 # To set the acknowledgments setting to TRUE
 set_attribution(TRUE)
-}
 
 }

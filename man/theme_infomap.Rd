@@ -2,7 +2,7 @@
 % Please edit documentation in R/theme.R
 \name{theme_infomap}
 \alias{theme_infomap}
-\title{Apply Info Map Theme with Specified Font}
+\title{Apply infomap theme with specified font}
 \usage{
 theme_infomap(font = "Poppins")
 }
@@ -10,18 +10,14 @@ theme_infomap(font = "Poppins")
 \item{font}{A character string specifying the font to use for the theme elements. The default is "Poppins". Only "Poppins", "Anton", "Cinzel", and "Barlow" are valid options.}
 }
 \value{
-A ggplot2 theme object with the information map theme settings applied.
+A 'ggplot2' theme object with the information map theme settings applied.
 }
 \description{
 This function applies a custom theme for information maps, allowing the user to specify a font from a predefined list. It sets various ggplot2 theme elements such as the title, subtitle, caption, and legend to use the specified font and adjusts their appearance based on a scale factor.
 }
 \examples{
-\dontrun{
-# Apply the info map theme with the default Poppins font to a ggplot object
-ggplot_object + theme_infomap()
-
-# Apply the info map theme with the Anton font
-ggplot_object + theme_infomap(font = "Anton")
-}
+data("osm")
+osm |> plot_map() +
+ theme_infomap()
 
 }

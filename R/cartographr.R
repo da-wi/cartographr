@@ -1,4 +1,4 @@
-#' Preprocess OpenStreetMap Data
+#' Preprocess OpenStreetMap data
 #'
 #' This function performs preprocessing on OpenStreetMap (OSM) data. It validates and
 #' unifies various OSM elements such as water lines, polygons, and multipolygons, as well
@@ -10,10 +10,9 @@
 #'         and with additional preprocessing information.
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
-#' preprocessed_osm <- preprocess_map(osm_data)
-#' }
+#' data("osm")
+#' preprocessed_osm <- osm |> preprocess_map()
+#' preprocessed_osm |> plot_map()
 #' @export
 preprocess_map = function(osm) {
   # copy osm_object
@@ -40,7 +39,7 @@ preprocess_map = function(osm) {
   suppressMessages(osm_object$water.dis  <- sf::st_union(osm_object$water[1:dim(osm_object$water)[1],]))
 
   # buidlings
-  osm_object$buildings <- list( osm_object$x1$osm_polygons, osm_object$x1$osm_multipolygons)
+  osm_object$buildings <- list( osm_object$x.building$osm_polygons, osm_object$x.building$osm_multipolygons)
   osm_object$buildings <- osm_object$buildings[!sapply(osm_object$buildings,is.null)]
   osm_object$buildings.dis <- NULL
   if (length(osm_object$buildings) > 1) {
@@ -50,8 +49,8 @@ preprocess_map = function(osm) {
     osm_object$buildings.dis <- osm_object$buildings[[1]]
   }
 
-  #if(!is.null(osm_object$x1$osm_polygons)) osm_object$x1$osm_polygons <-  osm_object$x1$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
-  #if(!is.null(osm_object$x1$osm_multipolygons)) osm_object$x1$osm_multipolygons <- osm_object$x1$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm_object$x.building$osm_polygons)) osm_object$x.building$osm_polygons <-  osm_object$x.building$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm_object$x.building$osm_multipolygons)) osm_object$x.building$osm_multipolygons <- osm_object$x.building$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
 
   osm_object$preprocessing <- "rect"
   osm_object$preprocessed <- TRUE
@@ -59,7 +58,7 @@ preprocess_map = function(osm) {
 }
 
 
-#' Crop a Preprocessed OpenStreetMap
+#' Crop a preprocessed OpenStreetMap
 #'
 #' This function crops an OpenStreetMap (OSM) object that has been preprocessed.
 #' It supports different types of geometric boundaries such as rectangles, circles, and hexagons,
@@ -80,18 +79,17 @@ preprocess_map = function(osm) {
 #' OSM object's metadata.
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming 'osm_data' is an OSM object obtained from the 'get_osmdata' function
+#' data("osm")
 #' # Apply a circular crop
-#' osm_data <- crop(osm_data, boundary = "circle")
+#' osm_circle_cropped <- osm |> crop(boundary = "circle")
 #'
 #' # Apply a hexagonal crop
-#' osm_data <- crop(osm_data, boundary = "hex")
+#' osm_hex_cropped <- osm |> crop(boundary = "hex")
 #'
 #' # Apply a custom 'sf' boundary crop
-#' custom_boundary <- sf::st_as_sf(...) # Define custom 'sf' boundary
-#' osm_data <- crop(osm_data, boundary = custom_boundary)
-#' }
+#' data("soho_boundary")
+#' osm_sf_cropped <- osm |> crop(boundary = soho_boundary)
+#'
 #' @export
 crop = function(osm, boundary = "rect") {
 
@@ -104,8 +102,8 @@ crop = function(osm, boundary = "rect") {
   }
   #osm = preprocess_map(osm) # should move to get_osmdata
 
-  if (inherits(boundary, "sf")) {
-    crop_extent = crop
+  if (inherits(boundary, "sf") | inherits(boundary, "sfc")) {
+    crop_extent = boundary
     osm_object$preprocessing <- "sf"
   }
 
@@ -133,8 +131,8 @@ crop = function(osm, boundary = "rect") {
   osm_object$bbox[c(3,4)] <- osm_object$bbox[c(3,4)]+(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
 
   # streets
-  if(!is.null(osm_object$x$osm_lines)) osm_object$x$osm_lines <- suppressMessages(osm_object$x$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
-  if(!is.null(osm_object$x$osm_points)) osm_object$x$osm_points <- suppressMessages(osm_object$x$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm_object$x.street$osm_lines)) osm_object$x.street$osm_lines <- suppressMessages(osm_object$x.street$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm_object$x.street$osm_points)) osm_object$x.street$osm_points <- suppressMessages(osm_object$x.street$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
 
   # buildings
@@ -164,9 +162,9 @@ crop = function(osm, boundary = "rect") {
 }
 
 
-#' Plot a Map with custom Palette
+#' Plot a map with custom palette
 #'
-#' This function takes an osmdata (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using `ggplot2` with the specified color palette.
+#' This function takes an 'osmdata' (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using 'ggplot2' with the specified color palette.
 #'
 #' @param ... Variable argument list:
 #'   - `osm`: A list retrieved from osmdata containing map data.
@@ -175,10 +173,10 @@ crop = function(osm, boundary = "rect") {
 #'
 #' @return A `ggplot` object representing the map with the chosen palette.
 #' @examples
-#' \dontrun{
-#' # Assuming 'osm_data' is a preloaded OSM object
-#'   plot_map(osm_data, palette = "imhof")
-#' }
+#' data("osm")
+#' osm |> plot_map()
+#' osm |> plot_map(palette = 'gray')
+#'
 #' @export
 plot_map <- function(...) {
   # Call the original plot_map function
@@ -272,16 +270,16 @@ plot_map <- function(...) {
                        color=color$railway, linewidth = 0.5)} +
 
     # streets
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "primary") , color=color$street, linewidth=4*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "secondary") , color=color$street, linewidth=4*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "tertiary") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "unclassified") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "residential") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "service") , color=color$street, linewidth=1*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x$osm_lines, osm$x$osm_lines$highway == "living_street"), color=color$street, linewidth=1*scale_factor) +
-    {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x$osm_points, color=color$lights, size=0.2*scale_factor)} +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "primary") , color=color$street, linewidth=4*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "secondary") , color=color$street, linewidth=4*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "tertiary") , color=color$street, linewidth=3*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "unclassified") , color=color$street, linewidth=3*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "residential") , color=color$street, linewidth=3*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "service") , color=color$street, linewidth=1*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "living_street"), color=color$street, linewidth=1*scale_factor) +
+    {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x.street$osm_points, color=color$lights, size=0.2*scale_factor)} +
 
     # buildings
     ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= borderc, linewidth =0.01*scale_factor)+
@@ -301,7 +299,7 @@ plot_map <- function(...) {
     return(p)
 }
 
-#' Retrieve OpenStreetMap Data for a Specified Location
+#' Retrieve OpenStreetMap data for a specified location
 #'
 #' This function fetches OpenStreetMap (OSM) data for a specified latitude and longitude,
 #' within a given distance range. It allows the user to specify distances in the x and y
@@ -309,13 +307,17 @@ plot_map <- function(...) {
 #' OSM data is retrieved. The function ensures that only two of the three parameters
 #' (x_distance, y_distance, aspect_ratio) are provided to define the area.
 #'
-#' @param lat Numeric, the latitude of the center point for the OSM data retrieval.
-#' @param lon Numeric, the longitude of the center point for the OSM data retrieval.
+#' @param lat Optional numeric, the latitude of the center point for the OSM data retrieval.
+#' @param lon Optional numeric, the longitude of the center point for the OSM data retrieval.
 #' @param x_distance Optional numeric, the distance in meters from the center point
 #'   to the edge of the area in the x direction (longitude). Default is NULL.
 #' @param y_distance Optional numeric, the distance in meters from the center point
 #'   to the edge of the area in the y direction (latitude). Default is NULL.
 #' @param aspect_ratio Optional numeric, the ratio of x_distance to y_distance.
+#'   Default is NULL.
+#' @param sf Optional sf of the map boundary.
+#'   Default is NULL.
+#' @param bbox Optional bbox of the map boundary.
 #'   Default is NULL.
 #' @param quiet Logical, whether to suppress informational messages during execution.
 #'   Default is FALSE.
@@ -325,63 +327,91 @@ plot_map <- function(...) {
 #'   bounding box of the retrieved area.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' data("soho_boundary")
 #' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
 #' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, y_distance = 1000, aspect_ratio = 1.41)
+#' osm_data <- get_osmdata(sf = soho_boundary)
 #' }
 #' @export
-get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, quiet = F) {
+get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = F) {
 
-  # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
-  num_args_provided <- sum(!is.null(c(y_distance, x_distance, aspect_ratio)))
-
-  # If all three are provided, stop the function
-  if (num_args_provided > 2) {
-    stop(cli::cli_abort("Only two of 'y_distance', 'x_distance', and 'aspect_ratio' should be provided."))
+  if (is.null(lat) && is.null(lon) && is.null(x_distance) && is.null(y_distance) && is.null(aspect_ratio) && is.null(bbox) && is.null(sf)) {
+    stop(cli::cli_abort("At least one argument must be set"))
   }
 
-  if (num_args_provided == 0) {
-    stop(cli::cli_abort("Please provide at least one of the arguments 'y_distance' or 'x_distance'."))
-  }
+  if (is.null(bbox) && is.null(sf)) {
+    # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
+    num_args_provided <- sum(!is.null(c(y_distance, x_distance, aspect_ratio)))
 
-  # If only two are provided, calculate the third variable
-  if (!is.null(y_distance) && !is.null(x_distance)) {
-    aspect_ratio <- x_distance / y_distance
-  } else if (!is.null(y_distance) && !is.null(aspect_ratio)) {
-    x_distance <- y_distance * aspect_ratio
-  } else if (!is.null(x_distance) && !is.null(aspect_ratio)) {
-    y_distance <- x_distance / aspect_ratio
-  }
-
-  # If only one of x_distance and y_distance is provided without aspect_ratio,
-  # try to calculate the aspect_ratio from the vector of length 2 returned by set_output_size()
-  if (is.null(aspect_ratio) && (is.null(y_distance) || is.null(x_distance))) {
-    output_size <- set_output_size() # Assuming get_output_size() returns a vector of length 2
-    if (length(output_size) == 2) {
-      aspect_ratio <- output_size[1] / output_size[2]
-      if (is.null(x_distance)) {
-        x_distance <- y_distance * aspect_ratio
-      } else {
-        y_distance <- x_distance / aspect_ratio
-      }
-    } else {
-      stop(cli::cli_abort("get_output_size() must return a vector of length 2 to calculate aspect_ratio."))
+    # If all three are provided, stop the function
+    if (num_args_provided > 2) {
+      stop(cli::cli_abort("Only two of 'y_distance', 'x_distance', and 'aspect_ratio' should be provided."))
     }
+
+    if (num_args_provided == 0) {
+      stop(cli::cli_abort("Please provide at least one of the arguments 'y_distance' or 'x_distance'."))
+    }
+
+    # If only two are provided, calculate the third variable
+    if (!is.null(y_distance) && !is.null(x_distance)) {
+      aspect_ratio <- x_distance / y_distance
+    } else if (!is.null(y_distance) && !is.null(aspect_ratio)) {
+      x_distance <- y_distance * aspect_ratio
+    } else if (!is.null(x_distance) && !is.null(aspect_ratio)) {
+      y_distance <- x_distance / aspect_ratio
+    }
+
+    # If only one of x_distance and y_distance is provided without aspect_ratio,
+    # try to calculate the aspect_ratio from the vector of length 2 returned by set_output_size()
+    if (is.null(aspect_ratio) && (is.null(y_distance) || is.null(x_distance))) {
+      output_size <- set_output_size() # Assuming get_output_size() returns a vector of length 2
+      if (length(output_size) == 2) {
+        aspect_ratio <- output_size[1] / output_size[2]
+        if (is.null(x_distance)) {
+          x_distance <- y_distance * aspect_ratio
+        } else {
+          y_distance <- x_distance / aspect_ratio
+        }
+      } else {
+          stop(cli::cli_abort("set_output_size() must return a vector of length 2 to calculate aspect_ratio."))
+      }
+    }
+
+    place <- get_border(as.numeric(lat),as.numeric(lon),y_distance,x_distance)
+    coords_bbox <- as.numeric(strsplit(osmdata::opq(bbox = place)$bbox, split = ",")[[1]])
+    coords_bbox[3]-coords_bbox[1]
+    coords_bbox[4]-coords_bbox[2]
+
+
+    bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
   }
 
-  place <- get_border(as.numeric(lat),as.numeric(lon),y_distance,x_distance)
-  #coords_bbox <- as.numeric(stringr::str_split(osmdata::opq(bbox = place)$bbox,",")[[1]])
-  coords_bbox <- as.numeric(strsplit(osmdata::opq(bbox = place)$bbox, split = ",")[[1]])
-  coords_bbox[3]-coords_bbox[1]
-  coords_bbox[4]-coords_bbox[2]
+  # bbox explicitly given
+  else {
+    if (is.null(sf)) {
+      place <- bbox
+    } else {
+      if (is.null(bbox)) {
+        place <- sf::st_bbox(sf)
+        bbox <- place
+      }
+    }
 
+    centroid_of_bbox <- c((bbox$xmin + bbox$xmax) / 2, (bbox$ymin + bbox$ymax) / 2)
+    lon <- centroid_of_bbox[1]
+    lat <- centroid_of_bbox[2]
 
-  bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
+    x_distance <- haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], centroid_of_bbox[2], bbox$xmax) +
+      haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], centroid_of_bbox[2],  bbox$xmin)
+    y_distance <- haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymax, centroid_of_bbox[1]) +
+      haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymin, centroid_of_bbox[1])
+  }
 
   q.street <- osmdata::opq(bbox = place) |>
     osmdata::add_osm_feature("highway", c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
 
-  q1 <- osmdata::opq(bbox = place) |>
+  q.building <- osmdata::opq(bbox = place) |>
     osmdata::add_osm_feature("building")
 
   q.water <- osmdata::opq(bbox = place) |>
@@ -423,31 +453,36 @@ get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_r
 
 
   if(!quiet) cli::cli_alert_info("Retrieving data, be patient with requests failing.")
-  if(!quiet) cli::cli_alert_info(paste0("lat:",round(lat,2),", lon:",round(lon,2),", dy:",round(y_distance,2),", dx:", round(x_distance,2)))
 
+  if (!is.null(bbox)) {
+    if(!quiet) cli::cli_alert_info(paste0("xmin:",round(bbox[1],2),", ymin:",round(bbox[2],2),", xmax:",round(bbox[3],2),", ymax:", round(bbox[4],2)))
+  }
+  else {
+    if(!quiet) cli::cli_alert_info(paste0("lat:",round(lat,2),", lon:",round(lon,2),", dy:",round(y_distance,2),", dx:", round(x_distance,2)))
+  }
   osm <- c()
 
   if(!quiet) cli::cli_progress_step("Creating street network", spinner = T)
 
-  osm$x <- q.street |> osmdata::osmdata_sf()
-  #osm$x$osm_lines <- osm$x$osm_lines |>
-  #  dplyr::mutate(length = as.numeric(sf::st_length(osm$x$osm_lines))) |>
+  osm$x.street <- q.street |> osmdata::osmdata_sf()
+  #osm$x.street$osm_lines <- osm$x.street$osm_lines |>
+  #  dplyr::mutate(length = as.numeric(sf::st_length(osm$x.street$osm_lines))) |>
   #  dplyr::filter(length >= stats::quantile(length,0.25))
-  osm$x$osm_lines$length <- as.numeric(sf::st_length(osm$x$osm_lines))
-  length_quantile <- stats::quantile(osm$x$osm_lines$length, 0.25)
-  osm$x$osm_lines <- subset(osm$x$osm_lines, length >= length_quantile)
+  osm$x.street$osm_lines$length <- as.numeric(sf::st_length(osm$x.street$osm_lines))
+  length_quantile <- stats::quantile(osm$x.street$osm_lines$length, 0.25)
+  osm$x.street$osm_lines <- subset(osm$x.street$osm_lines, length >= length_quantile)
 
   if(!quiet) cli::cli_progress_step("Constructing buildings", spinner = T)
-  osm$x1 <- q1 |> osmdata::osmdata_sf()
-  #osm$x1$osm_polygons <- osm$x1$osm_polygons |>
-  ##  (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) dplyr::filter( osm$x1$osm_polygons, is.na(tunnel) == TRUE) else x)()
-  #  (\(x) if(!is.null(osm$x1$osm_polygons$tunnel)) subset(is.na(tunnel)) else x)()
+  osm$x.building <- q.building |> osmdata::osmdata_sf()
+  #osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
+  ##  (\(x) if(!is.null(osm$x.building$osm_polygons$tunnel)) dplyr::filter( osm$x.building$osm_polygons, is.na(tunnel) == TRUE) else x)()
+  #  (\(x) if(!is.null(osm$x.building$osm_polygons$tunnel)) subset(is.na(tunnel)) else x)()
 
-  osm$x1$osm_polygons <- osm$x1$osm_polygons |>
+  osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
     (\(x) if(!is.null(x$tunnel)) x[is.na(x$tunnel), ] else x)()
 
-  if(!is.null(osm$x1$osm_polygons)) osm$x1$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_polygons)[1], replace = T)
-  if(!is.null(osm$x1$osm_multipolygons)) osm$x1$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x1$osm_multipolygons)[1], replace = T)
+  if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_polygons)[1], replace = T)
+  if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_multipolygons)[1], replace = T)
 
   if(!quiet) cli::cli_progress_step("Filling in water", spinner = T)
   osm$x.water <- q.water |> osmdata::osmdata_sf()
@@ -477,7 +512,7 @@ get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_r
 
 
 
-#' Save a Map to File
+#' Save a map to a file
 #'
 #' This function saves a ggplot object to a file using the specified filename. It checks for the orientation setting and warns if the scale factor has changed after the plot was created.
 #'
@@ -487,10 +522,11 @@ get_osmdata <- function(lat, lon, x_distance = NULL, y_distance = NULL, aspect_r
 #' @return The function saves the plot to a file and does not return anything.
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming 'map_plot' is a ggplot object and 'map.pdf' is the desired filename
-#' save_map(map_plot, "map.pdf")
-#' }
+#' data("osm")
+#' map_plot <- osm |> plot_map()
+#' filename <- tempfile(fileext =  ".pdf")
+#' save_map(map_plot, filename)
+#' unlink(filename)
 #'
 #' @export
 save_map <- function(plot, filename) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/palette.R
 \name{get_palette}
 \alias{get_palette}
-\title{Create a Color Theme for Maps}
+\title{Create a color theme for maps}
 \usage{
 get_palette(palette)
 }

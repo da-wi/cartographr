@@ -2,7 +2,7 @@
 % Please edit documentation in R/theme.R
 \name{theme_poster}
 \alias{theme_poster}
-\title{Create a poster-themed theme}
+\title{Create a poster theme}
 \usage{
 theme_poster(font = "Poppins")
 }
@@ -11,8 +11,14 @@ theme_poster(font = "Poppins")
 The default font is set to "Poppins".}
 }
 \value{
-A ggplot2 theme object that can be added to ggplot2 plotting calls.
+A 'ggplot2' theme object that can be added to 'ggplot2' plotting calls.
 }
 \description{
-This function generates a ggplot2 theme that resembles a poster style. It is designed to be used with ggplot2 plots to provide a clean and bold aesthetic suitable for poster visuals.
+This function generates a 'ggplot2' theme that resembles a poster style. It is designed to be used with 'ggplot2' plots to provide a clean and bold aesthetic suitable for poster visuals.
+}
+\examples{
+data("osm")
+osm |> plot_map() +
+ theme_poster()
+
 }

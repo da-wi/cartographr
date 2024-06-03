@@ -1,4 +1,4 @@
-#' Adjust the Viewport for Map Visualization
+#' Adjust the viewport for map visualization
 #'
 #' This internal function adjusts the viewport for map visualization using ggplot2.
 #' It modifies the x and y limits based on the bounding box (bbox) of the OpenStreetMap (OSM) object.
@@ -11,9 +11,9 @@
 #' The function calculates new x and y limits by adding and subtracting a twentieth of the bbox's width and height
 #' from the respective minimum and maximum x and y values. This creates a margin around the map, enhancing visibility.
 #'
-#' @export
+#' @noRd
+#' @keywords internal
 adjust_viewport <- function(osm_object) {
-  # TODO make this function internal
 
   return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1]+(osm_object$bbox[3]-osm_object$bbox[1])/20,
                                     osm_object$bbox[3]-(osm_object$bbox[3]-osm_object$bbox[1])/20),
@@ -21,7 +21,7 @@ adjust_viewport <- function(osm_object) {
                                     osm_object$bbox[4]-(osm_object$bbox[4]-osm_object$bbox[2])/20)))
 }
 
-#' Add Attribution Caption to Plots
+#' Add attribution caption to plots
 #'
 #' This function checks if acknowledgments are enabled in the
 #' environment and, if so, adds an attribution caption to the plot using ggplot2.
@@ -29,45 +29,15 @@ adjust_viewport <- function(osm_object) {
 #'
 #' @return A ggplot2 `labs` object with a caption attribute if acknowledgments
 #' are enabled; otherwise, `NULL`.
-#' @export
+#' @noRd
+#' @keywords internal
 add_attribution <- function() {
   if (cartographr_env$attribution) {
-    return(ggplot2::labs(caption = "CARTOGRAPHR   .   OPEN STREET MAP"))
+    return(ggplot2::labs(caption = "CARTOGRAPHR   |   OPENSTREETMAP"))
   }
   else {
     return(NULL)
   }
-}
-
-#' Calculate rectengular border given the coordinates
-#'
-#' This function calculates correct borders
-#'
-#' @param lat Latitude WSG84
-#' @param lon Latitude WSG84
-#' @param offlat offset Latitude
-#' @param offlon offset Longitude
-#' @return The border of the map in Coordinates
-#' @export
-get_border <- function(lat,lon,offlat,offlon) {
-  # Earth's radius, sphere
-  R = 6378137
-
-  # offsets in meters
-  dn = offlat
-  de = offlon
-
-  # Coordinate offsets in radians
-  dLat = dn/R
-  dLon = de/(R*cos(3.1415*lat/180))
-
-  # Offset, decimal degrees
-  ymax = lat + dLat * 180/3.1415
-  xmax = lon + dLon * 180/3.1415
-  ymin = lat - dLat * 180/3.1415
-  xmin = lon - dLon * 180/3.1415
-
-  return(c(xmin,ymin,xmax,ymax))
 }
 
 #' Generate bounding circle
@@ -79,7 +49,8 @@ get_border <- function(lat,lon,offlat,offlon) {
 #' @param y_distance Y distance in meters
 #' @param x_distance X distance in meters
 #' @return The circle
-#' @export
+#' @noRd
+#' @keywords internal
 get_circle <- function(lat,lon,y_distance,x_distance) {
   return(data.frame(lat = as.numeric(lat),  long = as.numeric(lon)) |>
            sf::st_as_sf(coords = c("long", "lat"), crs = 4326) |>
@@ -97,11 +68,12 @@ get_circle <- function(lat,lon,y_distance,x_distance) {
 #' @param y_distance Y distance in meters
 #' @param x_distance X distance in meters
 #' @return The hexagon
-#' @export
+#' @noRd
+#' @keywords internal
 get_hexagon <- function(lat, lon, y_distance, x_distance) {
   n_sides <- 6
   radius <- min(y_distance, x_distance)
-  earth_radius <- 6371000
+  R <- 6378137
 
   lat_rad <- lat * (pi / 180)
   lon_rad <- lon * (pi / 180)
@@ -115,11 +87,11 @@ get_hexagon <- function(lat, lon, y_distance, x_distance) {
   for (i in 1:n_sides) {
     bearing <- angles[i]
 
-    lat_hex[i] <- asin(sin(lat_rad) * cos(radius / earth_radius) +
-                         cos(lat_rad) * sin(radius / earth_radius) * cos(bearing))
+    lat_hex[i] <- asin(sin(lat_rad) * cos(radius / R) +
+                         cos(lat_rad) * sin(radius / R) * cos(bearing))
 
-    lon_hex[i] <- lon_rad + atan2(sin(bearing) * sin(radius / earth_radius) * cos(lat_rad),
-                                  cos(radius / earth_radius) - sin(lat_rad) * sin(lat_hex[i]))
+    lon_hex[i] <- lon_rad + atan2(sin(bearing) * sin(radius / R) * cos(lat_rad),
+                                  cos(radius / R) - sin(lat_rad) * sin(lat_hex[i]))
 
     # Convert the radians back to degrees
     lat_hex[i] <- lat_hex[i] * (180 / pi)
@@ -140,4 +112,69 @@ get_hexagon <- function(lat, lon, y_distance, x_distance) {
   hex_polygon <- sf::st_cast(combined_polygon, "POLYGON")
 
   return(hex_polygon)
+}
+
+
+#' Haversine distance
+#'
+#' This function calculates haversine distance
+#'
+#' @param lat1 Latitude 1 WGS84
+#' @param lon2 Longitude 1 WGS84
+#' @param lat2 Latitude 2 WGS84
+#' @param lon2 Longitude 2 WGS84
+#' @return The distance in meters
+#' @noRd
+#' @keywords internal
+haversine_distance <- function(lat1, lon1, lat2, lon2) {
+  # Convert degrees to radians
+  rad <- pi / 180
+  lat1 <- lat1 * rad
+  lat2 <- lat2 * rad
+  lon1 <- lon1 * rad
+  lon2 <- lon2 * rad
+
+  # Radius of the Earth in kilometers
+  R <- 6378137
+
+  # Difference in coordinates
+  dlat <- lat2 - lat1
+  dlon <- lon2 - lon1
+
+  # Haversine formula
+  a <- sin(dlat/2)^2 + cos(lat1) * cos(lat2) * sin(dlon/2)^2
+  c <- 2 * asin(min(1, sqrt(a)))
+  distance <- R * c
+
+  return(distance)
+}
+
+
+#' Calculate rectengular border given the coordinates
+#'
+#' This function calculates correct borders
+#'
+#' @param lat Latitude WSG84
+#' @param lon Latitude WSG84
+#' @param offlat offset Latitude
+#' @param offlon offset Longitude
+#' @return The border of the map in Coordinates
+#' @noRd
+#' @keywords internal
+get_border <- function(lat,lon,offlat,offlon) {
+  # Earth's radius, sphere
+  R = 6378137
+
+  dn = offlat
+  de = offlon
+
+  dLat = dn/R
+  dLon = de/(R*cos(3.1415*lat/180))
+
+  ymax = lat + dLat * 180/3.1415
+  xmax = lon + dLon * 180/3.1415
+  ymin = lat - dLat * 180/3.1415
+  xmin = lon - dLon * 180/3.1415
+
+  return(c(xmin,ymin,xmax,ymax))
 }
