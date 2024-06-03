@@ -18,7 +18,7 @@ This function generates a 'ggplot2' theme that resembles a poster style. It is d
 }
 \examples{
 data("osm")
-osm |> plot_map() +
+my_map <- osm |> plot_map() +
  theme_poster()
 
 }

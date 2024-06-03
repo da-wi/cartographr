@@ -7,7 +7,7 @@
 #' @return A 'ggplot2' theme object that can be added to 'ggplot2' plotting calls.
 #' @examples
 #' data("osm")
-#' osm |> plot_map() +
+#' my_map <- osm |> plot_map() +
 #'  theme_poster()
 #'
 #' @export
@@ -38,7 +38,7 @@ theme_poster <- function(font = "Poppins") {
 #'
 #' @examples
 #' data("osm")
-#' osm |> plot_map() +
+#' my_map <- osm |> plot_map() +
 #'  theme_poster_poppins()
 #'
 #' @export
@@ -54,7 +54,7 @@ theme_poster_poppins <- function() {
 #'
 #' @examples
 #' data("osm")
-#' osm |> plot_map() +
+#' my_map <- osm |> plot_map() +
 #'  theme_poster_anton()
 #'
 #' @export
@@ -72,7 +72,7 @@ theme_poster_anton <- function() {
 #'
 #' @examples
 #' data("osm")
-#' osm |> plot_map() +
+#' my_map <- osm |> plot_map() +
 #'  theme_infomap()
 #'
 #' @export
@@ -92,8 +92,8 @@ theme_infomap <- function(font = "Poppins") {
              plot.margin = ggplot2::margin(t = 40*scale_factor, r = 10*scale_factor, b = 40*scale_factor, l = 10*scale_factor, unit = "mm"),
              plot.caption = ggplot2::element_text(face="plain",size=scale_factor*8*2.845276, hjust = 1,family=font,color="#292e28"),
              legend.position = "top",
-             legend.title = ggplot2::element_text(size = 10*scale_factor*2.845276, family=font,face = "bold", color = "#292e28"),
-             legend.text = ggplot2::element_text(size = 10*scale_factor*2.845276, family = font, color= "#292e28"),
+             legend.title = ggplot2::element_text(size = 14*scale_factor*2.845276, family=font,face = "bold", color = "#292e28"),
+             legend.text = ggplot2::element_text(size = 14*scale_factor*2.845276, family = font, color= "#292e28"),
              legend.justification = c("right","top"),
              legend.margin = ggplot2::margin(-18*scale_factor, 0, 0, 0, unit = "mm"),
              legend.key.spacing = grid::unit(0,"mm")
@@ -108,7 +108,7 @@ theme_infomap <- function(font = "Poppins") {
 #'
 #' @examples
 #' data("osm")
-#' osm |> plot_map() +
+#' my_map <- osm |> plot_map() +
 #'  theme_infomap_anton()
 #'
 #' @export
@@ -123,10 +123,9 @@ theme_infomap_anton <- function() {
 #' @return A 'ggplot2' theme object with the infomap theme settings applied and 'Poppins' font set.
 #'
 #' @examples
-#' \dontrun{
-#' # Apply the infomap theme with Poppins font to a ggplot object
-#' ggplot_object + theme_poster_poppins()
-#' }
+#' data("osm")
+#' my_map <- osm |> plot_map() +
+#'  theme_infomap_poppins()
 #' @export
 theme_infomap_poppins <- function() {
   return(theme_infomap(font = "Poppins"))
@@ -140,7 +139,7 @@ theme_infomap_poppins <- function() {
 #'
 #' @examples
 #' data("osm")
-#' osm |> plot_map() +
+#' my_map <- osm |> plot_map() +
 #'  theme_infomap_barlow()
 #'
 #' @export

@@ -14,7 +14,7 @@ This function applies the poster theme using the 'Poppins' font.
 }
 \examples{
 data("osm")
-osm |> plot_map() +
+my_map <- osm |> plot_map() +
  theme_poster_poppins()
 
 }

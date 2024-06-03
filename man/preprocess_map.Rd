@@ -20,6 +20,5 @@ as building polygons and multipolygons.
 }
 \examples{
 data("osm")
-preprocessed_osm <- preprocess_map(osm)
-
+preprocessed_osm <- osm |> preprocess_map()
 }

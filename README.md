@@ -15,7 +15,7 @@ issues by providing a user-friendly interface akin to ggplot2,
 streamlining the map-making process and allowing users to concentrate on
 the narrative conveyed by their maps. It offers a practical and
 adaptable solution for transforming raw geospation data using simple
-features (`sf()`) geometries into informative, high-quality
+features (`sf`) geometries into informative, high-quality
 visualizations, thereby improving the dissemination of spatial
 information to diverse audiences. Whether you’re involved in urban
 planning, environmental studies, or need to create impactful public

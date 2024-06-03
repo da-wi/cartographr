@@ -28,13 +28,12 @@
 #' - **Tropical**: A lively palette with the bright and bold colors characteristic of tropical areas.
 #'
 #' @examples
-#' \dontrun{
-#' # Standard usage with a character argument for a predefined palette
-#' plot_map(osm, palette = 'tropical')
+#' # Use predefined palette
+#' get_palette("imhof")
 #'
 #' # Custom palette creation using a named list for a simple black and white palette
 #' custom_palette <- list(
-#'   palette_building = c("#000000", "#FFFFFF"),
+#'   palette_building = c("#000000", "#FFFFFF", "#CCCCCC"),
 #'   water = "#000000",
 #'   green = "#FFFFFF",
 #'   beach = "#000000",
@@ -44,8 +43,8 @@
 #'   railway = "#000000",
 #'   hatched = TRUE
 #' )
-#' plot_map(osm, palette = custom_palette)
-#' }
+#'
+#' get_palette(custom_palette)
 #' @export
 get_palette = function(palette) {
   if (is.list(palette) && all(names(palette) != "")) {

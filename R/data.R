@@ -1,7 +1,10 @@
 #' Manhattan crime dataset
 #'
-#' This dataset includes all valid felony, misdemeanor, and violation crimes reported to the New York City Police Department (NYPD) for Manhattan from 2004.
-#' \url{https://catalog.data.gov/}.
+#' This dataset encompasses all reported felony, misdemeanor, and violation crimes as recorded by the New York City Police Department (NYPD) for the borough of Manhattan, starting from the year 2004.
+#' The data is sourced from the public domain and is available for analysis and research purposes. It provides a comprehensive overview of crime patterns and can be utilized for developing crime prevention strategies, conducting sociological research, and enhancing public awareness.
+#'
+#' @format A data frame with columns representing various attributes of crimes such as type, location, date, and time.
+#' @source New York City Police Department (NYPD) \url{https://catalog.data.gov/}
 "crime"
 
 #' SoHo Boundary Simple Features Vector
@@ -12,7 +15,7 @@
 #'
 #' @format An object of class \code{sf} (inherits from \code{data.frame}),
 #' representing the SoHo boundary with its spatial attributes.
-#' @source https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+#' @source \url{https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html}
 #' @examples
 #' data(soho_boundary)
 #' plot(soho_boundary$geometry)
@@ -28,5 +31,5 @@
 #' @source OpenStreetMap
 #' @examples
 #' data("osm")
-#' osm |> plot_map()
+#' my_map <- osm |> plot_map()
 "osm"

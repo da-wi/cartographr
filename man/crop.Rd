@@ -29,6 +29,7 @@ to suppress warnings during processing. The type of preprocessing applied is sto
 OSM object's metadata.
 }
 \examples{
+\donttest{
 data("osm")
 # Apply a circular crop
 osm_circle_cropped <- osm |> crop(boundary = "circle")
@@ -39,5 +40,5 @@ osm_hex_cropped <- osm |> crop(boundary = "hex")
 # Apply a custom 'sf' boundary crop
 data("soho_boundary")
 osm_sf_cropped <- osm |> crop(boundary = soho_boundary)
-
+}
 }

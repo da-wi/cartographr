@@ -14,7 +14,7 @@ This function applies the infomap theme using the 'Anton' font.
 }
 \examples{
 data("osm")
-osm |> plot_map() +
+my_map <- osm |> plot_map() +
  theme_infomap_anton()
 
 }

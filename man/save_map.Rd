@@ -18,10 +18,11 @@ The function saves the plot to a file and does not return anything.
 This function saves a ggplot object to a file using the specified filename. It checks for the orientation setting and warns if the scale factor has changed after the plot was created.
 }
 \examples{
+\donttest{
 data("osm")
-map_plot <- osm |> plot_map()
+my_map <- osm |> plot_map()
 filename <- tempfile(fileext =  ".pdf")
-save_map(map_plot, filename)
+save_map(my_map, filename)
 unlink(filename)
-
+}
 }

@@ -12,7 +12,6 @@
 #' @examples
 #' data("osm")
 #' preprocessed_osm <- osm |> preprocess_map()
-#' preprocessed_osm |> plot_map()
 #' @export
 preprocess_map = function(osm) {
   # copy osm_object
@@ -20,7 +19,7 @@ preprocess_map = function(osm) {
 
   options(warn=-1)
 
-  sf::sf_use_s2(F)
+  suppressWarnings(suppressMessages(sf::sf_use_s2(FALSE)))
 
   # water
   osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines
@@ -79,6 +78,7 @@ preprocess_map = function(osm) {
 #' OSM object's metadata.
 #'
 #' @examples
+#' \donttest{
 #' data("osm")
 #' # Apply a circular crop
 #' osm_circle_cropped <- osm |> crop(boundary = "circle")
@@ -89,7 +89,7 @@ preprocess_map = function(osm) {
 #' # Apply a custom 'sf' boundary crop
 #' data("soho_boundary")
 #' osm_sf_cropped <- osm |> crop(boundary = soho_boundary)
-#'
+#' }
 #' @export
 crop = function(osm, boundary = "rect") {
 
@@ -174,8 +174,8 @@ crop = function(osm, boundary = "rect") {
 #' @return A `ggplot` object representing the map with the chosen palette.
 #' @examples
 #' data("osm")
-#' osm |> plot_map()
-#' osm |> plot_map(palette = 'gray')
+#' my_map <- osm |> plot_map()
+#' my_map <- osm |> plot_map(palette = 'gray')
 #'
 #' @export
 plot_map <- function(...) {
@@ -398,14 +398,17 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
       }
     }
 
-    centroid_of_bbox <- c((bbox$xmin + bbox$xmax) / 2, (bbox$ymin + bbox$ymax) / 2)
-    lon <- centroid_of_bbox[1]
-    lat <- centroid_of_bbox[2]
+    lon <- (bbox$xmin + bbox$xmax) / 2
+    lat <- (bbox$ymin + bbox$ymax) / 2
 
-    x_distance <- haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], centroid_of_bbox[2], bbox$xmax) +
-      haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], centroid_of_bbox[2],  bbox$xmin)
-    y_distance <- haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymax, centroid_of_bbox[1]) +
-      haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymin, centroid_of_bbox[1])
+    suppressWarnings(suppressMessages(sf::sf_use_s2(TRUE)))
+    x_distance <- sf::st_distance(sf::st_as_sf(data.frame(x = bbox[1], y = bbox[2]+(bbox[4]-bbox[2])/2), coords = c("x", "y"), crs = 4326), sf::st_as_sf(data.frame(x = bbox[3], y = bbox[2]+(bbox[4]-bbox[2])/2), coords = c("x", "y"), crs = 4326))
+    y_distance <- sf::st_distance(sf::st_as_sf(data.frame(x = bbox[2], y = bbox[1]+(bbox[3]-bbox[1])/2), coords = c("y", "x"), crs = 4326), sf::st_as_sf(data.frame(x = bbox[4], y = bbox[1]+(bbox[3]-bbox[1])/2), coords = c("y", "x"), crs = 4326))
+    suppressWarnings(suppressMessages(sf::sf_use_s2(FALSE)))
+
+    #centroid_of_bbox <- c((bbox$xmin + bbox$xmax) / 2, (bbox$ymin + bbox$ymax) / 2)
+    #y_distance <- haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymax, centroid_of_bbox[1]) +
+    #  haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymin, centroid_of_bbox[1])
   }
 
   q.street <- osmdata::opq(bbox = place) |>
@@ -465,12 +468,12 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   if(!quiet) cli::cli_progress_step("Creating street network", spinner = T)
 
   osm$x.street <- q.street |> osmdata::osmdata_sf()
-  #osm$x.street$osm_lines <- osm$x.street$osm_lines |>
-  #  dplyr::mutate(length = as.numeric(sf::st_length(osm$x.street$osm_lines))) |>
-  #  dplyr::filter(length >= stats::quantile(length,0.25))
-  osm$x.street$osm_lines$length <- as.numeric(sf::st_length(osm$x.street$osm_lines))
+
+  osm$x.street$osm_lines_meters <- sf::st_transform(osm$x.street$osm_lines, crs = 32632)
+  osm$x.street$osm_lines$length <- as.numeric(sf::st_length(osm$x.street$osm_lines_meters))
   length_quantile <- stats::quantile(osm$x.street$osm_lines$length, 0.25)
   osm$x.street$osm_lines <- subset(osm$x.street$osm_lines, length >= length_quantile)
+
 
   if(!quiet) cli::cli_progress_step("Constructing buildings", spinner = T)
   osm$x.building <- q.building |> osmdata::osmdata_sf()
@@ -522,12 +525,13 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 #' @return The function saves the plot to a file and does not return anything.
 #'
 #' @examples
+#' \donttest{
 #' data("osm")
-#' map_plot <- osm |> plot_map()
+#' my_map <- osm |> plot_map()
 #' filename <- tempfile(fileext =  ".pdf")
-#' save_map(map_plot, filename)
+#' save_map(my_map, filename)
 #' unlink(filename)
-#'
+#' }
 #' @export
 save_map <- function(plot, filename) {
   if(!cartographr_env$orientation %in% c('portrait','landscape'))

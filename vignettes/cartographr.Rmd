@@ -37,8 +37,12 @@ The `osm` object is a list with all our geometrical shapes stored in it (buildin
 ```{r eval=FALSE}
 plot_vienna <- osm |> plot_map(palette = "iberia") +
   theme_poster_poppins() +
-  ggplot2::labs(title="vienna")
+  ggplot2::labs(title = "vienna")
+```
 
+Plot the map by calling its print function:
+
+```{r eval=FALSE}
 plot_vienna
 ```
 
@@ -49,13 +53,13 @@ knitr::include_graphics('vienna_a4.png')
 Lastly, we can save the map ready-to-print as pdf using `save_map()`.
 
 ```{r eval=FALSE}
-save_map(plot = plot_vienna, filename=paste0("vienna_a4.pdf"))
+save_map(plot = plot_vienna, filename="vienna_a4.pdf")
 ```
 
 If you prefer a bitmap format, you can also directly call `ggsave()` from the `ggplot2()` package.
 
 ```{r eval=FALSE}
-ggsave(paste0("~/vienna_a4.png"),
+ggsave(paste0("vienna_a4.png"),
        plot = plot_vienna,
        bg = "white",
        device = "png",

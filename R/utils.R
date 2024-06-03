@@ -114,42 +114,6 @@ get_hexagon <- function(lat, lon, y_distance, x_distance) {
   return(hex_polygon)
 }
 
-
-#' Haversine distance
-#'
-#' This function calculates haversine distance
-#'
-#' @param lat1 Latitude 1 WGS84
-#' @param lon2 Longitude 1 WGS84
-#' @param lat2 Latitude 2 WGS84
-#' @param lon2 Longitude 2 WGS84
-#' @return The distance in meters
-#' @noRd
-#' @keywords internal
-haversine_distance <- function(lat1, lon1, lat2, lon2) {
-  # Convert degrees to radians
-  rad <- pi / 180
-  lat1 <- lat1 * rad
-  lat2 <- lat2 * rad
-  lon1 <- lon1 * rad
-  lon2 <- lon2 * rad
-
-  # Radius of the Earth in kilometers
-  R <- 6378137
-
-  # Difference in coordinates
-  dlat <- lat2 - lat1
-  dlon <- lon2 - lon1
-
-  # Haversine formula
-  a <- sin(dlat/2)^2 + cos(lat1) * cos(lat2) * sin(dlon/2)^2
-  c <- 2 * asin(min(1, sqrt(a)))
-  distance <- R * c
-
-  return(distance)
-}
-
-
 #' Calculate rectengular border given the coordinates
 #'
 #' This function calculates correct borders

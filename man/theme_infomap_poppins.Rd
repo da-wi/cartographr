@@ -13,8 +13,7 @@ A 'ggplot2' theme object with the infomap theme settings applied and 'Poppins' f
 This function applies the infomap theme using the 'Poppins' font.
 }
 \examples{
-\dontrun{
-# Apply the infomap theme with Poppins font to a ggplot object
-ggplot_object + theme_poster_poppins()
-}
+data("osm")
+my_map <- osm |> plot_map() +
+ theme_infomap_poppins()
 }

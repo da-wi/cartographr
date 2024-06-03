@@ -9,7 +9,7 @@ An object of class \code{sf} (inherits from \code{data.frame}),
 representing the SoHo boundary with its spatial attributes.
 }
 \source{
-https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+\url{https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html}
 }
 \usage{
 soho_boundary

@@ -40,13 +40,12 @@ The color moods for the predefined palettes are described as follows:
 }
 }
 \examples{
-\dontrun{
-# Standard usage with a character argument for a predefined palette
-plot_map(osm, palette = 'tropical')
+# Use predefined palette
+get_palette("imhof")
 
 # Custom palette creation using a named list for a simple black and white palette
 custom_palette <- list(
-  palette_building = c("#000000", "#FFFFFF"),
+  palette_building = c("#000000", "#FFFFFF", "#CCCCCC"),
   water = "#000000",
   green = "#FFFFFF",
   beach = "#000000",
@@ -56,6 +55,6 @@ custom_palette <- list(
   railway = "#000000",
   hatched = TRUE
 )
-plot_map(osm, palette = custom_palette)
-}
+
+get_palette(custom_palette)
 }

@@ -20,6 +20,6 @@ It includes various geographical and spatial attributes relevant to the area.
 }
 \examples{
 data("osm")
-osm |> plot_map()
+my_map <- osm |> plot_map()
 }
 \keyword{datasets}

@@ -62,7 +62,7 @@ osm <- get_osmdata(sf = soho_boundary)
 
 `plot_map()` generates a `ggplot2` object using the color theme set as parameter. That means that we can easily adjust the plot using `ggplot2` commands and also add new information to the map.
 
-```{r plot map, fig.dim=c(11.7,16.5), fig.dpi = 72, out.width="100%"}
+```{r create  map, message=FALSE, warning=FALSE}
 p <- osm |> 
   crop(soho_boundary) |> 
   plot_map(palette = "gray") +
@@ -73,7 +73,11 @@ p <- osm |>
   # Set labels
   labs(title = "CRIME IN SOHO (2023)",
        shape = "TYPE")
+```
 
+Now we can plot the map by simply calling its print method implicity:
+
+```{r plot the map, fig.dim=c(8.3,11.7), fig.dpi = 72, out.width="100%"}
 p
 ```
 
@@ -82,5 +86,5 @@ p
 `save_map()` can be used to store the print-ready plot object to the disk as a drawn object in `pdf` format. 
 
 ```{r save map, eval=F}
-save_map(plot = p, filename = "~/ny_crime.pdf")
+save_map(plot = p, filename = "ny_crime.pdf")
 ```
