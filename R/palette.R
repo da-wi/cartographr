@@ -39,7 +39,7 @@
 #'   beach = "#000000",
 #'   parking = "#FFFFFF",
 #'   street = "#000000",
-#'   background = "#FFFFFF",
+#'   background = "#CCCCCC",
 #'   railway = "#000000",
 #'   hatched = TRUE
 #' )
