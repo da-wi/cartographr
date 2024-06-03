@@ -2,6 +2,10 @@
 
 # cartographr <a href='https://da-wi.github.io/cartographr'><img src="man/figures/logo.png" align="right" height="139" /></a>
 
+[![R-CMD-check](https://github.com/da-wi/cartographr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/da-wi/cartographr/actions/workflows/R-CMD-check.yaml)
+[![codecov test
+coverage](https://codecov.io/gh/da-wi/cartographr/branch/develop/graph/badge.svg)](https://app.codecov.io/gh/da-wi/cartographr?branch=develop)
+
 ## Overview
 
 Creating maps from OpenStreetMap data can be a complex and
