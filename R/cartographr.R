@@ -93,11 +93,11 @@ preprocess_map = function(osm) {
 #' @export
 crop = function(osm, boundary = "rect") {
 
-  if (is.null(osm) || is.na(osm)) {
+  if (is.null(osm)) {
     stop(cli::cli_abort("osm list is not a valid object."))
   }
 
-  if (is.null(boundary) || is.na(boundary)) {
+  if (is.null(boundary)) {
     stop(cli::cli_abort("boundary is not a valid character or `sf` object."))
   }
 

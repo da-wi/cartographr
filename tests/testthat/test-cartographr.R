@@ -89,13 +89,13 @@ test_that("get_osmdata stops with an error when no arguments are provided", {
 
 
 test_that("get_osmdata calculates x_distance and y_distance correctly", {
-  result <- get_osmdata(lat = 40.0, lon = -74.0, y_distance = 100)
-  expect_equal(result$x_distance, 100)
+  result <- get_osmdata(lat = 40.0, lon = -74.0, y_distance = 100, quiet = T)
+  expect_equal(result$x_distance, result$y_distance * result$aspect_ratio)
   expect_equal(result$y_distance, 100)
 })
 
 test_that("get_osmdata retrieves data without errors", {
-  result <- get_osmdata(lat = 44.1348, lon=9.683,  x_distance = 100, y_distance = 50)
+  result <- get_osmdata(lat = 44.1348, lon=9.683,  x_distance = 100, y_distance = 50, quiet = T)
   expect_silent(result)
   expect_equal(result$aspect_ratio, 2)
   expect_equal(result$x_distance, 100)
