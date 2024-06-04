@@ -213,17 +213,27 @@ plot_map <- function(...) {
   osm_object <- osm
 
   if (color$hatched) {
+    # Approach 1
     # patterns for hatching
-    df.point <- merge(data.frame( x = seq(osm_object$bbox$xmin,osm_object$bbox$xmax,(osm_object$bbox$xmax-osm_object$bbox$xmin)/300)),
-          data.frame( y = seq(osm_object$bbox$ymin,osm_object$bbox$ymax,(osm_object$bbox$ymax-osm_object$bbox$ymin)/300)),all=TRUE)
-    df.point <- df.point |> sf::st_as_sf(coords = c(1,2))
-    sf::st_crs(df.point) <- 4326
+    #df.point <- merge(data.frame( x = seq(osm_object$bbox$xmin,osm_object$bbox$xmax,(osm_object$bbox$xmax-osm_object$bbox$xmin)/300)),
+    #      data.frame( y = seq(osm_object$bbox$ymin,osm_object$bbox$ymax,(osm_object$bbox$ymax-osm_object$bbox$ymin)/300)),all=TRUE)
+    #df.point <- df.point |> sf::st_as_sf(coords = c(1,2))
+    #sf::st_crs(df.point) <- 4326
+
+    # Approach 2
+    suppressMessages({
+      df.point <- sf::st_make_grid(sf::st_crop(osm_object$water.dis,osm_object$bbox),
+                             n = 300, what = "corners")
+
+
+      df.point.gg <- df.point[sf::st_intersects(df.point, sf::st_crop(osm_object$water.dis,osm_object$bbox), sparse = FALSE), ]
+    })
 
     # df.point[lengths(sf::st_intersects(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox))) > 0,])
 
     # this is an expensive operation computationally
     #suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
-    suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
+    #suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
 
   }
     # create a list of ggobjects for water
@@ -278,7 +288,7 @@ plot_map <- function(...) {
     {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x.street$osm_points, color=color$lights, size=0.2*scale_factor)} +
 
     # buildings
-    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= borderc, linewidth =0.01*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= borderc, linewidth =0.05*scale_factor)+
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes

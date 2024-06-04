@@ -65,6 +65,10 @@ test_that("crop function throws error for invalid boundary input", {
   expect_error(crop(osm, boundary = "invalid_input"))
 })
 
+test_that("crop function throws error for NULL input", {
+  expect_error(crop(osm, boundary = NULL))
+})
+
 test_that("crop function throws error for invalid osm input", {
   expect_error(crop(NULL, boundary = "rect"))
 })

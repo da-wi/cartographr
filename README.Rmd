@@ -40,7 +40,7 @@ The basic workflow consists of
 1. Retrieving openstreet map data for a given area:
 
 ```{r eval=FALSE}
-osm <- get_osmdata(lat =  36.188, lon = -115.176, x_distance = 1000)
+osm <- get_osmdata(lat =  36.188, lon = -115.176, x_distance = 1000, y_distance = 1000)
 ```
 
 2. Plot the map

@@ -29,15 +29,15 @@ cartographr::set_output_size("A4")
 Next, we retrieve the openstreet map data with `get_osmdata()`. Here, a width of 1200 meters is set for the map with `x_distance` parameter. The height of the map is automatically calculated by the aspect ratio of the output size if it is omitted. 
 
 ```{r eval=FALSE}
-osm <- get_osmdata(48.210, 16.371, x_distance = 1200)
+osm <- get_osmdata(48.210, 16.370, x_distance = 1200)
 ```
 
 The `osm` object is a list with all our geometrical shapes stored in it (buildings, rivers, parks, ...). The map can be simply created using `plot_map()` function. Additionally, we can directly set the appearance of our map using themes. Here, we decide on making a poster of Vienna using the `theme_poster()`. There are also different color palettes for the map, have a look at `get_palette()` to get an idea of which color palettes exist and how to create your own color palette.
 
 ```{r eval=FALSE}
-plot_vienna <- osm |> plot_map(palette = "iberia") +
-  theme_poster_poppins() +
-  ggplot2::labs(title = "vienna")
+plot_vienna <- osm |> plot_map(palette = "metropolitan") +
+  theme_infomap() +
+  ggplot2::labs(title = "VIENNA")
 ```
 
 Plot the map by calling its print function:
@@ -47,19 +47,19 @@ plot_vienna
 ```
 
 ```{r echo=FALSE, fig.align='center', fig.cap='', out.width='100%'}
-knitr::include_graphics('vienna_a4.png')
+knitr::include_graphics('vienna.png')
 ```
 
 Lastly, we can save the map ready-to-print as pdf using `save_map()`.
 
 ```{r eval=FALSE}
-save_map(plot = plot_vienna, filename="vienna_a4.pdf")
+save_map(plot = plot_vienna, filename="vienna.pdf")
 ```
 
 If you prefer a bitmap format, you can also directly call `ggsave()` from the `ggplot2()` package.
 
 ```{r eval=FALSE}
-ggsave(paste0("vienna_a4.png"),
+ggsave("vienna.png",
        plot = plot_vienna,
        bg = "white",
        device = "png",

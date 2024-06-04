@@ -1,0 +1,45 @@
+---
+title: "Exploring palettes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Exploring palettes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  message=FALSE,
+  warning=FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r setup}
+library(cartographr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r load osm, echo=T, message=F}
+data("osm")
+```
+
+# Exploring all palettes
+
+```{r load all palettes}
+df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "autumn-muted","bw",
+                        "desert","evening", "gray", "iberia", "imhof","lines","midnight",
+                        "minimal","metropolitan","swiss","tropical"),
+                  osm = list(osm)) |>
+  rowwise() |>
+  mutate(p = list(osm |> plot_map(palettes) + theme_infomap() + labs(title = palettes)))
+```
+
+
+```{r plot palettes, fig.dim=c(8.3,11.7), fig.dpi = 72, out.width="100%"}
+df_pal |> pull(p)
+```
