@@ -93,6 +93,14 @@ preprocess_map = function(osm) {
 #' @export
 crop = function(osm, boundary = "rect") {
 
+  if (is.null(osm) || is.na(osm)) {
+    stop(cli::cli_abort("osm list is not a valid object."))
+  }
+
+  if (is.null(boundary) || is.na(boundary)) {
+    stop(cli::cli_abort("boundary is not a valid character or `sf` object."))
+  }
+
   options(warn=-1)
 
   osm_object <- osm
@@ -119,17 +127,15 @@ crop = function(osm, boundary = "rect") {
 
     if (boundary == "rect") {
       crop_extent <- osm_object$bbox |> sf::st_as_sfc()
+      osm_object$crop <- "rect"
     }
   }
 
   osm_object$bbox <- sf::st_bbox(crop_extent)
-  osm_object$bbox[c(1,2)] <- osm_object$bbox[c(1,2)]-(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
-  osm_object$bbox[c(3,4)] <- osm_object$bbox[c(3,4)]+(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
 
   # streets
   if(!is.null(osm_object$x.street$osm_lines)) osm_object$x.street$osm_lines <- suppressMessages(osm_object$x.street$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
   if(!is.null(osm_object$x.street$osm_points)) osm_object$x.street$osm_points <- suppressMessages(osm_object$x.street$osm_points |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
-
 
   # buildings
   if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
@@ -180,7 +186,6 @@ plot_map <- function(...) {
     stop(cli::cli_abort("Input should be a list or contain a named argument 'osm'."))
   }
 
-  list(...)$osm
   plot <- .plot_map(...)
 
   plot + adjust_viewport(osm) + add_attribution()
@@ -331,6 +336,8 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     stop(cli::cli_abort("At least one argument must be set"))
   }
 
+  calculated_bbox <- T
+
   if (is.null(bbox) && is.null(sf)) {
     # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
     num_args_provided <- sum(!is.null(c(y_distance, x_distance, aspect_ratio)))
@@ -338,10 +345,6 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     # If all three are provided, stop the function
     if (num_args_provided > 2) {
       stop(cli::cli_abort("Only two of 'y_distance', 'x_distance', and 'aspect_ratio' should be provided."))
-    }
-
-    if (num_args_provided == 0) {
-      stop(cli::cli_abort("Please provide at least one of the arguments 'y_distance' or 'x_distance'."))
     }
 
     # If only two are provided, calculate the third variable
@@ -371,15 +374,13 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
     place <- get_border(as.numeric(lat),as.numeric(lon),y_distance,x_distance)
     coords_bbox <- as.numeric(strsplit(osmdata::opq(bbox = place)$bbox, split = ",")[[1]])
-    coords_bbox[3]-coords_bbox[1]
-    coords_bbox[4]-coords_bbox[2]
-
 
     bbox <- sf::st_bbox(c(xmin=coords_bbox[2],xmax=coords_bbox[4],ymin=coords_bbox[1],ymax=coords_bbox[3]), crs=sf::st_crs(4326))
   }
 
   # bbox explicitly given
   else {
+    calculated_bbox <- F
     if (is.null(sf)) {
       place <- bbox
     } else {
@@ -445,28 +446,30 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
       "\"railway\"=\"rail\""
     ))
 
+  osm <- c()
 
   if(!quiet) cli::cli_alert_info("Retrieving data, be patient with requests failing.")
 
-  if (!is.null(bbox)) {
+  if (calculated_bbox) {
     if(!quiet) cli::cli_alert_info(paste0("xmin:",round(bbox[1],2),", ymin:",round(bbox[2],2),", xmax:",round(bbox[3],2),", ymax:", round(bbox[4],2)))
   }
   else {
     if(!quiet) cli::cli_alert_info(paste0("lat:",round(lat,2),", lon:",round(lon,2),", dy:",round(y_distance,2),", dx:", round(x_distance,2)))
   }
-  osm <- c()
 
-  if(!quiet) cli::cli_progress_step("Creating street network", spinner = T)
+
+  if(!quiet) cli::cli_progress_step("[1/5] Creating street network")
 
   osm$x.street <- q.street |> osmdata::osmdata_sf()
 
-  osm$x.street$osm_lines_meters <- sf::st_transform(osm$x.street$osm_lines, crs = 32632)
-  osm$x.street$osm_lines$length <- as.numeric(sf::st_length(osm$x.street$osm_lines_meters))
-  length_quantile <- stats::quantile(osm$x.street$osm_lines$length, 0.25)
-  osm$x.street$osm_lines <- subset(osm$x.street$osm_lines, length >= length_quantile)
+  if (!is.null(osm$x.street$osm_lines)) {
+    osm$x.street$osm_lines_meters <- sf::st_transform(osm$x.street$osm_lines, crs = 32632)
+    osm$x.street$osm_lines$length <- as.numeric(sf::st_length(osm$x.street$osm_lines_meters))
+    length_quantile <- stats::quantile(osm$x.street$osm_lines$length, 0.25)
+    osm$x.street$osm_lines <- subset(osm$x.street$osm_lines, length >= length_quantile)
+  }
 
-
-  if(!quiet) cli::cli_progress_step("Constructing buildings", spinner = T)
+  if(!quiet) cli::cli_progress_step("[2/5] Constructing buildings")
   osm$x.building <- q.building |> osmdata::osmdata_sf()
   #osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
   ##  (\(x) if(!is.null(osm$x.building$osm_polygons$tunnel)) dplyr::filter( osm$x.building$osm_polygons, is.na(tunnel) == TRUE) else x)()
@@ -478,15 +481,15 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_polygons)[1], replace = T)
   if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_multipolygons)[1], replace = T)
 
-  if(!quiet) cli::cli_progress_step("Filling in water", spinner = T)
+  if(!quiet) cli::cli_progress_step("[3/5] Filling in water")
   osm$x.water <- q.water |> osmdata::osmdata_sf()
   osm$x.sea <- q.sea |> osmdata::osmdata_sf()
 
-  if(!quiet) cli::cli_progress_step("Planting trees", spinner = T)
+  if(!quiet) cli::cli_progress_step("[4/5] Planting trees")
   osm$x.green <- q.green |> osmdata::osmdata_sf()
 
 
-  if(!quiet) cli::cli_progress_step("Creating parking", spinner = T)
+  if(!quiet) cli::cli_progress_step("[5/5] Laying tracks")
   osm$x.beach <- q.beach |> osmdata::osmdata_sf()
   osm$x.parking <- q.parking |> osmdata::osmdata_sf()
   osm$x.railway <- q.railway |> osmdata::osmdata_sf()
@@ -494,6 +497,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   osm$bbox <- bbox
   osm$y_distance <- y_distance
   osm$x_distance <- x_distance
+  osm$aspect_ratio <- aspect_ratio
   osm$lat <- lat
   osm$lon <- lon
   if(!quiet) cli::cli_progress_done()

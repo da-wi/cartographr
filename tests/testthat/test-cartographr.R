@@ -29,18 +29,79 @@ test_that("preprocessing information is added", {
 })
 
 # Test that the function handles invalid inputs gracefully
-test_that("function handles invalid inputs gracefully", {
+test_that("preprocess_map handles invalid inputs gracefully", {
   expect_error(preprocess_map(NULL))
   expect_error(preprocess_map(list()))
   expect_error(preprocess_map(data.frame()))
 })
 
 # Test that the function does not modify the input object
-test_that("function does not modify the input object", {
+test_that("preprocess_map does not modify the input object", {
   original_osm <- osm
   result <- preprocess_map(osm)
   expect_equal(original_osm, osm)
 })
+
+test_that("crop function sets crop variable correctly", {
+  data("osm")
+  data("soho_boundary")
+  result_rect <- crop(osm, boundary = "rect")
+  expect_equal(result_rect$crop, "rect")
+  expect_true(all(c(-74.02,  40.71, -73.99,  40.73 ) == round(result_rect$bbox,2)))
+
+  result_circle <- crop(osm, boundary = "circle")
+  expect_equal(result_circle$crop, "circle")
+
+  result_hex <- crop(osm, boundary = "hex")
+  expect_equal(result_hex$crop, "hex")
+
+
+  result_custom_sf <- crop(osm, boundary = soho_boundary)
+  expect_equal(result_custom_sf$crop, "sf")
+})
+
+
+test_that("crop function throws error for invalid boundary input", {
+  expect_error(crop(osm, boundary = "invalid_input"))
+})
+
+test_that("crop function throws error for invalid osm input", {
+  expect_error(crop(NULL, boundary = "rect"))
+})
+
+test_that("plot_map works with a named argument 'osm'", {
+  expect_silent(plot_map(osm))
+})
+
+test_that("plot_map returns a plot object", {
+  result <- plot_map(osm)
+  expect_true(is.ggplot(result))
+})
+
+test_that("plot_map stops with an error for incorrect input", {
+  expect_error(plot_map(123))
+  expect_error(plot_map(NULL))
+})
+
+test_that("get_osmdata stops with an error when no arguments are provided", {
+  expect_error(get_osmdata())
+})
+
+
+test_that("get_osmdata calculates x_distance and y_distance correctly", {
+  result <- get_osmdata(lat = 40.0, lon = -74.0, y_distance = 100)
+  expect_equal(result$x_distance, 100)
+  expect_equal(result$y_distance, 100)
+})
+
+test_that("get_osmdata retrieves data without errors", {
+  result <- get_osmdata(lat = 44.1348, lon=9.683,  x_distance = 100, y_distance = 50)
+  expect_silent(result)
+  expect_equal(result$aspect_ratio, 2)
+  expect_equal(result$x_distance, 100)
+  expect_equal(result$y_distance, 50)
+})
+
 
 test_that("save_map saves a map object to a file", {
   set_output_size("A4")
