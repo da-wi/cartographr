@@ -75,7 +75,7 @@ test_that("plot_map works with a named argument 'osm'", {
 
 test_that("plot_map returns a plot object", {
   result <- plot_map(osm)
-  expect_true(is.ggplot(result))
+  expect_true(ggplot2::is.ggplot(result))
 })
 
 test_that("plot_map stops with an error for incorrect input", {
