@@ -43,17 +43,17 @@ test_that("function does not modify the input object", {
   expect_equal(original_osm, osm)
 })
 
-test_that("save_map saves a ggplot object to a file", {
+test_that("save_map saves a map object to a file", {
   set_output_size("A4")
+  temp_file <- tempfile(fileext = ".pdf")
+  on.exit(unlink(temp_file))
+
   p <- osm |>
     plot_map(palette="swiss")
 
-  temp_file <- tempfile(fileext = ".pdf")
-
-  expect_silent(save_map(p, temp_file))
+  expect_false(file.exists(temp_file))
+  save_map(p, temp_file)
   expect_true(file.exists(temp_file))
-
-  unlink(temp_file)
 })
 
 

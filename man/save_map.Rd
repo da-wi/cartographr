@@ -4,12 +4,14 @@
 \alias{save_map}
 \title{Save a map to a file}
 \usage{
-save_map(plot, filename)
+save_map(plot, filename, device = "pdf")
 }
 \arguments{
 \item{plot}{A ggplot object representing the map to be saved.}
 
 \item{filename}{A character string specifying the path and name of the file to save the plot to.}
+
+\item{device}{The output device defaulting to pdf}
 }
 \value{
 The function saves the plot to a file and does not return anything.

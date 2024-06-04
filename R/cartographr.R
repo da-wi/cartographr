@@ -521,7 +521,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 #'
 #' @param plot A ggplot object representing the map to be saved.
 #' @param filename A character string specifying the path and name of the file to save the plot to.
-#'
+#' @param device The output device defaulting to pdf
 #' @return The function saves the plot to a file and does not return anything.
 #'
 #' @examples
@@ -533,7 +533,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 #' unlink(filename)
 #' }
 #' @export
-save_map <- function(plot, filename) {
+save_map <- function(plot, filename, device = "pdf") {
   if(!cartographr_env$orientation %in% c('portrait','landscape'))
     stop(cli::cli_abort("Orientation not recognized. Try 'portrait' or 'landscape'"))
 
@@ -542,9 +542,9 @@ save_map <- function(plot, filename) {
     cli::cli_alert_warning("`output_size` was changed after creating the plot, you might get unexpected results.")
   }
 
-  ggplot2::ggsave(plot=plot,
-                  filename=filename,
-                  device = grDevices::cairo_pdf,
+  ggplot2::ggsave(plot= plot,
+                  filename = filename,
+                  device = device,
                   width = cartographr_env$output_size[1],
                   height = cartographr_env$output_size[2],
                   units = "mm")
