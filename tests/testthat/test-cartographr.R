@@ -11,7 +11,7 @@ test_that("preprocess_map returns an object with expected names", {
   expected_names <- c('x.street', 'x.building', 'x.water', 'x.sea', 'x.green', 'x.beach',
                       'x.parking', 'x.railway', 'bbox', 'y_distance', 'x_distance',
                       'lat', 'lon', 'water', 'water.dis', 'buildings',
-                      'buildings.dis', 'preprocessing', 'preprocessed')
+                      'buildings.dis', 'crop', 'preprocessed')
   expect_named(result, expected_names, ignore.case = T, ignore.order = T)
 })
 
@@ -25,7 +25,6 @@ test_that("water bodies and buildings are correctly preprocessed", {
 # Test that preprocessing information is added
 test_that("preprocessing information is added", {
   result <- preprocess_map(osm)
-  expect_equal(result$preprocessing, "rect")
   expect_true(result$preprocessed)
 })
 

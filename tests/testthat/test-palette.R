@@ -1,10 +1,21 @@
-# Test for predefined palette names
-test_that("get_palette returns correct color settings for predefined palettes", {
-  expect_type(get_palette("gray"), "list")
-  expect_named(get_palette("gray"))
-  expect_true(all(names(get_palette("gray")) != ""))
-  expect_equal(length(get_palette("gray")), 11)
+# Test for valid palettes
+valid_palettes <- c("alphabet", "arctic", "autumn", "autumn-muted", "bw",
+                    "desert", "evening", "gray", "iberia", "imhof", "lines",
+                    "midnight", "minimal", "metropolitan", "swiss", "tropical")
+
+for (palette in valid_palettes) {
+  test_that(paste("Palette", palette, "returns a list"), {
+    result <- get_palette(palette)
+    expect_type(result, "list")
+    expect_named(result)
+  })
+}
+
+# Test for invalid palette
+test_that("Invalid palette throws an error", {
+  expect_error(get_palette("invalid_palette"))
 })
+
 
 # Test for custom palette as a named list
 test_that("get_palette returns correct color settings for custom palettes", {
@@ -22,9 +33,4 @@ test_that("get_palette returns correct color settings for custom palettes", {
   expect_type(get_palette(custom_palette), "list")
   expect_named(get_palette(custom_palette))
   expect_true(all(names(get_palette(custom_palette)) != ""))
-})
-
-# Test for error handling with invalid palette names
-test_that("get_palette throws an error for invalid palette names", {
-  expect_error(get_palette("invalid_palette_name"))
 })

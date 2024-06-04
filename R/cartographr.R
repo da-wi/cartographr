@@ -51,7 +51,7 @@ preprocess_map = function(osm) {
   #if(!is.null(osm_object$x.building$osm_polygons)) osm_object$x.building$osm_polygons <-  osm_object$x.building$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
   #if(!is.null(osm_object$x.building$osm_multipolygons)) osm_object$x.building$osm_multipolygons <- osm_object$x.building$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
 
-  osm_object$preprocessing <- "rect"
+  osm_object$crop <- NA
   osm_object$preprocessed <- TRUE
   return(osm_object)
 }
@@ -100,31 +100,27 @@ crop = function(osm, boundary = "rect") {
   if (is.null(osm_object$preprocessed)) {
     osm_object <- preprocess_map(osm_object)
   }
-  #osm = preprocess_map(osm) # should move to get_osmdata
 
   if (inherits(boundary, "sf") | inherits(boundary, "sfc")) {
     crop_extent = boundary
-    osm_object$preprocessing <- "sf"
+    osm_object$crop <- "sf"
   }
 
   if (is.character(boundary)) {
     if (boundary == "circle") {
       crop_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
-      osm_object$preprocessing <- "circle"
+      osm_object$crop <- "circle"
     }
 
     if (boundary == "hex") {
       crop_extent <- get_hexagon(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
-      osm_object$preprocessing <- "hex"
+      osm_object$crop <- "hex"
     }
 
     if (boundary == "rect") {
       crop_extent <- osm_object$bbox |> sf::st_as_sfc()
     }
   }
-
-  # decrease margin for circle
-  # scaling <- scaling/sqrt(2)
 
   osm_object$bbox <- sf::st_bbox(crop_extent)
   osm_object$bbox[c(1,2)] <- osm_object$bbox[c(1,2)]-(osm_object$bbox[c(3,4)]-osm_object$bbox[c(1,2)])*0.02
@@ -138,15 +134,10 @@ crop = function(osm, boundary = "rect") {
   # buildings
   if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  # TODO
-  # for some magical reason, one needs to create a copy for water polygons to make it work. No idea why.
-  #if(!is.null(osm_object$x.water$osm_lines)) osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )  |>  sf::st_make_valid()
-  #if(!is.null(osm_object$x.water$osm_multipolygons)) osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons |> sf::st_intersection(., crop_extent )
-  #if(!is.null(osm_object$x.water$osm_polygons)) osm_object$x.water$osm_polygon1 <-  osm_object$x.water$osm_polygons |> sf::st_intersection(., crop_extent )
-  #if(!is.null(osm_object$x.sea$osm_multipolygons)) osm_object$x.sea$osm_multipolygons1 <-  osm_object$x.sea$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
-  #if(!is.null(osm_object$x.sea$osm_polygons)) osm_object$x.sea$osm_polygons1 <-  osm_object$x.sea$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
-
+  # water
   if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent )  |>  sf::st_make_valid())
+
+  # green
   if(!is.null(osm_object$x.green$osm_multipolygons)) suppressMessages(osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
   if(!is.null(osm_object$x.green$osm_polygons)) suppressMessages(osm_object$x.green$osm_polygons <-  osm_object$x.green$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
@@ -245,7 +236,7 @@ plot_map <- function(...) {
 
   p <- ggplot2::ggplot() +
     # add background
-    {if(osm_object$preprocessing %in% c("circle","hex","sf")) ggplot2::geom_sf(data=osm_object$crop_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
+    {if(osm_object$crop %in% c("circle","hex","sf")) ggplot2::geom_sf(data=osm_object$crop_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
 
 
     ### add layers on top

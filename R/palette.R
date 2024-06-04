@@ -52,7 +52,7 @@ get_palette = function(palette) {
     return(color)
   }
 
-  if (!(palette %in% c( "alphabet",   "arctic","autumn", "autumn-muted","bw",
+  if (!(palette %in% c( "alphabet", "arctic","autumn", "autumn-muted","bw",
                         "desert","evening", "gray", "iberia", "imhof","lines","midnight",
                         "minimal","metropolitan","swiss","tropical")))
     stop(cli::cli_abort(paste(palette,"is not a predefined palette.")))
@@ -61,98 +61,17 @@ get_palette = function(palette) {
 
   color$name <- palette
 
-  if (palette == "gray") {
-    color$palette_building <- c("#d9d9d9", "#d9d9d9", "#d9d9d9")
-    color$building_border <- "#bdbdbd"
-    color$water <- "#a6a6a6"
-    color$street <- "#f0f0f0"
-    color$green <- "#cccccc"
-    color$background <- "#f0f0f0"
-    color$parking <- "#f0f0f0"
-    color$railway <- "#999999"
+  if (palette == "alphabet") {
+    color$palette_building <- c("#f2eeea","#dad2c6","#ded2c4")
+    color$water <- c("#5a95b8")
+    color$street <- c("#fefefe")
+    color$green <- c("#9bc2a6")
+    color$background <- c("#eceeec")
+    color$parking <- c("#f1f3f2")
+    color$railway <- c("#c2c2bf")
     color$hatched <- FALSE
-    color$beach <- "#d9d9d9"
-    color$parking <- "#f0f0f0"
-  }
-
-  if (palette == "swiss") {
-    color$palette_building <- c("#cdc4b9", "#cdc4b9", "#d9d9d9")
-    color$building_border <- "#bdbdbd"
-    color$water <- "#d1dfe6"
-    color$street <- "#fbfbf9"
-    color$green <- "#dbe5d0"
-    color$background <- "#fbfbf9"
-    color$parking <- "#fbfbf9"
-    color$railway <- "#999999"
-    color$hatched <- FALSE
-    color$beach <- "#fbfbf9"
-    color$parking <- "#fbfbf9"
-  }
-
-  if (palette == "evening") {
-    color$palette_building = c("#855988","#6B4984", "#483475")
-    color$water <- "#192058"
-    color$green <- "#2B2F77"
-    color$railway <- "#1b1b1b"
-    color$lights <- "#F7E7C2" # "#f7f7c8"
-    color$beach <- "#2F2352"
-    color$parking <- "#2F2352"
-    color$street <- "#1C1F31"
-    color$background <- "#060A2E"
-    color$hatched <- FALSE
-  }
-
-  if (palette == "midnight") {
-    color$palette_building <- c("#333333", "#333333", "#333333")
-    color$building_border <- NULL
-    color$water <- "#2d2d2d"
-    color$green <- "#393939"
-    color$railway <- "#121212"
-    color$lights <- "#ffee90"
-    color$beach <- "#333333"
-    color$parking <- "#333333"
-    color$street <- "#1c1c1c"
-    color$background <- "#181818"
-    color$hatched <- FALSE
-  }
-
-  # BW
-  if (palette == "lines") {
-    color$palette_building = c("#FFFFFF","#FFFFFF", "#FFFFFF")
-    color$railway <- "#292e28"
-    color$green <- "#FFFFFF"
-    color$water <- "#FFFFFF" #"#97B2B9"
-    color$background <- "#ffffff" # "#D3CCAF" #"#192058"
-    color$street <- "#292e28"
-    color$beach <- "#ffffff"
-    color$parking <- "#Ffffff"
-    color$hatched <- FALSE
-  }
-
-  if (palette == "minimal") {
-    color$palette_building <- c("#ffffff", "#ffffff", "#ffffff")
-    color$building_border <- "#000000"
-    color$water <- "#e6e6e6"
-    color$street <- "#ffffff"
-    color$green <- "#f2f2f2"
-    color$background <- "#ffffff"
-    color$parking <- "#ffffff"
-    color$railway <- "#4d4d4d"
-    color$hatched <- FALSE
-    color$beach <- "#ffffff"
-    color$parking <- "#ffffff"
-  }
-
-  if (palette == "bw") {
-    color$palette_building = c("#292e28","#292e28", "#292e28")
-    color$railway <- "#faf5eb"#FFFFFF"
-    color$green <- "#faf5eb"
-    color$water <- "#faf5eb" #"#97B2B9"
-    color$background <- "#292e28" # "#D3CCAF" #"#192058"
-    color$street <- "#faf5eb"
-    color$beach <- "#faf5eb"
-    color$parking <- "#faf5eb"
-    color$hatched <- FALSE
+    color$beach <- "#ded2c4"
+    color$parking <- "#fefefe"
   }
 
   if (palette == "arctic") {
@@ -169,12 +88,11 @@ get_palette = function(palette) {
     color$parking <- "#f0f5f7"
   }
 
-
   if (palette == "autumn") {
     color$palette_building = c("#ff643d","#80321F", "#E65A37")
     color$railway <- "#a38263"
     color$green <- "#d2d8b3"
-    color$water <- "#a1bcae" #"#97B2B9"
+    color$water <- "#a1bcae"
     color$background <- "#fff5d9"
     color$street <- "#fff5d9"
     color$beach <- "#fff5d9"
@@ -194,6 +112,18 @@ get_palette = function(palette) {
     color$hatched <- TRUE
   }
 
+  if (palette == "bw") {
+    color$palette_building = c("#292e28","#292e28", "#292e28")
+    color$railway <- "#faf5eb"
+    color$green <- "#faf5eb"
+    color$water <- "#faf5eb"
+    color$background <- "#292e28"
+    color$street <- "#faf5eb"
+    color$beach <- "#faf5eb"
+    color$parking <- "#faf5eb"
+    color$hatched <- FALSE
+  }
+
   if (palette == "desert") {
     color$palette_building <- c("#e8d9c3", "#e8d9c3", "#e8d9c3")
     color$building_border <- "#d3c2a6"
@@ -206,6 +136,69 @@ get_palette = function(palette) {
     color$hatched <- FALSE
     color$beach <- "#e8d9c3"
     color$parking <- "#f0e8d7"
+  }
+
+  if (palette == "evening") {
+    color$palette_building = c("#855988","#6B4984", "#483475")
+    color$water <- "#192058"
+    color$green <- "#2B2F77"
+    color$railway <- "#1b1b1b"
+    color$lights <- "#F7E7C2"
+    color$beach <- "#2F2352"
+    color$parking <- "#2F2352"
+    color$street <- "#1C1F31"
+    color$background <- "#060A2E"
+    color$hatched <- FALSE
+  }
+
+  if (palette == "gray") {
+    color$palette_building <- c("#d9d9d9", "#d9d9d9", "#d9d9d9")
+    color$building_border <- "#bdbdbd"
+    color$water <- "#a6a6a6"
+    color$street <- "#f0f0f0"
+    color$green <- "#cccccc"
+    color$background <- "#f0f0f0"
+    color$parking <- "#f0f0f0"
+    color$railway <- "#999999"
+    color$hatched <- FALSE
+    color$beach <- "#d9d9d9"
+    color$parking <- "#f0f0f0"
+  }
+
+  if (palette == "iberia") {
+    color$background <- "#F2F4CB"
+    color$water <- "#a8e1e6"
+    color$green <- "#8BB174"
+    color$streets <- "#2F3737"
+    color$palette_building <- c("#433633","#433633", "#FF5E5B")
+    color$beach <- "#FCE19C"
+    color$parking <- "#F2F4CB"
+    color$railway <- "#1b1b1b"
+    color$hatched <- TRUE
+  }
+
+  if (palette == "imhof") {
+    color$palette_building = c("#73664d","#88754E", "#5A4925")
+    color$railway <- "#bd4833"
+    color$green <- "#bdddb0"
+    color$water <- "#eefaee"
+    color$background <- "#fef7d1"
+    color$street <- "#bdddb0"
+    color$beach <- "#fef7d1"
+    color$parking <- "#bdddb0"
+    color$hatched <- FALSE
+  }
+
+  if (palette == "lines") {
+    color$palette_building = c("#FFFFFF","#FFFFFF", "#FFFFFF")
+    color$railway <- "#292e28"
+    color$green <- "#FFFFFF"
+    color$water <- "#FFFFFF"
+    color$background <- "#ffffff"
+    color$street <- "#292e28"
+    color$beach <- "#ffffff"
+    color$parking <- "#Ffffff"
+    color$hatched <- FALSE
   }
 
   if (palette == "metropolitan") {
@@ -222,33 +215,49 @@ get_palette = function(palette) {
     color$parking <- "#f2f0d7"
   }
 
-  if (palette == "imhof") {
-    color$palette_building = c("#73664d","#88754E", "#5A4925")
-    color$railway <- "#bd4833"
-    color$green <- "#bdddb0"
-    color$water <- "#eefaee" #"#97B2B9"
-    color$background <- "#fef7d1" # "#D3CCAF" #"#192058"
-    color$street <- "#bdddb0" # "#B4D3DB"
-    color$beach <- "#fef7d1"
-    color$parking <- "#bdddb0"
+  if (palette == "midnight") {
+    color$palette_building <- c("#333333", "#333333", "#333333")
+    color$building_border <- NULL
+    color$water <- "#2d2d2d"
+    color$green <- "#393939"
+    color$railway <- "#121212"
+    color$lights <- "#ffee90"
+    color$beach <- "#333333"
+    color$parking <- "#333333"
+    color$street <- "#1c1c1c"
+    color$background <- "#181818"
     color$hatched <- FALSE
   }
 
-  if (palette == "alphabet") {
-    color$palette_building <- c("#f2eeea","#dad2c6","#ded2c4")
-    color$water <- c("#5a95b8")
-    color$street <- c("#fefefe")
-    color$green <- c("#9bc2a6")
-    color$background <- c("#eceeec")
-    color$parking <- c("#f1f3f2")
-    color$railway <- c("#c2c2bf")
+  if (palette == "minimal") {
+    color$palette_building <- c("#ffffff", "#ffffff", "#ffffff")
+    color$building_border <- "#000000"
+    color$water <- "#e6e6e6"
+    color$street <- "#ffffff"
+    color$green <- "#f2f2f2"
+    color$background <- "#ffffff"
+    color$parking <- "#ffffff"
+    color$railway <- "#4d4d4d"
     color$hatched <- FALSE
-    color$beach <- "#ded2c4"
-    color$parking <- "#fefefe"
+    color$beach <- "#ffffff"
+    color$parking <- "#ffffff"
+  }
+
+  if (palette == "swiss") {
+    color$palette_building <- c("#cdc4b9", "#cdc4b9", "#d9d9d9")
+    color$building_border <- "#bdbdbd"
+    color$water <- "#d1dfe6"
+    color$street <- "#fbfbf9"
+    color$green <- "#dbe5d0"
+    color$background <- "#fbfbf9"
+    color$parking <- "#fbfbf9"
+    color$railway <- "#999999"
+    color$hatched <- FALSE
+    color$beach <- "#fbfbf9"
+    color$parking <- "#fbfbf9"
   }
 
   if (palette == "tropical") {
-    # MACAU
     color$palette_building = c("#FFC857","#E9724C","#C5283D")
     color$water <- "#a8e1e6"
     color$green <- "#8BB174"
@@ -257,18 +266,6 @@ get_palette = function(palette) {
     color$street <- "#475657"
     color$background <- "#F2F4CB"
     color$railway <- "#475657"
-    color$hatched <- TRUE
-  }
-
-  if (palette == "iberia") {
-    color$background <- "#F2F4CB"
-    color$water <- "#a8e1e6"
-    color$green <- "#8BB174"
-    color$streets <- "#2F3737"
-    color$palette_building <- c("#433633","#433633", "#FF5E5B")
-    color$beach <- "#FCE19C"
-    color$parking <- "#F2F4CB"
-    color$railway <- "#1b1b1b"
     color$hatched <- TRUE
   }
 
