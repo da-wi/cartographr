@@ -94,11 +94,11 @@ preprocess_map = function(osm) {
 crop = function(osm, boundary = "rect") {
 
   if (is.null(osm)) {
-    stop(cli::cli_abort("osm list is not a valid object."))
+    stop(cli::cli_abort("'osm' is not a valid object."))
   }
 
   if (is.null(boundary)) {
-    stop(cli::cli_abort("boundary is not a valid character or `sf` object."))
+    stop(cli::cli_abort("boundary is not a valid character or 'sf' object."))
   }
 
   options(warn=-1)
@@ -199,6 +199,7 @@ plot_map <- function(...) {
 #' @param palette Color theme applied to the plot
 #' @return NULL
 #' @keywords internal
+#' @noRd
 .plot_map = function(osm, palette = "imhof") {
 
   if (is.null(osm$preprocessed)) {
@@ -220,12 +221,14 @@ plot_map <- function(...) {
     #df.point <- df.point |> sf::st_as_sf(coords = c(1,2))
     #sf::st_crs(df.point) <- 4326
 
-    # Approach 2
+    # Approach 2 should be faster and more accurate
     suppressMessages({
-      df.point <- sf::st_make_grid(sf::st_crop(osm_object$water.dis,osm_object$bbox),
-                             n = 300, what = "corners")
+      n_dots <- 200
 
-
+      df.point <- rbind(sf::st_make_grid(sf::st_crop(osm_object$water.dis,osm_object$bbox),
+                                         n = n_dots, what = c("centers")) |> sf::st_as_sf(),
+                        sf::st_make_grid(sf::st_crop(osm_object$water.dis,osm_object$bbox),
+                                         n = n_dots, what = c("corners")) |> sf::st_as_sf())
       df.point.gg <- df.point[sf::st_intersects(df.point, sf::st_crop(osm_object$water.dis,osm_object$bbox), sparse = FALSE), ]
     })
 
@@ -236,12 +239,6 @@ plot_map <- function(...) {
     #suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
 
   }
-    # create a list of ggobjects for water
-  gg.water <- list(ggplot2::geom_sf(data =osm_object$x.water$osm_lines1, fill = color$water, color= color$water, size = 1),
-                   ggplot2::geom_sf(data =osm_object$x.water$osm_multipolygons1, fill = color$water, color =color$water),
-                   ggplot2::geom_sf(data =osm_object$x.water$osm_polygons1, fill = color$water, color =color$water),
-                   ggplot2::geom_sf(data =osm_object$x.sea$osm_polygons1, fill = color$water, color =color$water),
-                   ggplot2::geom_sf(data =osm_object$x.sea$osm_multipolygons1, fill = color$water, color =color$water))
 
   # building border color
   if (!is.null(color$building_border))
@@ -272,8 +269,8 @@ plot_map <- function(...) {
     # railway
     {if(!is.null(osm_object$x.railway$osm_lines))
       ggplot2::geom_sf(data =osm_object$x.railway$osm_lines |> subset(if (!is.null(osm_object$x.railway$osm_lines$tunnel)) is.na(osm_object$x.railway$osm_lines$tunnel) else rep(TRUE,dim(osm_object$x.railway$osm_lines)[1])),
-                       linetype = "11",
-                       color=color$railway, linewidth = 0.5)} +
+                       linetype = "solid",
+                       color=color$railway, linewidth = 2*scale_factor)} +
 
     # streets
     ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
@@ -299,7 +296,6 @@ plot_map <- function(...) {
     ggnewscale::new_scale_fill()
 
     options(warn=0)
-    #p$scaling <- scaling
 
     p$scale_factor <- scale_factor
     return(p)
@@ -378,7 +374,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
           y_distance <- x_distance / aspect_ratio
         }
       } else {
-          stop(cli::cli_abort("set_output_size() must return a vector of length 2 to calculate aspect_ratio."))
+          stop(cli::cli_abort("`set_output_size()` must return a vector of length 2 to calculate aspect_ratio."))
       }
     }
 
@@ -540,11 +536,11 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 #' @export
 save_map <- function(plot, filename, device = "pdf") {
   if(!cartographr_env$orientation %in% c('portrait','landscape'))
-    stop(cli::cli_abort("Orientation not recognized. Try 'portrait' or 'landscape'"))
+    stop(cli::cli_abort('Orientation not recognized. Try "portrait" or "landscape"'))
 
   # if scale factors do not match anymore, we have to redraw the plot
   if (plot$scale_factor != cartographr_env$scale_factor) {
-    cli::cli_alert_warning("`output_size` was changed after creating the plot, you might get unexpected results.")
+    cli::cli_alert_warning("'output_size' was changed after creating the plot, you might get unexpected results.")
   }
 
   ggplot2::ggsave(plot= plot,

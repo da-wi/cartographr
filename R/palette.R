@@ -169,7 +169,7 @@ get_palette = function(palette) {
     color$background <- "#F2F4CB"
     color$water <- "#a8e1e6"
     color$green <- "#8BB174"
-    color$streets <- "#2F3737"
+    color$streets <- "#3F4747"
     color$palette_building <- c("#433633","#433633", "#FF5E5B")
     color$beach <- "#FCE19C"
     color$parking <- "#F2F4CB"
@@ -237,7 +237,7 @@ get_palette = function(palette) {
     color$green <- "#f2f2f2"
     color$background <- "#ffffff"
     color$parking <- "#ffffff"
-    color$railway <- "#4d4d4d"
+    color$railway <- "#d0d0d0"
     color$hatched <- FALSE
     color$beach <- "#ffffff"
     color$parking <- "#ffffff"
@@ -265,7 +265,7 @@ get_palette = function(palette) {
     color$parking <- "#F2F4CB"
     color$street <- "#475657"
     color$background <- "#F2F4CB"
-    color$railway <- "#475657"
+    color$railway <- "#586F6F"
     color$hatched <- TRUE
   }
 

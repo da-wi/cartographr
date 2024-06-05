@@ -2,9 +2,15 @@
 % Please edit documentation in R/theme.R
 \name{theme_poster}
 \alias{theme_poster}
+\alias{theme_poster_poppins}
+\alias{theme_poster_anton}
 \title{Create a poster theme}
 \usage{
 theme_poster(font = "Poppins")
+
+theme_poster_poppins()
+
+theme_poster_anton()
 }
 \arguments{
 \item{font}{The font family to be used for text elements in the plot.
@@ -16,9 +22,11 @@ A 'ggplot2' theme object that can be added to 'ggplot2' plotting calls.
 \description{
 This function generates a 'ggplot2' theme that resembles a poster style. It is designed to be used with 'ggplot2' plots to provide a clean and bold aesthetic suitable for poster visuals.
 }
+\details{
+\code{theme_poster_poppins()}, \code{theme_poster_anton()} are aliases to \code{theme_poster("Poppins")}, etc.
+}
 \examples{
 data("osm")
 my_map <- osm |> plot_map() +
  theme_poster()
-
 }

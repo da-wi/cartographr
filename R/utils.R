@@ -9,16 +9,16 @@
 #'
 #' @details
 #' The function calculates new x and y limits by adding and subtracting a twentieth of the bbox's width and height
-#' from the respective minimum and maximum x and y values. This creates a margin around the map, enhancing visibility.
+#' from the respective minimum and maximum x and y values. This removes the margin around the map, enhancing visibility.
 #'
 #' @noRd
 #' @keywords internal
 adjust_viewport <- function(osm_object) {
 
-  return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1]+(osm_object$bbox[3]-osm_object$bbox[1])/20,
-                                    osm_object$bbox[3]-(osm_object$bbox[3]-osm_object$bbox[1])/20),
-                           ylim = c(osm_object$bbox[2]+(osm_object$bbox[4]-osm_object$bbox[2])/20,
-                                    osm_object$bbox[4]-(osm_object$bbox[4]-osm_object$bbox[2])/20)))
+  return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1] +(osm_object$bbox[3]-osm_object$bbox[1])/22,
+                                    osm_object$bbox[3] -(osm_object$bbox[3]-osm_object$bbox[1])/22),
+                           ylim = c(osm_object$bbox[2] +(osm_object$bbox[4]-osm_object$bbox[2])/22,
+                                    osm_object$bbox[4] -(osm_object$bbox[4]-osm_object$bbox[2])/22)))
 }
 
 #' Add attribution caption to plots

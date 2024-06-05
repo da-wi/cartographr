@@ -5,11 +5,12 @@
 #' @param font The font family to be used for text elements in the plot.
 #'             The default font is set to "Poppins".
 #' @return A 'ggplot2' theme object that can be added to 'ggplot2' plotting calls.
+#' @details
+#' `theme_poster_poppins()`, `theme_poster_anton()` are aliases to `theme_poster("Poppins")`, etc.
 #' @examples
 #' data("osm")
 #' my_map <- osm |> plot_map() +
 #'  theme_poster()
-#'
 #' @export
 theme_poster <- function(font = "Poppins") {
   #if (!(font %in% c("Poppins","Anton","Cinzel","Barlow"))) {
@@ -30,33 +31,13 @@ theme_poster <- function(font = "Poppins") {
            ))
 }
 
-#' Apply poster theme with Poppins font
-#'
-#' This function applies the poster theme using the 'Poppins' font.
-#'
-#' @return A 'ggplot2' theme object with the poster theme settings applied and 'Poppins' font set.
-#'
-#' @examples
-#' data("osm")
-#' my_map <- osm |> plot_map() +
-#'  theme_poster_poppins()
-#'
+#' @rdname theme_poster
 #' @export
 theme_poster_poppins <- function() {
   return(theme_poster(font = "Poppins"))
 }
 
-#' Apply poster theme with Anton font
-#'
-#' This function applies the poster theme using the 'Anton' font.
-#'
-#' @return A 'ggplot2' theme object with the poster theme settings applied and 'Anton' font set.
-#'
-#' @examples
-#' data("osm")
-#' my_map <- osm |> plot_map() +
-#'  theme_poster_anton()
-#'
+#' @rdname theme_poster
 #' @export
 theme_poster_anton <- function() {
   return(theme_poster(font = "Anton"))
@@ -69,19 +50,18 @@ theme_poster_anton <- function() {
 #' @param font A character string specifying the font to use for the theme elements. The default is "Poppins". Only "Poppins", "Anton", "Cinzel", and "Barlow" are valid options.
 #'
 #' @return A 'ggplot2' theme object with the information map theme settings applied.
+#' @details
+#' `theme_infomap_poppins()`, `theme_infomap_anton()` are aliases to `theme_infomap("Poppins")`, etc.
 #'
 #' @examples
 #' data("osm")
 #' my_map <- osm |> plot_map() +
-#'  theme_infomap()
+#'  theme_infomap_poppins()
 #'
 #' @export
 theme_infomap <- function(font = "Poppins") {
-  #if (!(font %in% c("Poppins","Anton","Cinzel","Barlow"))) {
-  #  stop(cli::cli_abort("Font not found."))
-  #}
 
-  scale_factor <- cartographr_env$scale_factor
+    scale_factor <- cartographr_env$scale_factor
 
   return(ggplot2::theme_void()+
            ggplot2::theme(
@@ -92,56 +72,27 @@ theme_infomap <- function(font = "Poppins") {
              plot.margin = ggplot2::margin(t = 40*scale_factor, r = 10*scale_factor, b = 40*scale_factor, l = 10*scale_factor, unit = "mm"),
              plot.caption = ggplot2::element_text(face="plain",size=scale_factor*8*2.845276, hjust = 1,family=font,color="#292e28"),
              legend.position = "top",
-             legend.title = ggplot2::element_text(size = 14*scale_factor*2.845276, family=font,face = "bold", color = "#292e28"),
-             legend.text = ggplot2::element_text(size = 14*scale_factor*2.845276, family = font, color= "#292e28"),
+             legend.title = ggplot2::element_text(size = 18*scale_factor*2.845276, family=font,face = "bold", color = "#292e28"),
+             legend.text = ggplot2::element_text(size = 18*scale_factor*2.845276, family = font, color= "#292e28"),
              legend.justification = c("right","top"),
              legend.margin = ggplot2::margin(-18*scale_factor, 0, 0, 0, unit = "mm"),
              legend.key.spacing = grid::unit(0,"mm")
            ))
 }
 
-#' Apply infomap theme with Anton font
-#'
-#' This function applies the infomap theme using the 'Anton' font.
-#'
-#' @return A 'ggplot2' theme object with the infomap theme settings applied and 'Anton' font set.
-#'
-#' @examples
-#' data("osm")
-#' my_map <- osm |> plot_map() +
-#'  theme_infomap_anton()
-#'
+#' @rdname theme_infomap
 #' @export
 theme_infomap_anton <- function() {
   return(theme_infomap(font = "Anton"))
 }
 
-#' Apply infomap Theme with Poppins Font
-#'
-#' This function applies the infomap theme using the 'Poppins' font.
-#'
-#' @return A 'ggplot2' theme object with the infomap theme settings applied and 'Poppins' font set.
-#'
-#' @examples
-#' data("osm")
-#' my_map <- osm |> plot_map() +
-#'  theme_infomap_poppins()
+#' @rdname theme_infomap
 #' @export
 theme_infomap_poppins <- function() {
   return(theme_infomap(font = "Poppins"))
 }
 
-#' Apply infomap theme with Barlow font
-#'
-#' This function applies the infomap theme using the 'Barlow' font.
-#'
-#' @return A 'ggplot2' theme object with the infomap theme settings applied and 'Barlow' font set.
-#'
-#' @examples
-#' data("osm")
-#' my_map <- osm |> plot_map() +
-#'  theme_infomap_barlow()
-#'
+#' @rdname theme_infomap
 #' @export
 theme_infomap_barlow <- function() {
   return(theme_infomap(font = "Barlow"))

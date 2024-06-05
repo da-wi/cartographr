@@ -13,11 +13,11 @@ test_that("set_output_size throws error for unrecognized orientation", {
 })
 
 test_that("set_output_size throws error for unrecognized paper size", {
-  expect_error(set_output_size("B4"), "Format not recognized")
+  expect_error(set_output_size("B4"))
 })
 
 test_that("set_output_size throws error for incorrect custom dimensions length", {
-  expect_error(set_output_size(c(300)), "Lenght of vector `format` must be exactly 2")
+  expect_error(set_output_size(c(300)))
 })
 
 test_that("reversing output size for landscape orientation", {

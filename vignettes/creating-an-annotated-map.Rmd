@@ -77,7 +77,7 @@ p <- osm |>
 
 Now we can plot the map by simply calling its print method implicity:
 
-```{r plot the map, fig.dim=c(8.3,11.7), fig.dpi = 72, out.width="100%"}
+```{r plot the map, fig.dim=c(5.81,8.3), fig.dpi = 72, out.width="100%"}
 p
 ```
 
