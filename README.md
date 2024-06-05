@@ -40,8 +40,9 @@ devtools::install_github("da-wi/cartographr")
 get_osmdata(lat = 50, lon = 10, x_distance = 1000) |> plot_map()
 ```
 
-For a comprehensive walkthrough of the package’s features, please refer
-to the [introductory vignette](articles/cartographr.html).
+For a step-by-step guide of the package’s basic features, please refer
+to the [introductory
+vignette](https://da-wi.github.io/cartographr/articles/cartographr.html).
 
 ## Data licensing
 

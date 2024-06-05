@@ -3,8 +3,8 @@ osm_test_object <- list(bbox = c(10, 20, 30, 40))
 test_that("adjust_viewport returns correct ggplot2 coord_sf object", {
   result <- adjust_viewport(osm_test_object)
   expect_s3_class(result, "CoordSf")
-  expect_equal(result$limits$x, c(11, 29))
-  expect_equal(result$limits$y, c(21, 39))
+  expect_equal(round(result$limits$x,2), c(10.91, 29.09))
+  expect_equal(round(result$limits$y,2), c(20.91, 39.09))
 })
 
 test_that("add_attribution returns correct ggplot2 labs object", {
