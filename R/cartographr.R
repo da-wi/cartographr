@@ -187,6 +187,7 @@ plot_map <- function(...) {
   }
 
   plot <- .plot_map(...)
+
   plot + adjust_viewport(plot) + add_attribution()
 
 }
@@ -248,6 +249,7 @@ plot_map <- function(...) {
 
   frame <- NULL
   if (!is.null(color$border_color)) {
+    suppressWarnings({
     width = ifelse(is.null(color$border_width),0.001,color$border_width)
     projected_shape <- sf::st_transform(osm_object$crop_extent, crs = "+proj=utm +zone=33 +datum=WGS84")
 
@@ -255,6 +257,7 @@ plot_map <- function(...) {
                                                                              (sf::st_bbox(projected_shape)[4]-sf::st_bbox(projected_shape)[2])^2)*width)
     buffered_shape <- sf::st_transform(buffered_projected_shape, crs = sf::st_crs(osm_object$crop_extent))
     frame <- suppressMessages(sf::st_difference(buffered_shape, osm_object$crop_extent))
+    })
     # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
   }
 
@@ -355,10 +358,7 @@ plot_map <- function(...) {
 #'
 #' @examples
 #' \donttest{
-#' data("soho_boundary")
-#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
-#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, y_distance = 1000, aspect_ratio = 1.41)
-#' osm_data <- get_osmdata(sf = soho_boundary)
+#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 10)
 #' }
 #' @export
 get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = F) {

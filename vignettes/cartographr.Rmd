@@ -25,7 +25,7 @@ In this vignette, you will learn how to use the package functions step-by-step.
 *Step 2:* Decide on the size of the printed map, such as A4. This will help scale the text and lines on the map proportionally, no matter the print size.
 
 ```{r eval=FALSE}
-set_output_size("A4")
+set_output_size(c(300,300))
 ```
 
 *Step 3:* Use the `get_osmdata()` function to collect OpenStreetMap data. Set the width of your map area in meters using the `x_distance` parameter. If you leave out the height (`y_distance`), it will be calculated based on the width and the aspect ratio of your chosen output size.
@@ -49,7 +49,7 @@ plot_vienna <- osm |> plot_map(palette = "metropolitan") +
 plot_vienna
 ```
 
-```{r echo=FALSE, fig.align='center', fig.cap='', out.width='100%'}
+```{r echo=FALSE, fig.align='center', fig.cap='',fig.dim=c(2.5,2.5), out.width='70%'}
 knitr::include_graphics('vienna.png')
 ```
 

@@ -22,8 +22,8 @@ In this vignette, you will learn how to add new information to a map. Here, we r
 
 ```{r setup}
 library(cartographr)
-library(ggplot2)
 library(dplyr)
+library(ggplot2)
 library(sf)
 ```
 
@@ -33,6 +33,7 @@ First, we load the locations of crimes in Manhattan.
 ```{r load crime locations, echo=T, message=F}
 data("crime") 
 data("soho_boundary") 
+data("osm")
 ```
 
 # Convert longitude / latitude into a `sf`
@@ -41,8 +42,7 @@ To add the crime locations in the dataset to our map, we harness the `sf` (simpl
 
 ```{r convert to sf}
 df_crime <- crime |> 
- st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = F) |>
- filter(date >= "2023-01-01" & date < "2024-01-01")
+ st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = F)
 
 df_crime |> head()
 ```
@@ -65,11 +65,13 @@ osm <- get_osmdata(sf = soho_boundary)
 ```{r create  map, message=FALSE, warning=FALSE}
 p <- osm |> 
   crop(soho_boundary) |> 
-  plot_map(palette = "gray") +
-  # add geom with crimes
-  geom_point(data = suppressMessages(sf::st_intersection(df_crime, soho_boundary)),
-             aes(x = longitude, y = latitude, shape = type), color="#222424", size=2) + 
+  plot_map(palette = "imhof") +
   theme_infomap_barlow() + 
+  
+  # Add geom with crimes
+  geom_point(data = df_crime,
+             aes(x = longitude, y = latitude, shape = type), color="#A72424", size=2) + 
+  
   # Set labels
   labs(title = "CRIME IN SOHO (2023)",
        shape = "TYPE")
@@ -77,7 +79,7 @@ p <- osm |>
 
 Now we can plot the map by simply calling its print method implicity:
 
-```{r plot the map, fig.dim=c(5.81,8.3), fig.dpi = 72, out.width="100%"}
+```{r plot the map, fig.dim=c(5.81,8.3), fig.dpi = 62, out.width="100%"}
 p
 ```
 

@@ -37,7 +37,7 @@ devtools::install_github("da-wi/cartographr")
 ## Usage
 
 ``` r
-get_osmdata(lat = 50, lon = 10, x_distance = 1000) |> plot_map()
+get_osmdata(lat = 53.543, lon = 10.000, x_distance = 1000) |> plot_map()
 ```
 
 For a step-by-step guide of the package’s basic features, please refer
