@@ -269,5 +269,8 @@ get_palette = function(palette) {
     color$hatched <- TRUE
   }
 
+  color$border_color <- "#121212"
+  color$border_width <- 0.001
+
   return(color)
 }

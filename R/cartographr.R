@@ -187,9 +187,11 @@ plot_map <- function(...) {
   }
 
   plot <- .plot_map(...)
+  plot + adjust_viewport(plot) + add_attribution()
 
-  plot + adjust_viewport(osm) + add_attribution()
 }
+
+
 
 #' Plot a map
 #'
@@ -240,11 +242,22 @@ plot_map <- function(...) {
 
   }
 
-  # building border color
-  if (!is.null(color$building_border))
-    borderc = color$building_border
-  else
-    borderc = NA
+  # create a border around the map?
+  if (is.null(osm_object$crop_extent))
+    osm_object$crop_extent <- osm_object$bbox |> sf::st_as_sfc()
+
+  frame <- NULL
+  if (!is.null(color$border_color)) {
+    width = ifelse(is.null(color$border_width),0.001,color$border_width)
+    projected_shape <- sf::st_transform(osm_object$crop_extent, crs = "+proj=utm +zone=33 +datum=WGS84")
+
+    buffered_projected_shape <- sf::st_buffer(projected_shape, dist = sqrt((sf::st_bbox(projected_shape)[3]-sf::st_bbox(projected_shape)[1])^2+
+                                                                             (sf::st_bbox(projected_shape)[4]-sf::st_bbox(projected_shape)[2])^2)*width)
+    buffered_shape <- sf::st_transform(buffered_projected_shape, crs = sf::st_crs(osm_object$crop_extent))
+    frame <- suppressMessages(sf::st_difference(buffered_shape, osm_object$crop_extent))
+    # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
+  }
+
 
   p <- ggplot2::ggplot() +
     # add background
@@ -285,7 +298,11 @@ plot_map <- function(...) {
     {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x.street$osm_points, color=color$lights, size=0.2*scale_factor)} +
 
     # buildings
-    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color= borderc, linewidth =0.05*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
+
+    # border
+    ggplot2::geom_sf(data=frame, fill = "black", color = NA) +
+
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes
@@ -297,7 +314,15 @@ plot_map <- function(...) {
 
     options(warn=0)
 
+    # store scale_factor for check if output size has changed
     p$scale_factor <- scale_factor
+
+    # store bbox for adjust_viewport()
+    if(is.null(frame))
+      p$bbox <- osm_object$bbox
+    else
+      p$bbox <- sf::st_bbox(frame)
+
     return(p)
 }
 

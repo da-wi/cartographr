@@ -18,7 +18,8 @@ adjust_viewport <- function(osm_object) {
   return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1] +(osm_object$bbox[3]-osm_object$bbox[1])/22,
                                     osm_object$bbox[3] -(osm_object$bbox[3]-osm_object$bbox[1])/22),
                            ylim = c(osm_object$bbox[2] +(osm_object$bbox[4]-osm_object$bbox[2])/22,
-                                    osm_object$bbox[4] -(osm_object$bbox[4]-osm_object$bbox[2])/22)))
+                                    osm_object$bbox[4] -(osm_object$bbox[4]-osm_object$bbox[2])/22),
+                           clip = "on"))
 }
 
 #' Add attribution caption to plots
@@ -54,7 +55,7 @@ add_attribution <- function() {
 get_circle <- function(lat,lon,y_distance,x_distance) {
   return(data.frame(lat = as.numeric(lat),  long = as.numeric(lon)) |>
            sf::st_as_sf(coords = c("long", "lat"), crs = 4326) |>
-           sf::st_transform(crs=7801) |>
+           sf::st_transform(crs = "+proj=utm +zone=33 +datum=WGS84") |>
            sf::st_buffer(dist = min(y_distance,x_distance)) |>
            sf::st_transform(crs = 4326))
 }
@@ -67,10 +68,14 @@ get_circle <- function(lat,lon,y_distance,x_distance) {
 #' @param lon Longitude WGS84
 #' @param y_distance Y distance in meters
 #' @param x_distance X distance in meters
+#' @param orientation X distance in meters
 #' @return The hexagon
 #' @noRd
 #' @keywords internal
-get_hexagon <- function(lat, lon, y_distance, x_distance) {
+get_hexagon <- function(lat, lon, y_distance, x_distance, orientation = "horizontal") {
+  if(!(orientation %in% c("vertical","horizontal")))
+    stop(cli::cli_abort('{.arg orientation} must be either "vertical" or "horizontal"'))
+
   n_sides <- 6
   radius <- min(y_distance, x_distance)
   R <- 6378137
@@ -78,7 +83,9 @@ get_hexagon <- function(lat, lon, y_distance, x_distance) {
   lat_rad <- lat * (pi / 180)
   lon_rad <- lon * (pi / 180)
 
-  angles <- seq(0, 2 * pi, length.out = n_sides + 1)
+  # Adjust the starting angle based on the orientation
+  start_angle <- ifelse(orientation == "vertical", 0, pi / 2)
+  angles <- seq(start_angle, 2 * pi + start_angle, length.out = n_sides + 1)
 
   lat_hex <- numeric(n_sides)
   lon_hex <- numeric(n_sides)
