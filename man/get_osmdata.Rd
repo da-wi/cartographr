@@ -52,9 +52,6 @@ OSM data is retrieved. The function ensures that only two of the three parameter
 }
 \examples{
 \donttest{
-data("soho_boundary")
-osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
-osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, y_distance = 1000, aspect_ratio = 1.41)
-osm_data <- get_osmdata(sf = soho_boundary)
+osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 10)
 }
 }

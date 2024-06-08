@@ -24,7 +24,6 @@ The color moods for the predefined palettes are described as follows:
 \item \strong{Alphabet}: A modern palette with a straightforward aesthetic.
 \item \strong{Arctic}: A palette that reflects the clear and bright qualities of Arctic landscapes.
 \item \strong{Autumn}: A palette with the warm and varied hues typical of the fall season.
-\item \strong{Autumn Muted}: A subdued version of the autumn palette, offering a gentle and warm atmosphere.
 \item \strong{BW}: A classic black and white palette with a hint of warmth for a traditional feel.
 \item \strong{Desert}: A palette that captures the earthy and natural tones found in desert environments.
 \item \strong{Evening}: A palette that embodies the quiet and contemplative nature of dusk.
@@ -53,7 +52,20 @@ custom_palette <- list(
   street = "#000000",
   background = "#CCCCCC",
   railway = "#000000",
-  hatched = TRUE
+  hatched = TRUE,
+  linewidth_buildings = 0.05,
+  linewidth_motorway = 6,
+  linewidth_primary = 4,
+  linewidth_secondary = 4,
+  linewidth_tertiary=3,
+  linewidth_unclassified = 3,
+  linewidth_residential = 3,
+  linewidth_pedestrian = 1,
+  linewidth_service = 1,
+  linewidth_living_street = 1,
+  size_hatch = 1,
+  alpha_hatch = 0.1,
+  size_streetlamp = 0.2
 )
 
 get_palette(custom_palette)

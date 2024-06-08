@@ -14,7 +14,6 @@ Imports:
         crayon,
 	osmdata,
 	ggplot2,
-        ggnewscale,
 	grid,
 	showtext,
 	sysfonts,

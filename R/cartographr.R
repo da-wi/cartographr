@@ -15,45 +15,121 @@
 #' @export
 preprocess_map = function(osm) {
   # copy osm_object
-  osm_object = osm
+  # osm_object = osm
 
   options(warn=-1)
 
-  suppressWarnings(suppressMessages(sf::sf_use_s2(FALSE)))
+  # Streets
+  osm$x.street <- list()
+  if(!is.null(osm$x$osm_lines)) osm$x.street$osm_lines <- subset(osm$x$osm_lines, osm$x$osm_lines$highway %in%  c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
+  if(!is.null(osm$x$osm_points)) osm$x.street$osm_points <-osm$x$osm_points
 
-  # water
-  osm_object$x.water$osm_lines1 <- osm_object$x.water$osm_lines
-  osm_object$x.water$osm_polygons1 <- osm_object$x.water$osm_polygons
-  osm_object$x.water$osm_multipolygons1 <- osm_object$x.water$osm_multipolygons
-  osm_object$x.sea$osm_polygons1 <- osm_object$x.sea$osm_polygons
-  osm_object$x.sea$osm_multipolygons1 <- osm_object$x.sea$osm_multipolygons
+  # Railway
+  osm$x.railway <- list()
+  if(!is.null(osm$x$osm_lines)) osm$x.railway$osm_lines <- subset(osm$x$osm_lines, osm$x$osm_lines$railway %in%  c("rail"))
 
-  tmp.water <- list(if (!is.null(osm_object$x.water$osm_lines1)) osm_object$x.water$osm_lines1 |> sf::st_make_valid(),
-                    if (!is.null(osm_object$x.water$osm_polygons1)) osm_object$x.water$osm_polygons1  |> sf::st_make_valid(),
-                    if (!is.null(osm_object$x.water$osm_multipolygons1)) osm_object$x.water$osm_multipolygons1 |> sf::st_make_valid(),
-                    if (!is.null(osm_object$x.sea$osm_multipolygons1)) osm_object$x.sea$osm_multipolygons1 |> sf::st_make_valid(),
-                    if (!is.null(osm_object$x.sea$osm_polygons1)) osm_object$x.sea$osm_polygons1 |> sf::st_make_valid())
+  # Buildings
+  osm$x.building <- list()
+  if(!is.null(osm$x$osm_polygons)) osm$x.building$osm_polygons <- subset(osm$x$osm_polygons, osm$x$osm_polygons$building != "" )
+  if(!is.null(osm$x$osm_multipolygons)) osm$x.building$osm_multipolygons <- subset(osm$x$osm_multipolygons, osm$x$osm_multipolygons$building != "")
 
-  osm_object$water <- do.call(rbind, lapply(tmp.water, function(df) df[, Reduce(intersect, lapply(tmp.water, colnames))]))
-  suppressMessages(osm_object$water.dis  <- sf::st_union(osm_object$water[1:dim(osm_object$water)[1],]))
+  if(!is.null(osm$x.building$osm_polygons))  osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
+    (\(x) if(!is.null(x$tunnel)) x[is.na(x$tunnel), ] else x)()
 
-  # buidlings
-  osm_object$buildings <- list( osm_object$x.building$osm_polygons, osm_object$x.building$osm_multipolygons)
-  osm_object$buildings <- osm_object$buildings[!sapply(osm_object$buildings,is.null)]
-  osm_object$buildings.dis <- NULL
-  if (length(osm_object$buildings) > 1) {
-    #osm_object$buildings.dis <- dplyr::bind_rows(osm_object$buildings)
-    osm_object$buildings.dis <- do.call(rbind, lapply(osm_object$buildings, function(df) df[, Reduce(intersect, lapply(osm_object$buildings, colnames))]))
-  } else {
-    osm_object$buildings.dis <- osm_object$buildings[[1]]
+  #if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_polygons)[1], replace = T)
+  #if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_multipolygons)[1], replace = T)
+
+  # Water
+  subset_water <- function(x) {
+    tmp <- c()
+    if(!(is.null(x$water))) { a <- subset(x, x$water != "" ); if(nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    return(tmp)
   }
 
-  #if(!is.null(osm_object$x.building$osm_polygons)) osm_object$x.building$osm_polygons <-  osm_object$x.building$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
-  #if(!is.null(osm_object$x.building$osm_multipolygons)) osm_object$x.building$osm_multipolygons <- osm_object$x.building$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  subset_sea <- function(x) {
+    tmp <- c()
+    if(!(is.null(x$place))) { a <- subset(x,x$place %in% c("sea","ocean")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$natural))) { a <- subset(x,x$natural %in% c("water","strait","bay")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$boundary))) { a <- subset(x,x$boundary %in% c("maritime")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$waterway))) { a <- subset(x,x$waterway %in% c("stream")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    return(tmp)
+  }
 
-  osm_object$crop <- NA
-  osm_object$preprocessed <- TRUE
-  return(osm_object)
+  osm$x.water <- list()
+  osm$x.sea <- list()
+  if(!is.null(osm$x$osm_lines)) osm$x.water$osm_lines <- subset_water(osm$x$osm_lines)
+  if(!is.null(osm$x$osm_polygons)) {
+    osm$x.water$osm_polygons <- subset_water(osm$x$osm_polygons)
+    osm$x.sea$osm_polygons <- subset_sea(osm$x$osm_polygons)
+  }
+  if(!is.null(osm$x$osm_multipolygons)) {
+    osm$x.water$osm_multipolygons <- subset_water(osm$x$osm_multipolygons)
+    osm$x.sea$osm_multipolygons <- subset_sea(osm$x$osm_multipolygons)
+  }
+
+  # Green
+  subset_green <- function(x) {
+    tmp <- c()
+    if(!(is.null(x$landuse))) { a <- subset(x,x$landuse %in% c("forest","grass","orchard","recreation_ground")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$leisure))) { a <- subset(x,x$leisure %in% c("park")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$natural))) { a <- subset(x,x$natural %in% c("island", "wood")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    return(tmp)
+  }
+
+  osm$x.green <- list()
+  if(!is.null(osm$x$osm_polygons)) osm$x.green$osm_polygons <- subset_green(osm$x$osm_polygons)
+  if(!is.null(osm$x$osm_multipolygons)) osm$x.green$osm_multipolygons <- subset_green(osm$x$osm_multipolygons)
+
+  # Beach
+  osm$x.beach <- list()
+  if(!is.null(osm$x$osm_multipolygons)) osm$x.beach$osm_multipolygons <- subset(osm$x.beach$osm_multipolygons,osm$x.beach$osm_multipolygons$natural %in% c("beach"))
+
+  # Parking
+  osm$x.parking <- list()
+  subset_parking <- function(x) {
+    tmp <- c()
+    if(!(is.null(x$amenity))) { a <- subset(x,x$amenity %in% c("parking")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$highway))) { a <- subset(x,x$highway %in% c("pedestrian")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$man_made))) { a <- subset(x,x$man_made %in% c("pier")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    return(tmp)
+  }
+
+  if(!is.null(osm$x$osm_multipolygons)) osm$x.parking$osm_multipolygons <- subset_parking(osm$x$osm_multipolygons)
+
+  # water
+  #osm$x.water$osm_lines1 <- osm$x.water$osm_lines
+  #osm$x.water$osm_polygons1 <- osm$x.water$osm_polygons
+  #osm$x.water$osm_multipolygons1 <- osm$x.water$osm_multipolygons
+  #osm$x.sea$osm_polygons1 <- osm$x.sea$osm_polygons
+  #osm$x.sea$osm_multipolygons1 <- osm$x.sea$osm_multipolygons
+
+  tmp.water <- list(if (!is.null(osm$x.water$osm_lines)) osm$x.water$osm_lines |> sf::st_make_valid(),
+                    if (!is.null(osm$x.water$osm_polygons)) osm$x.water$osm_polygons  |> sf::st_make_valid(),
+                    if (!is.null(osm$x.water$osm_multipolygons)) osm$x.water$osm_multipolygons |> sf::st_make_valid(),
+                    if (!is.null(osm$x.sea$osm_multipolygons)) osm$x.sea$osm_multipolygons |> sf::st_make_valid(),
+                    if (!is.null(osm$x.sea$osm_polygons)) osm$x.sea$osm_polygons |> sf::st_make_valid())
+
+  osm$water <- do.call(rbind, lapply(tmp.water, function(df) df[, Reduce(intersect, lapply(tmp.water, colnames))]))
+
+  if(!is.null(osm$water)) { suppressMessages(osm$water.dis  <- sf::st_union(osm$water[1:dim(osm$water)[1],])) }
+
+  # buildings
+  osm$buildings <- list( osm$x.building$osm_polygons, osm$x.building$osm_multipolygons)
+  osm$buildings <- osm$buildings[!sapply(osm$buildings,is.null)]
+  osm$buildings.dis <- NULL
+  if (length(osm$buildings) > 1) {
+    osm$buildings.dis <- do.call(rbind, lapply(osm$buildings, function(df) df[, Reduce(intersect, lapply(osm$buildings, colnames))]))
+  } else {
+    if(!is.null(osm$buildings))
+      osm$buildings.dis <- osm$buildings[[1]]
+  }
+
+  #if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons <-  osm$x.building$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  #if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons <- osm$x.building$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+
+  osm$crop <- NA
+  osm$preprocessed <- TRUE
+  return(osm)
 }
 
 
@@ -261,6 +337,13 @@ plot_map <- function(...) {
     # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
   }
 
+  # colors for buildings
+  if(!is.null(osm_object$buildings.dis)) {
+    osm_object$buildings.dis$colors <- sample(color$palette_building,dim(osm_object$buildings.dis)[1], replace = T)
+  }
+
+  #print(head(osm_object$buildings.dis$colors))
+
 
   p <- ggplot2::ggplot() +
     # add background
@@ -274,10 +357,10 @@ plot_map <- function(...) {
     ggplot2::geom_sf(data =osm_object$water.dis, fill = color$water, color= color$water) +
 
     # water hatched
-    {if(!is.null(osm_object$water.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = 0.3, alpha=0.1 )}+
+    {if(!is.null(osm_object$water.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
 
     # green, beach & parking
-    ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) + # "#2F3737"
+    ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.green$osm_polygons, fill = color$green, color= NA, linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.beach$osm_multipolygons, fill = color$beach, color= NA, linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.parking$osm_multipolygons, fill = color$parking, color= NA, linewidth=0.05) +
@@ -289,19 +372,19 @@ plot_map <- function(...) {
                        color=color$railway, linewidth = 2*scale_factor)} +
 
     # streets
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "motorway") , color=color$street, linewidth=6*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "primary") , color=color$street, linewidth=4*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "secondary") , color=color$street, linewidth=4*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "tertiary") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "unclassified") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "residential") , color=color$street, linewidth=3*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=1*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "service") , color=color$street, linewidth=1*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "living_street"), color=color$street, linewidth=1*scale_factor) +
-    {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x.street$osm_points, color=color$lights, size=0.2*scale_factor)} +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "motorway") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "primary") , color=color$street, linewidth=color$linewidth_primary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "secondary") , color=color$street, linewidth=color$linewidth_secondary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "tertiary") , color=color$street, linewidth=color$linewidth_tertiary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "unclassified") , color=color$street, linewidth=color$linewidth_unclassified*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "residential") , color=color$street, linewidth=color$linewidth_residential*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=color$linewidth_pedestrian*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "service") , color=color$street, linewidth=color$linewidth_service*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "living_street"), color=color$street, linewidth=color$linewidth_living_street*scale_factor) +
+    {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$x.street$osm_points, color=color$lights, size=color$size_streetlamp*scale_factor)} +
 
     # buildings
-    ggplot2::geom_sf(data = osm_object$buildings.dis, ggplot2::aes(fill = osm_object$buildings.dis$colors), show.legend = F, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$buildings.dis, fill = osm_object$buildings.dis$colors, show.legend = F, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
 
     # border
     ggplot2::geom_sf(data=frame, fill = "black", color = NA) +
@@ -309,11 +392,7 @@ plot_map <- function(...) {
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes
-    ggplot2::theme_void()+
-
-    # add new scales
-    ggnewscale::new_scale_color()+
-    ggnewscale::new_scale_fill()
+    ggplot2::theme_void()
 
     options(warn=0)
 
@@ -326,8 +405,10 @@ plot_map <- function(...) {
     else
       p$bbox <- sf::st_bbox(frame)
 
+
     return(p)
 }
+
 
 #' Retrieve OpenStreetMap data for a specified location
 #'
@@ -399,7 +480,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
           y_distance <- x_distance / aspect_ratio
         }
       } else {
-          stop(cli::cli_abort("`set_output_size()` must return a vector of length 2 to calculate aspect_ratio."))
+        stop(cli::cli_abort("`set_output_size()` must return a vector of length 2 to calculate aspect_ratio."))
       }
     }
 
@@ -434,52 +515,35 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     #  haversine_distance(centroid_of_bbox[2], centroid_of_bbox[1], bbox$ymin, centroid_of_bbox[1])
   }
 
-  q.street <- osmdata::opq(bbox = place) |>
-    osmdata::add_osm_feature("highway", c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
-
-  q.building <- osmdata::opq(bbox = place) |>
-    osmdata::add_osm_feature("building")
-
-  q.water <- osmdata::opq(bbox = place) |>
-    osmdata::add_osm_feature("water")
-
-  q.sea <- osmdata::opq(bbox = place) |>
-    osmdata::add_osm_features(c(
-      "\"place\"=\"sea\"",
-      "\"place\"=\"ocean\"",
-      "\"natural\"=\"water\"",
-      "\"natural\"=\"strait\"",
-      "\"natural\"=\"bay\""))
-
-  q.green <- osmdata::opq(bbox = place) |>
-    osmdata::add_osm_features (features = c (
-      "\"landuse\"=\"forest\"",
-      "\"landuse\"=\"grass\"",
-      "\"landuse\"=\"orchard\"",
-      "\"landuse\"=\"recreation_ground\"",
-      "\"leisure\"=\"park\"",
-      "\"natural\"=\"island\"",
-      "\"natural\"=\"wood\""
-    ))
-
-  q.beach <- osmdata::opq(bbox = place) |>
-    osmdata::add_osm_feature("natural", c("beach"))
-
-  q.parking <- osmdata::opq (bbox=place) |>
-    osmdata::add_osm_features (features = c (
-      "\"amenity\"=\"parking\"",
-      "\"highway\"=\"pedestrian\"",
-      "\"man_made\"=\"pier\""
-    ))
-
-  q.railway <- osmdata::opq (bbox=place) |>
-    osmdata::add_osm_features (features = c (
-      "\"railway\"=\"rail\""
-    ))
+  query <- osmdata::opq(bbox = place) |>
+    osmdata::add_osm_features(list("highway" =
+                                     c("motorway", "primary", "secondary",
+                                       "tertiary", "unclassified", "residential",
+                                       "living_street","street_lamp", "pedestrian"),
+                                   "water" = c(),
+                                   "building" = c(),
+                                   "natural" = "beach",
+                                   "amenity" = "parking",
+                                   "man_made" = "pier",
+                                   "railway" = "rail",
+                                   "place" = "sea",
+                                   "place" = "ocean",
+                                   "natural"= "water",
+                                   "natural" = "strait",
+                                   "natural" = "bay",
+                                   "boundary" = "maritime",
+                                   "waterway" = "stream",
+                                   "landuse"="forest",
+                                   "landuse"="grass",
+                                   "landuse"="orchard",
+                                   "landuse"="recreation_ground",
+                                   "leisure"="park",
+                                   "natural"="island",
+                                   "natural"="wood"))
 
   osm <- c()
 
-  if(!quiet) cli::cli_alert_info("Retrieving data, be patient with requests failing.")
+  if(!quiet) cli::cli_alert_info("Retrieving data, be patient, on public servers it can last up to one minute")
 
   if (calculated_bbox) {
     if(!quiet) cli::cli_alert_info(paste0("xmin:",round(bbox[1],2),", ymin:",round(bbox[2],2),", xmax:",round(bbox[3],2),", ymax:", round(bbox[4],2)))
@@ -488,42 +552,10 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     if(!quiet) cli::cli_alert_info(paste0("lat:",round(lat,2),", lon:",round(lon,2),", dy:",round(y_distance,2),", dx:", round(x_distance,2)))
   }
 
-
-  if(!quiet) cli::cli_progress_step("[1/5] Creating street network")
-
-  osm$x.street <- q.street |> osmdata::osmdata_sf()
-
-  if (!is.null(osm$x.street$osm_lines)) {
-    osm$x.street$osm_lines_meters <- sf::st_transform(osm$x.street$osm_lines, crs = 32632)
-    osm$x.street$osm_lines$length <- as.numeric(sf::st_length(osm$x.street$osm_lines_meters))
-    length_quantile <- stats::quantile(osm$x.street$osm_lines$length, 0.25)
-    osm$x.street$osm_lines <- subset(osm$x.street$osm_lines, length >= length_quantile)
-  }
-
-  if(!quiet) cli::cli_progress_step("[2/5] Constructing buildings")
-  osm$x.building <- q.building |> osmdata::osmdata_sf()
-  #osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
-  ##  (\(x) if(!is.null(osm$x.building$osm_polygons$tunnel)) dplyr::filter( osm$x.building$osm_polygons, is.na(tunnel) == TRUE) else x)()
-  #  (\(x) if(!is.null(osm$x.building$osm_polygons$tunnel)) subset(is.na(tunnel)) else x)()
-
-  osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
-    (\(x) if(!is.null(x$tunnel)) x[is.na(x$tunnel), ] else x)()
-
-  if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_polygons)[1], replace = T)
-  if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_multipolygons)[1], replace = T)
-
-  if(!quiet) cli::cli_progress_step("[3/5] Filling in water")
-  osm$x.water <- q.water |> osmdata::osmdata_sf()
-  osm$x.sea <- q.sea |> osmdata::osmdata_sf()
-
-  if(!quiet) cli::cli_progress_step("[4/5] Planting trees")
-  osm$x.green <- q.green |> osmdata::osmdata_sf()
+  # Retrieve data (can last 30s)
+  osm$x <- query |> osmdata::osmdata_sf(quiet = T)
 
 
-  if(!quiet) cli::cli_progress_step("[5/5] Laying tracks")
-  osm$x.beach <- q.beach |> osmdata::osmdata_sf()
-  osm$x.parking <- q.parking |> osmdata::osmdata_sf()
-  osm$x.railway <- q.railway |> osmdata::osmdata_sf()
 
   osm$bbox <- bbox
   osm$y_distance <- y_distance
@@ -538,7 +570,6 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
   return(osm)
 }
-
 
 
 #' Save a map to a file
