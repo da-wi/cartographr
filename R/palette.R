@@ -40,7 +40,7 @@
 #'   street = "#000000",
 #'   background = "#CCCCCC",
 #'   railway = "#000000",
-#'   hatched = TRUE,
+#'   hatch_water = TRUE,
 #'   linewidth_buildings = 0.05,
 #'   linewidth_motorway = 6,
 #'   linewidth_primary = 4,
@@ -61,27 +61,43 @@
 get_palette = function(palette) {
   if (is.list(palette) && all(names(palette) != "")) {
     color <- palette
+    class(color) <- "cartographr_palette"
     return(color)
   }
 
-  if (!(palette %in% c( "alphabet", "arctic","autumn", "bw",
+  if (!(palette %in% c( "alphabet", "arctic","autumn", "bw","dotted",
                         "desert","evening", "gray", "iberia", "imhof","lines","midnight",
-                        "minimal","metropolitan","swiss","tropical")))
+                        "mikimal","minimal","metropolitan","swiss","tropical")))
     stop(cli::cli_abort(paste(palette,"is not a predefined palette.")))
 
   sizes <- list(linewidth_buildings = 0.05,
                 linewidth_motorway = 6,
                 linewidth_primary = 4,
                 linewidth_secondary = 4,
-                linewidth_tertiary=3,
+                linewidth_tertiary= 3,
                 linewidth_unclassified = 3,
                 linewidth_residential = 3,
                 linewidth_pedestrian = 1,
                 linewidth_service = 1,
                 linewidth_living_street = 1,
+                hatch_water = FALSE,
+                hatch_water_npoints = 200,
+                hatch_water_nlines = 100,
+                hatch_water_type = "points",
+                hatch_buildings = FALSE,
+                hatch_buildings_npoints = 200,
+                hatch_buildings_nlines = 100,
+                hatch_buildings_type = "points",
+                hatch_green = FALSE,
+                hatch_green_npoints = 200,
+                hatch_green_nlines = 100,
+                hatch_green_type = "lines",
                 size_hatch = 1,
                 alpha_hatch = 0.1,
-                size_streetlamp = 0.2
+                size_streetlamp = 0.2,
+                name = palette,
+                border_color = "#121212",
+                border_width = 0.001
   )
 
   color <- list()
@@ -95,7 +111,6 @@ get_palette = function(palette) {
       background = "#eceeec",
       parking = "#fefefe",
       railway =  "#c2c2bf",
-      hatched = FALSE,
       beach = "#ded2c4"
     )
   }
@@ -110,7 +125,6 @@ get_palette = function(palette) {
       background = "#f0f5f7",
       parking = "#f0f5f7",
       railway = "#c2d1d9",
-      hatched = FALSE,
       beach = "#e0e4e8"
     )
   }
@@ -125,7 +139,8 @@ get_palette = function(palette) {
       street = "#fff5d9",
       beach = "#fff5d9",
       parking = "#fff5d9",
-      hatched = TRUE
+      hatch_water = TRUE,
+      hatch_green = TRUE
     )
   }
 
@@ -138,8 +153,7 @@ get_palette = function(palette) {
       background = "#292e28",
       street = "#faf5eb",
       beach = "#faf5eb",
-      parking = "#faf5eb",
-      hatched = FALSE
+      parking = "#faf5eb"
     )
   }
 
@@ -153,7 +167,6 @@ get_palette = function(palette) {
       background = "#f0e8d7",
       parking = "#f0e8d7",
       railway = "#b2a690",
-      hatched = FALSE,
       beach = "#e8d9c3"
     )
   }
@@ -168,8 +181,7 @@ get_palette = function(palette) {
       beach = "#2F2352",
       parking = "#2F2352",
       street = "#1C1F31",
-      background = "#060A2E",
-      hatched = FALSE
+      background = "#060A2E"
     )
   }
 
@@ -183,7 +195,6 @@ get_palette = function(palette) {
       background = "#f0f0f0",
       parking = "#f0f0f0",
       railway = "#999999",
-      hatched = FALSE,
       beach = "#d9d9d9"
     )
   }
@@ -197,8 +208,7 @@ get_palette = function(palette) {
       palette_building = c("#433633", "#433633", "#FF5E5B"),
       beach = "#FCE19C",
       parking = "#F2F4CB",
-      railway = "#1b1b1b",
-      hatched = TRUE
+      railway = "#1b1b1b"
     )
   }
 
@@ -211,8 +221,7 @@ get_palette = function(palette) {
       background = "#f3efe2",
       street = "#b0a18f",
       beach = "#e2d1b3",
-      parking = "#a9a18c",
-      hatched = FALSE
+      parking = "#a9a18c"
     )
   }
 
@@ -225,8 +234,7 @@ get_palette = function(palette) {
       background = "#ffffff",
       street = "#292e28",
       beach = "#ffffff",
-      parking = "#ffffff",
-      hatched = FALSE
+      parking = "#ffffff"
     )
   }
 
@@ -240,7 +248,6 @@ get_palette = function(palette) {
       background = "#f4f2e1",
       parking = "#f4f2e1",
       railway = "#c4c4bc",
-      hatched = FALSE,
       beach = "#e6d5c3"
     )
   }
@@ -256,8 +263,7 @@ get_palette = function(palette) {
       beach = "#333333",
       parking = "#333333",
       street = "#1c1c1c",
-      background = "#181818",
-      hatched = FALSE
+      background = "#181818"
     )
   }
 
@@ -271,8 +277,43 @@ get_palette = function(palette) {
       background = "#ffffff",
       parking = "#ffffff",
       railway = "#d0d0d0",
-      hatched = FALSE,
       beach = "#ffffff"
+    )
+  }
+
+  if (palette == "mikimal") {
+    color <- list(
+      palette_building = c("#fbfaf8", "#f3f3f1"),
+      building_border = "#adacaa",
+      water = "#cdd6d3",
+      street = "#f6f2ef",
+      green = "#d2caa5",
+      background = "#f6f2ef",
+      parking = "#f6f2ef",
+      railway = "#d0d0d0",
+      beach = "#dedfda",
+      hatch_green = T,
+      hatch_water = T
+    )
+  }
+
+  if (palette == "dotted") {
+    color <- list(
+      palette_building = "#ffffff",
+      building_border = "#adacaa",
+      water = "#cdcdd3",
+      street = "#ffffff",
+      green = "#adadae",
+      background = "#ffffff",
+      parking = "#ffffff",
+      railway = "#cdcdd3",
+      beach = "#ffffff",
+      hatch_buildings = TRUE,
+      hatch_alpha = 1,
+      hatch_buildings_npoints = 280,
+      hatch_buildings_nlines = 100,
+      hatch_buildings_type = "points",
+      hatch_green = TRUE
     )
   }
 
@@ -286,7 +327,6 @@ get_palette = function(palette) {
       background = "#fbfbf9",
       parking = "#fbfbf9",
       railway = "#999999",
-      hatched = FALSE,
       beach = "#fbfbf9"
     )
   }
@@ -300,15 +340,11 @@ get_palette = function(palette) {
       parking = "#F2F4CB",
       street = "#475657",
       background = "#F2F4CB",
-      railway = "#586F6F",
-      hatched = TRUE
+      railway = "#586F6F"
     )
   }
 
-  color <- c(color, sizes)
-  color$name <- palette
-  color$border_color <- "#121212"
-  color$border_width <- 0.001
+  color <- modifyList(sizes, color)
 
   class(color) <- "cartographr_palette"
 

@@ -97,39 +97,107 @@ preprocess_map = function(osm) {
   if(!is.null(osm$x$osm_multipolygons)) osm$x.parking$osm_multipolygons <- subset_parking(osm$x$osm_multipolygons)
 
   # water
-  #osm$x.water$osm_lines1 <- osm$x.water$osm_lines
-  #osm$x.water$osm_polygons1 <- osm$x.water$osm_polygons
-  #osm$x.water$osm_multipolygons1 <- osm$x.water$osm_multipolygons
-  #osm$x.sea$osm_polygons1 <- osm$x.sea$osm_polygons
-  #osm$x.sea$osm_multipolygons1 <- osm$x.sea$osm_multipolygons
-
-  tmp.water <- list(if (!is.null(osm$x.water$osm_lines)) osm$x.water$osm_lines |> sf::st_make_valid(),
+  water <- list(if (!is.null(osm$x.water$osm_lines)) osm$x.water$osm_lines |> sf::st_make_valid(),
                     if (!is.null(osm$x.water$osm_polygons)) osm$x.water$osm_polygons  |> sf::st_make_valid(),
                     if (!is.null(osm$x.water$osm_multipolygons)) osm$x.water$osm_multipolygons |> sf::st_make_valid(),
                     if (!is.null(osm$x.sea$osm_multipolygons)) osm$x.sea$osm_multipolygons |> sf::st_make_valid(),
                     if (!is.null(osm$x.sea$osm_polygons)) osm$x.sea$osm_polygons |> sf::st_make_valid())
 
-  osm$water <- do.call(rbind, lapply(tmp.water, function(df) df[, Reduce(intersect, lapply(tmp.water, colnames))]))
+  water <- do.call(rbind, lapply(water, function(df) df[, Reduce(intersect, lapply(water, colnames))]))
 
-  if(!is.null(osm$water)) { suppressMessages(osm$water.dis  <- sf::st_union(osm$water[1:dim(osm$water)[1],])) }
+  if(!is.null(water)) { suppressMessages(osm$water.dis  <- sf::st_union(water[1:dim(water)[1],])) }
 
   # buildings
-  osm$buildings <- list( osm$x.building$osm_polygons, osm$x.building$osm_multipolygons)
-  osm$buildings <- osm$buildings[!sapply(osm$buildings,is.null)]
+  buildings <- list( osm$x.building$osm_polygons, osm$x.building$osm_multipolygons)
+  buildings <- buildings[!sapply(buildings,is.null)]
   osm$buildings.dis <- NULL
-  if (length(osm$buildings) > 1) {
-    osm$buildings.dis <- do.call(rbind, lapply(osm$buildings, function(df) df[, Reduce(intersect, lapply(osm$buildings, colnames))]))
+  if (length(buildings) > 1) {
+    osm$buildings.dis <- do.call(rbind, lapply(buildings, function(df) df[, Reduce(intersect, lapply(buildings, colnames))]))
   } else {
-    if(!is.null(osm$buildings))
-      osm$buildings.dis <- osm$buildings[[1]]
+    if(!is.null(buildings))
+      osm$buildings.dis <- buildings[[1]]
   }
 
-  #if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons <-  osm$x.building$osm_polygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
-  #if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons <- osm$x.building$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(., crop_extent )
+  # green
+  green <- list( osm$x.green$osm_polygons, osm$x.green$osm_multipolygons)
+  green <- green[!sapply(green,is.null)]
+  osm$green.dis <- NULL
+  if (length(osm$green) > 1) {
+    osm$green.dis <- do.call(rbind, lapply(green, function(df) df[, Reduce(intersect, lapply(green, colnames))]))
+  } else {
+    if(!is.null(osm$green))
+      osm$green.dis <- green[[1]]
+  }
 
   osm$crop <- NA
   osm$preprocessed <- TRUE
   return(osm)
+}
+
+#' Create hatch patterns within a boundary
+#'
+#' This function generates hatch patterns within a given spatial boundary. The patterns can be generated as either points or lines, depending on the specified type.
+#' @param boundary A spatial object representing the boundary within which to create the hatch pattern.
+#' @param type A character string specifying the type of hatch pattern to create: "points" or "lines".
+#' @param n_points The number of points to generate within the boundary when 'type' is "points". Default is 200.
+#' @param n_lines The number of lines to generate within the boundary when 'type' is "lines". Default is 100.
+#' @return A spatial object containing the generated hatch pattern.
+#' @noRd
+#' @keywords internal
+.create_hatch_pattern <- function(boundary, type = "points", n_points = 200, n_lines = 100)  {
+
+  # union to multipolygon if list
+  if (!is.null(nrow(boundary))) {
+    suppressWarnings(suppressMessages({
+      boundary <- sf::st_make_valid(boundary)
+      boundary <- sf::st_union(boundary[1:dim(boundary)[1],])
+    }))
+  }
+
+  if (type =="points") {
+    suppressWarnings(suppressMessages({
+      fillgrid <- rbind(sf::st_make_grid(boundary,
+                                         n = n_points, what = c("centers")) |> sf::st_as_sf(),
+                        sf::st_make_grid(boundary,
+                                         n = n_points, what = c("corners")) |> sf::st_as_sf())
+
+
+      fillgrid <- fillgrid[sf::st_contains(boundary, fillgrid, sparse = FALSE), ]
+    }))
+
+    return(fillgrid)
+  }
+
+  else if (type == "lines") {
+    suppressWarnings(suppressMessages({
+      fillgrid <- sf::st_make_grid(boundary,
+                                   what = "polygons",
+                                   square = T, n = n_lines
+      )
+
+      direction = list( horizontal = c(1, 2),
+                        vertical = c(1, 4),
+                        left2right = c(2, 4),
+                        right2left = c(1, 3)
+      )
+
+      endsf = lapply(1:length(fillgrid), function(j)
+        sf::st_linestring(
+          sf::st_coordinates(
+            fillgrid[j])[direction[[3]], 1:2]
+        )
+      )
+      endsf = sf::st_sfc(endsf, crs = sf::st_crs(boundary))
+
+      endsf = sf::st_intersection(endsf,boundary)
+      endsf = endsf[sf::st_geometry_type(endsf)
+                    %in% c("LINESTRING", "MULTILINESTRING")
+      ]
+      endsf = sf::st_line_merge(sf::st_union(endsf))
+    }))
+
+    return(endsf)
+  }
 }
 
 
@@ -287,38 +355,33 @@ plot_map <- function(...) {
 
   color = get_palette(palette)
 
-  #scale_factor <- mean(scaling[1], scaling[2])
   scale_factor <- cartographr_env$scale_factor
 
   osm_object <- osm
 
-  if (color$hatched) {
-    # Approach 1
-    # patterns for hatching
-    #df.point <- merge(data.frame( x = seq(osm_object$bbox$xmin,osm_object$bbox$xmax,(osm_object$bbox$xmax-osm_object$bbox$xmin)/300)),
-    #      data.frame( y = seq(osm_object$bbox$ymin,osm_object$bbox$ymax,(osm_object$bbox$ymax-osm_object$bbox$ymin)/300)),all=TRUE)
-    #df.point <- df.point |> sf::st_as_sf(coords = c(1,2))
-    #sf::st_crs(df.point) <- 4326
-
-    # Approach 2 should be faster and more accurate
-    suppressMessages({
-      n_dots <- 200
-
-      df.point <- rbind(sf::st_make_grid(sf::st_crop(osm_object$water.dis,osm_object$bbox),
-                                         n = n_dots, what = c("centers")) |> sf::st_as_sf(),
-                        sf::st_make_grid(sf::st_crop(osm_object$water.dis,osm_object$bbox),
-                                         n = n_dots, what = c("corners")) |> sf::st_as_sf())
-      df.point.gg <- df.point[sf::st_intersects(df.point, sf::st_crop(osm_object$water.dis,osm_object$bbox), sparse = FALSE), ]
-    })
-
-    # df.point[lengths(sf::st_intersects(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox))) > 0,])
-
-    # this is an expensive operation computationally
-    #suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
-    #suppressMessages(df.point.gg <- sf::st_intersection(df.point,sf::st_crop(osm_object$water.dis,osm_object$bbox)))
-
+  if (color$hatch_water) {
+      # water can extend a lot outside of bbox.. so we crop it for convencience
+      pattern_water <- .create_hatch_pattern(boundary = suppressMessages(sf::st_crop(osm_object$water.dis,osm_object$bbox)),
+                                            type = color$hatch_water_type,
+                                            n_points = color$hatch_water_npoints,
+                                            n_lines  = color$hatch_water_nlines)
   }
 
+  if (color$hatch_buildings) {
+    pattern_buildings <- .create_hatch_pattern(osm_object$buildings.dis,
+                                              type = color$hatch_buildings_type,
+                                              n_points = color$hatch_buildings_npoints,
+                                              n_lines  = color$hatch_buildings_nlines)
+  }
+
+  if (color$hatch_green) {
+    pattern_green <- .create_hatch_pattern(osm_object$green.dis,
+                                          type = color$hatch_green_type,
+                                          n_points = color$hatch_green_npoints,
+                                          n_lines  = color$hatch_green_nlines)
+  }
+
+  ########
   # create a border around the map?
   if (is.null(osm_object$crop_extent))
     osm_object$crop_extent <- osm_object$bbox |> sf::st_as_sfc()
@@ -336,13 +399,12 @@ plot_map <- function(...) {
     })
     # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
   }
+  ###########
 
   # colors for buildings
   if(!is.null(osm_object$buildings.dis)) {
     osm_object$buildings.dis$colors <- sample(color$palette_building,dim(osm_object$buildings.dis)[1], replace = T)
   }
-
-  #print(head(osm_object$buildings.dis$colors))
 
 
   p <- ggplot2::ggplot() +
@@ -357,13 +419,15 @@ plot_map <- function(...) {
     ggplot2::geom_sf(data =osm_object$water.dis, fill = color$water, color= color$water) +
 
     # water hatched
-    {if(!is.null(osm_object$water.dis) && color$hatched == TRUE)  ggplot2::geom_sf( data=df.point.gg, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
+    {if(!is.null(osm_object$water.dis) && color$hatch_water == TRUE)  ggplot2::geom_sf( data=pattern_water, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
 
     # green, beach & parking
-    ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) +
-    ggplot2::geom_sf(data =osm_object$x.green$osm_polygons, fill = color$green, color= NA, linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.beach$osm_multipolygons, fill = color$beach, color= NA, linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.parking$osm_multipolygons, fill = color$parking, color= NA, linewidth=0.05) +
+    ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) +
+    ggplot2::geom_sf(data =osm_object$x.green$osm_polygons, fill = color$green, color= NA, linewidth=0.05) +
+
+    {if(!is.null(osm_object$green.dis) && color$hatch_green == TRUE)  ggplot2::geom_sf( data=pattern_green, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
 
     # railway
     {if(!is.null(osm_object$x.railway$osm_lines))
@@ -385,6 +449,8 @@ plot_map <- function(...) {
 
     # buildings
     ggplot2::geom_sf(data = osm_object$buildings.dis, fill = osm_object$buildings.dis$colors, show.legend = F, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
+    {if(!is.null(osm_object$buildings.dis) && color$hatch_buildings == TRUE)  ggplot2::geom_sf(data = pattern_buildings, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
+
 
     # border
     ggplot2::geom_sf(data=frame, fill = "black", color = NA) +
