@@ -122,10 +122,10 @@ preprocess_map = function(osm) {
   green <- list( osm$x.green$osm_polygons, osm$x.green$osm_multipolygons)
   green <- green[!sapply(green,is.null)]
   osm$green.dis <- NULL
-  if (length(osm$green) > 1) {
+  if (length(green) > 1) {
     osm$green.dis <- do.call(rbind, lapply(green, function(df) df[, Reduce(intersect, lapply(green, colnames))]))
   } else {
-    if(!is.null(osm$green))
+    if(!is.null(green))
       osm$green.dis <- green[[1]]
   }
 
@@ -146,7 +146,7 @@ preprocess_map = function(osm) {
 #' @keywords internal
 .create_hatch_pattern <- function(boundary, type = "points", n_points = 200, n_lines = 100)  {
 
-  # union to multipolygon if list
+  # union to multipolygon if listtools:
   if (!is.null(nrow(boundary))) {
     suppressWarnings(suppressMessages({
       boundary <- sf::st_make_valid(boundary)
@@ -361,21 +361,21 @@ plot_map <- function(...) {
 
   if (color$hatch_water) {
       # water can extend a lot outside of bbox.. so we crop it for convencience
-      pattern_water <- .create_hatch_pattern(boundary = suppressMessages(sf::st_crop(osm_object$water.dis,osm_object$bbox)),
+      pattern_water <- .create_hatch_pattern(boundary = suppressMessages(sf::st_crop(osm_object$water.dis |> sf::st_make_valid(),osm_object$bbox)),
                                             type = color$hatch_water_type,
                                             n_points = color$hatch_water_npoints,
                                             n_lines  = color$hatch_water_nlines)
   }
 
   if (color$hatch_buildings) {
-    pattern_buildings <- .create_hatch_pattern(osm_object$buildings.dis,
+    pattern_buildings <- .create_hatch_pattern( suppressMessages(sf::st_crop(osm_object$buildings.dis |> sf::st_make_valid(),osm_object$bbox)),
                                               type = color$hatch_buildings_type,
                                               n_points = color$hatch_buildings_npoints,
                                               n_lines  = color$hatch_buildings_nlines)
   }
 
   if (color$hatch_green) {
-    pattern_green <- .create_hatch_pattern(osm_object$green.dis,
+    pattern_green <- .create_hatch_pattern(suppressMessages(sf::st_crop(osm_object$green.dis |> sf::st_make_valid(),osm_object$bbox)),
                                           type = color$hatch_green_type,
                                           n_points = color$hatch_green_npoints,
                                           n_lines  = color$hatch_green_nlines)
@@ -411,7 +411,6 @@ plot_map <- function(...) {
     # add background
     {if(osm_object$crop %in% c("circle","hex","sf")) ggplot2::geom_sf(data=osm_object$crop_extent, fill=color$background,color=NA) else ggplot2::geom_sf(data=sf::st_as_sfc(osm_object$bbox), fill=color$background,color=NA)} +
 
-
     ### add layers on top
     # water
     # ATTENTION: when using {if} the original osm_object is used (important, when cropped!)
@@ -419,7 +418,7 @@ plot_map <- function(...) {
     ggplot2::geom_sf(data =osm_object$water.dis, fill = color$water, color= color$water) +
 
     # water hatched
-    {if(!is.null(osm_object$water.dis) && color$hatch_water == TRUE)  ggplot2::geom_sf( data=pattern_water, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
+    {if(!is.null(osm_object$water.dis) && color$hatch_water == TRUE)  ggplot2::geom_sf( data=pattern_water, shape=18,fill="black", size = color$hatch_water_size*scale_factor, alpha=color$hatch_water_alpha )}+
 
     # green, beach & parking
     ggplot2::geom_sf(data =osm_object$x.beach$osm_multipolygons, fill = color$beach, color= NA, linewidth=0.05) +
@@ -427,7 +426,7 @@ plot_map <- function(...) {
     ggplot2::geom_sf(data =osm_object$x.green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) +
     ggplot2::geom_sf(data =osm_object$x.green$osm_polygons, fill = color$green, color= NA, linewidth=0.05) +
 
-    {if(!is.null(osm_object$green.dis) && color$hatch_green == TRUE)  ggplot2::geom_sf( data=pattern_green, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
+    {if(!is.null(osm_object$green.dis) && color$hatch_green == TRUE)  ggplot2::geom_sf( data=pattern_green, shape=18,fill="black", size = color$hatch_green_size*scale_factor,linewidth = color$hatch_green_size*scale_factor, alpha=color$hatch_green_alpha )}+
 
     # railway
     {if(!is.null(osm_object$x.railway$osm_lines))
@@ -449,7 +448,7 @@ plot_map <- function(...) {
 
     # buildings
     ggplot2::geom_sf(data = osm_object$buildings.dis, fill = osm_object$buildings.dis$colors, show.legend = F, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
-    {if(!is.null(osm_object$buildings.dis) && color$hatch_buildings == TRUE)  ggplot2::geom_sf(data = pattern_buildings, shape=18,fill="black", size = color$size_hatch*scale_factor, alpha=color$alpha_hatch )}+
+    {if(!is.null(osm_object$buildings.dis) && color$hatch_buildings == TRUE)  ggplot2::geom_sf(data = pattern_buildings, shape=18,fill="black", size = color$hatch_buildings_size*scale_factor,linewidth = color$hatch_buildings_size*scale_factor, alpha=color$hatch_buildings_alpha )}+
 
 
     # border

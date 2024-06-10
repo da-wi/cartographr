@@ -84,14 +84,20 @@ get_palette = function(palette) {
                 hatch_water_npoints = 200,
                 hatch_water_nlines = 100,
                 hatch_water_type = "points",
+                hatch_water_size = 1,
+                hatch_water_alpha = 0.1,
                 hatch_buildings = FALSE,
                 hatch_buildings_npoints = 200,
                 hatch_buildings_nlines = 100,
                 hatch_buildings_type = "points",
+                hatch_buildings_size = 1,
+                hatch_buildings_alpha = 0.1,
                 hatch_green = FALSE,
                 hatch_green_npoints = 200,
                 hatch_green_nlines = 100,
                 hatch_green_type = "lines",
+                hatch_green_size = 1,
+                hatch_green_alpha = 0.1,
                 size_hatch = 1,
                 alpha_hatch = 0.1,
                 size_streetlamp = 0.2,
@@ -309,11 +315,13 @@ get_palette = function(palette) {
       railway = "#cdcdd3",
       beach = "#ffffff",
       hatch_buildings = TRUE,
-      hatch_alpha = 1,
+      hatch_buildings_alpha = 0.1,
       hatch_buildings_npoints = 280,
       hatch_buildings_nlines = 100,
       hatch_buildings_type = "points",
-      hatch_green = TRUE
+      hatch_green = TRUE,
+      hatch_green_nlines = 150,
+      hatch_green_size = 0.05
     )
   }
 

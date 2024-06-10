@@ -1,7 +1,7 @@
 # Test for valid palettes
-valid_palettes <- c("alphabet", "arctic", "autumn", "autumn-muted", "bw",
-                    "desert", "evening", "gray", "iberia", "imhof", "lines",
-                    "midnight", "minimal", "metropolitan", "swiss", "tropical")
+valid_palettes <- c("alphabet", "arctic","autumn", "bw","dotted",
+                    "desert","evening", "gray", "iberia", "imhof","lines","midnight",
+                    "mikimal","minimal","metropolitan","swiss","tropical")
 
 for (palette in valid_palettes) {
   test_that(paste("Palette", palette, "returns a list"), {
