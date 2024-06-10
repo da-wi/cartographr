@@ -36,9 +36,6 @@ preprocess_map = function(osm) {
   if(!is.null(osm$x.building$osm_polygons))  osm$x.building$osm_polygons <- osm$x.building$osm_polygons |>
     (\(x) if(!is.null(x$tunnel)) x[is.na(x$tunnel), ] else x)()
 
-  #if(!is.null(osm$x.building$osm_polygons)) osm$x.building$osm_polygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_polygons)[1], replace = T)
-  #if(!is.null(osm$x.building$osm_multipolygons)) osm$x.building$osm_multipolygons$colors <- sample(as.factor(c(1,2,3)) ,dim(osm$x.building$osm_multipolygons)[1], replace = T)
-
   # Water
   subset_water <- function(x) {
     tmp <- c()

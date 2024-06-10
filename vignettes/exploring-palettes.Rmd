@@ -44,7 +44,7 @@ osm <- get_osmdata(lat = 53.545, lon = 10.000, x_distance = 1200)
 Here, we create a data frame `df_pal` that contains a list of palette names. We then use a row-wise operation to apply each palette to our map data (osm) and store the resulting plot object. This allows us to see how each palette affects the map’s appearance.
 
 ```{r load all palettes}
-df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "autumn-muted","bw",
+df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
                         "desert","evening", "gray", "iberia", "imhof","lines","midnight",
                         "minimal","metropolitan","swiss","tropical"),
                   osm = list(osm)) |>

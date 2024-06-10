@@ -59,18 +59,11 @@
 #' get_palette(custom_palette)
 #' @export
 get_palette = function(palette) {
-  if (is.list(palette) && all(names(palette) != "")) {
-    color <- palette
-    class(color) <- "cartographr_palette"
-    return(color)
-  }
+  sizes <- list(name = palette,
+                border_color = "#121212",
+                border_width = 0.001,
 
-  if (!(palette %in% c( "alphabet", "arctic","autumn", "bw","dotted",
-                        "desert","evening", "gray", "iberia", "imhof","lines","midnight",
-                        "mikimal","minimal","metropolitan","swiss","tropical")))
-    stop(cli::cli_abort(paste(palette,"is not a predefined palette.")))
-
-  sizes <- list(linewidth_buildings = 0.05,
+                linewidth_buildings = 0.05,
                 linewidth_motorway = 6,
                 linewidth_primary = 4,
                 linewidth_secondary = 4,
@@ -80,6 +73,8 @@ get_palette = function(palette) {
                 linewidth_pedestrian = 1,
                 linewidth_service = 1,
                 linewidth_living_street = 1,
+                size_streetlamp = 0.2,
+
                 hatch_water = FALSE,
                 hatch_water_npoints = 200,
                 hatch_water_nlines = 100,
@@ -97,14 +92,25 @@ get_palette = function(palette) {
                 hatch_green_nlines = 100,
                 hatch_green_type = "lines",
                 hatch_green_size = 1,
-                hatch_green_alpha = 0.1,
-                size_hatch = 1,
-                alpha_hatch = 0.1,
-                size_streetlamp = 0.2,
-                name = palette,
-                border_color = "#121212",
-                border_width = 0.001
+                hatch_green_alpha = 0.1
   )
+
+  if (is.list(palette) && all(names(palette) != "")) {
+    if(!all(c("water", "street", "palette_building", "green", "background","parking","railway", "beach") %in% names(palette)))
+      stop(cli::cli_abort("Required fields for custom palette are 'background', 'beach', 'green', 'parking', 'palette_building', 'railway','street','water'"))
+
+    palette$name <- "custom"
+    color <- modifyList(sizes, palette)
+    class(color) <- "cartographr_palette"
+    return(color)
+  }
+
+  if (!(palette %in% c( "alphabet", "arctic","autumn", "bw","dotted",
+                        "desert","evening", "gray", "iberia", "imhof","lines","midnight",
+                        "mikimal","minimal","metropolitan","swiss","tropical")))
+    stop(cli::cli_abort(paste(palette,"is not a predefined palette.")))
+
+
 
   color <- list()
 
