@@ -21,6 +21,5 @@ other relevant geographical attributes.
 }
 \examples{
 data(soho_boundary)
-plot(soho_boundary$geometry)
 }
 \keyword{datasets}

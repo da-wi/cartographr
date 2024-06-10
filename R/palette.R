@@ -65,6 +65,7 @@ get_palette = function(palette) {
 
                 linewidth_buildings = 0.05,
                 linewidth_motorway = 6,
+                linewidth_trunk = 6,
                 linewidth_primary = 4,
                 linewidth_secondary = 4,
                 linewidth_tertiary= 3,
@@ -100,7 +101,7 @@ get_palette = function(palette) {
       stop(cli::cli_abort("Required fields for custom palette are 'background', 'beach', 'green', 'parking', 'palette_building', 'railway','street','water'"))
 
     palette$name <- "custom"
-    color <- modifyList(sizes, palette)
+    color <- utils::modifyList(sizes, palette)
     class(color) <- "cartographr_palette"
     return(color)
   }
@@ -358,7 +359,7 @@ get_palette = function(palette) {
     )
   }
 
-  color <- modifyList(sizes, color)
+  color <-  utils::modifyList(sizes, color)
 
   class(color) <- "cartographr_palette"
 

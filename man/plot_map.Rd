@@ -22,7 +22,6 @@ This function takes an 'osmdata' (osm) object and a palette name, preprocesses t
 }
 \examples{
 data("osm")
-my_map <- osm |> plot_map()
 my_map <- osm |> plot_map(palette = 'gray')
 
 }

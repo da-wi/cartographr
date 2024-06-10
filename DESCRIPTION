@@ -17,7 +17,8 @@ Imports:
 	grid,
 	showtext,
 	sysfonts,
-	sf
+	sf,
+	utils
 Suggests:
 	dplyr,
 	knitr,

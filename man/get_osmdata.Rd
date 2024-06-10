@@ -52,6 +52,6 @@ OSM data is retrieved. The function ensures that only two of the three parameter
 }
 \examples{
 \donttest{
-osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 10)
+osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
 }
 }

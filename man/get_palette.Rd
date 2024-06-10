@@ -52,7 +52,7 @@ custom_palette <- list(
   street = "#000000",
   background = "#CCCCCC",
   railway = "#000000",
-  hatched = TRUE,
+  hatch_water = TRUE,
   linewidth_buildings = 0.05,
   linewidth_motorway = 6,
   linewidth_primary = 4,

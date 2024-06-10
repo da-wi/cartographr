@@ -18,7 +18,6 @@
 #' @source \url{https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html}
 #' @examples
 #' data(soho_boundary)
-#' plot(soho_boundary$geometry)
 "soho_boundary"
 
 #' OSM SoHo New York simple features
@@ -31,5 +30,4 @@
 #' @source OpenStreetMap
 #' @examples
 #' data("osm")
-#' my_map <- osm |> plot_map()
 "osm"

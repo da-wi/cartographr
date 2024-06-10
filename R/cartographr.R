@@ -14,14 +14,11 @@
 #' preprocessed_osm <- osm |> preprocess_map()
 #' @export
 preprocess_map = function(osm) {
-  # copy osm_object
-  # osm_object = osm
-
-  options(warn=-1)
+   options(warn=-1)
 
   # Streets
   osm$x.street <- list()
-  if(!is.null(osm$x$osm_lines)) osm$x.street$osm_lines <- subset(osm$x$osm_lines, osm$x$osm_lines$highway %in%  c("motorway", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
+  if(!is.null(osm$x$osm_lines)) osm$x.street$osm_lines <- subset(osm$x$osm_lines, osm$x$osm_lines$highway %in%  c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
   if(!is.null(osm$x$osm_points)) osm$x.street$osm_points <-osm$x$osm_points
 
   # Railway
@@ -94,15 +91,26 @@ preprocess_map = function(osm) {
   if(!is.null(osm$x$osm_multipolygons)) osm$x.parking$osm_multipolygons <- subset_parking(osm$x$osm_multipolygons)
 
   # water
-  water <- list(if (!is.null(osm$x.water$osm_lines)) osm$x.water$osm_lines |> sf::st_make_valid(),
-                    if (!is.null(osm$x.water$osm_polygons)) osm$x.water$osm_polygons  |> sf::st_make_valid(),
-                    if (!is.null(osm$x.water$osm_multipolygons)) osm$x.water$osm_multipolygons |> sf::st_make_valid(),
-                    if (!is.null(osm$x.sea$osm_multipolygons)) osm$x.sea$osm_multipolygons |> sf::st_make_valid(),
-                    if (!is.null(osm$x.sea$osm_polygons)) osm$x.sea$osm_polygons |> sf::st_make_valid())
+  osm$water.dis <- NULL
+  #water <- list(if (!is.null(osm$x.water$osm_lines)) sf::st_make_valid( osm$x.water$osm_lines),
+  #                  if (!is.null(osm$x.water$osm_polygons)) sf::st_make_valid(osm$x.water$osm_polygons),
+  #                  if (!is.null(osm$x.water$osm_multipolygons)) sf::st_make_valid(osm$x.water$osm_multipolygons),
+  #                  if (!is.null(osm$x.sea$osm_multipolygons)) sf::st_make_valid(osm$x.sea$osm_multipolygons),
+  #                  if (!is.null(osm$x.sea$osm_polygons)) sf::st_make_valid(osm$x.sea$osm_polygons))
+  water <- list(osm$x.water$osm_lines,osm$x.water$osm_polygons,osm$x.water$osm_multipolygons,
+                osm$x.sea$osm_multipolygons, osm$x.sea$osm_polygons)
 
-  water <- do.call(rbind, lapply(water, function(df) df[, Reduce(intersect, lapply(water, colnames))]))
+  water <- water[!sapply(water,is.null)]
 
-  if(!is.null(water)) { suppressMessages(osm$water.dis  <- sf::st_union(water[1:dim(water)[1],])) }
+  # if(!is.null(water)) { suppressMessages(water  <- sf::st_union(water[1:dim(water)[1],])) }
+
+  if (length(water) > 1) {
+    osm$water.dis <- do.call(rbind, lapply(water, function(df) df[, Reduce(intersect, lapply(water, colnames))]))
+  } else {
+    if(!is.null(water))
+      osm$water.dis <- water[[1]]
+  }
+
 
   # buildings
   buildings <- list( osm$x.building$osm_polygons, osm$x.building$osm_multipolygons)
@@ -282,7 +290,7 @@ crop = function(osm, boundary = "rect") {
   if(!is.null(osm_object$buildings.dis)) osm_object$buildings.dis <- suppressMessages(osm_object$buildings.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
   # water
-  if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent )  |>  sf::st_make_valid())
+  if(!is.null(osm_object$water.dis)) osm_object$water.dis <- suppressMessages(osm_object$water.dis |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent)  |>  sf::st_make_valid())
 
   # green
   if(!is.null(osm_object$x.green$osm_multipolygons)) suppressMessages(osm_object$x.green$osm_multipolygons <-  osm_object$x.green$osm_multipolygons |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
@@ -312,7 +320,6 @@ crop = function(osm, boundary = "rect") {
 #' @return A `ggplot` object representing the map with the chosen palette.
 #' @examples
 #' data("osm")
-#' my_map <- osm |> plot_map()
 #' my_map <- osm |> plot_map(palette = 'gray')
 #'
 #' @export
@@ -432,7 +439,10 @@ plot_map <- function(...) {
                        color=color$railway, linewidth = 2*scale_factor)} +
 
     # streets
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "trunk") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "trunk_link") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
     ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "motorway") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "motorway_link") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
     ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "primary") , color=color$street, linewidth=color$linewidth_primary*scale_factor) +
     ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "secondary") , color=color$street, linewidth=color$linewidth_secondary*scale_factor) +
     ggplot2::geom_sf(data = subset(osm_object$x.street$osm_lines, osm$x.street$osm_lines$highway == "tertiary") , color=color$street, linewidth=color$linewidth_tertiary*scale_factor) +
@@ -501,7 +511,7 @@ plot_map <- function(...) {
 #'
 #' @examples
 #' \donttest{
-#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 10)
+#' osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
 #' }
 #' @export
 get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = F) {
@@ -579,7 +589,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
   query <- osmdata::opq(bbox = place) |>
     osmdata::add_osm_features(list("highway" =
-                                     c("motorway", "primary", "secondary",
+                                     c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
                                        "tertiary", "unclassified", "residential",
                                        "living_street","street_lamp", "pedestrian"),
                                    "water" = c(),
