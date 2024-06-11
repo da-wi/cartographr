@@ -38,7 +38,7 @@ osm <- get_osmdata(48.210, 16.370, x_distance = 1200)
 *Step 4:* The `osm` variable now contains all the geometric shapes (like buildings, rivers, parks) that will appear on your map. Generate the map with `plot_map()` and customize its look with themes and color palettes. For instance, create an infomap of Vienna using `theme_infomap()` and choose a color scheme (see `get_palette()`).
 
 ```{r eval=FALSE}
-plot_vienna <- osm |> plot_map(palette = "metropolitan") +
+plot_vienna <- osm |> plot_map(palette = "dotted") +
   theme_infomap() +
   ggplot2::labs(title = "VIENNA")
 ```
@@ -49,8 +49,14 @@ plot_vienna <- osm |> plot_map(palette = "metropolitan") +
 plot_vienna
 ```
 
-```{r echo=FALSE, fig.align='center', fig.cap='',fig.dim=c(2.5,2.5), out.width='70%'}
-knitr::include_graphics('vienna.png')
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/vienna.png' width='100%'>
+
+```{r eval=FALSE, include  = FALSE}
+ggsave(plot_vienna + theme(plot.title = element_text(size = 60)), filename = "png/vienna.png", device = "png",width = 300,height = 300, units = "mm", dpi = 96, bg = "white" )
+```
+
+```{r echo=FALSE,include=FALSE,fig.align='center', fig.cap='',fig.dim=c(2.5,2.5), out.width='70%'}
+# knitr::include_graphics('vienna.png')
 ```
 
 *Step 6:* Finally, save your map as a PDF file, ready for printing.
@@ -58,3 +64,5 @@ knitr::include_graphics('vienna.png')
 ```{r eval=FALSE}
 save_map(plot = plot_vienna, filename="vienna.pdf")
 ```
+
+
