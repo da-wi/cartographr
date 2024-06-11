@@ -10,7 +10,8 @@ test_that("preprocess_map returns an object with expected names", {
   result <- preprocess_map(osm)
   expected_names <- c('x','sf_street', 'sf_building', 'sf_water', 'sf_sea', 'sf_green', 'sf_beach',
                       'sf_parking', 'sf_railway', 'bbox', 'y_distance', 'x_distance',
-                      'lat', 'lon', 'sf_water_combined','sf_buildings_combined','sf_green_combined', 'crop', 'preprocessed')
+                      'lat', 'lon', 'sf_water_combined','sf_buildings_combined','sf_green_combined',
+                      'crop','crop_extent', 'preprocessed')
   expect_named(result, expected_names, ignore.case = T, ignore.order = T)
 })
 
