@@ -57,22 +57,35 @@ df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
 
 Finally, we extract and display all the map plots from `df_pal`.
 
-```{r plot palettes, echo = FALSE, eval=F, results='hide',fig.keep='all', fig.dpi=72, fig.dim=c(6,6), out.width="100%"}
+```{r plot palettes, echo = FALSE, eval = FALSE, results='hide',fig.keep='all', fig.dpi=72, fig.dim=c(6,6), out.width="100%"}
 df_pal |> pull(p)
 ```
 
+
+```{r load all palettes, eval = F, include = FALSE}
+df_pal |> ungroup() |> mutate(i = row_number(), filename = sprintf("png/plot palettes-%d.png",i)) |> rowwise() |> mutate(res = ggsave(p + theme(plot.title = element_text(size = 75)), filename = sprintf("png/plot palettes-%d.png",i), device = "png",width = 160,height = 160, units = "mm", dpi = 150))
+```
+
 <p align="center">
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-1.png' width='30%'>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-2.png' width='30%'>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-3.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-1.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-2.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-3.png' width='30%'>
   <br>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-4.png' width='30%'>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-5.png' width='30%'>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-6.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-4.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-5.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-6.png' width='30%'>
   <br>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-7.png' width='30%'>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-8.png' width='30%'>
-  <img src='https://github.com/da-wi/cartographr/raw/development/png/plot palettes-9.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-7.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-8.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-9.png' width='30%'>
+  <br>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-10.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-11.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-12.png' width='30%'>
+  <br>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-13.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-14.png' width='30%'>
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-15.png' width='30%'>
 </p>
 
 

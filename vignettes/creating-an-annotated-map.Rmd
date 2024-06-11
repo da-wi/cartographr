@@ -30,7 +30,7 @@ library(sf)
 First, we load the locations of crimes in Manhattan. 
 
 
-```{r load crime locations, echo=T, message=F}
+```{r load crime locations, echo=T, message=F, eval = F}
 data("crime") 
 data("soho_boundary") 
 data("osm")
@@ -40,7 +40,7 @@ data("osm")
 
 To add the crime locations in the dataset to our map, we harness the `sf` (simple features) package, which includes a lot of useful tools for working with geo data. To this end, we convert the dataset into a `sf` object using latitude and longitude.  
 
-```{r convert to sf}
+```{r convert to sf, eval = F}
 crime |> head()
 ```
 
@@ -50,7 +50,7 @@ This can be achieved with the function `sf::st_as_sf()` using the coordinates fr
 
 We have to provide `longitude`, `latitude` and `x_distance` (i.e., the width of the map in meters). Furthermore, we define the extend of the OSM data in meters in `get_osmdata()`. `y_distance` is calculated automatically using the output size aspect ratio. 
 
-```{r define bbox}
+```{r define bbox, eval = F}
 set_output_size("A4", orientation = "portrait")
 osm <- get_osmdata(sf = soho_boundary)
 ```
@@ -59,7 +59,7 @@ osm <- get_osmdata(sf = soho_boundary)
 
 `plot_map()` generates a `ggplot2` object using the color theme set as parameter. That means that we can easily adjust the plot using `ggplot2` commands and also add new information to the map.
 
-```{r create  map, message=FALSE, warning=FALSE}
+```{r create  map, message=FALSE, warning=FALSE, eval = F}
 p <- osm |> 
   crop(soho_boundary) |> 
   plot_map(palette = "gray") +
@@ -76,9 +76,13 @@ p <- osm |>
 
 Now we can plot the map by simply calling its print method implicity:
 
-```{r plot the map, fig.dim=c(5.81,8.3), fig.dpi = 72, out.width="100%"}
+```{r plot the map, eval = F, fig.dim=c(5.81,8.3), fig.dpi = 72, out.width="100%"}
 p
 ```
+
+<p align="center">
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot the map-1.png' width='80%'>
+</p>
 
 # Save map
 
