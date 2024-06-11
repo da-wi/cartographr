@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cartographr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,8 +52,11 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/creating-an-annotated-map.html">Creating an annotated map</a>
-    <a class="dropdown-item" href="../articles/creating-posters.html">Creating multiple posters</a>
+    <a class="dropdown-item" href="../articles/exploring-palettes.html">Exploring palettes</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -92,12 +95,14 @@
 Here, we retrieve a map of Manhattan, NYC.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://da-wi.github.io/cartographr">cartographr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span></code></pre></div>
 <p>First, we load the locations of crimes in Manhattan.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"crime"</span><span class="op">)</span> </span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"crime"</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"soho_boundary"</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"osm"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="convert-longitude-latitude-into-a-sf">Convert longitude / latitude into a <code>sf</code><a class="anchor" aria-label="anchor" href="#convert-longitude-latitude-into-a-sf"></a>
 </h2>
@@ -106,23 +111,7 @@ Here, we retrieve a map of Manhattan, NYC.</p>
 useful tools for working with geo data. To this end, we convert the
 dataset into a <code>sf</code> object using latitude and longitude.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_crime</span> <span class="op">&lt;-</span> <span class="va">crime</span> <span class="op">|&gt;</span> </span>
-<span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"longitude"</span>, <span class="st">"latitude"</span><span class="op">)</span>, crs<span class="op">=</span><span class="fl">4326</span>, remove <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">&gt;=</span> <span class="st">"2023-01-01"</span> <span class="op">&amp;</span> <span class="va">date</span> <span class="op">&lt;</span> <span class="st">"2024-01-01"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">df_crime</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Simple feature collection with 6 features and 4 fields</span></span>
-<span><span class="co">#&gt; Geometry type: POINT</span></span>
-<span><span class="co">#&gt; Dimension:     XY</span></span>
-<span><span class="co">#&gt; Bounding box:  xmin: -74.00257 ymin: 40.71537 xmax: -73.96558 ymax: 40.78731</span></span>
-<span><span class="co">#&gt; Geodetic CRS:  WGS 84</span></span>
-<span><span class="co">#&gt;                  date latitude longitude      type                   geometry</span></span>
-<span><span class="co">#&gt; 1 2023-11-14 09:00:00 40.74311 -73.98740    FELONY  POINT (-73.9874 40.74311)</span></span>
-<span><span class="co">#&gt; 2 2023-06-14 21:59:00 40.77014 -73.96559    FELONY POINT (-73.96559 40.77014)</span></span>
-<span><span class="co">#&gt; 3 2023-02-15 15:00:00 40.78731 -73.97820    FELONY  POINT (-73.9782 40.78731)</span></span>
-<span><span class="co">#&gt; 4 2023-12-31 22:30:00 40.73283 -73.99120    FELONY  POINT (-73.9912 40.73283)</span></span>
-<span><span class="co">#&gt; 5 2023-12-05 09:30:00 40.71537 -74.00257 VIOLATION POINT (-74.00257 40.71537)</span></span>
-<span><span class="co">#&gt; 6 2023-12-31 18:00:00 40.78075 -73.97265    FELONY POINT (-73.97265 40.78075)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">crime</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>This can be achieved with the function <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">sf::st_as_sf()</a></code>
 using the coordinates from the dataset.</p>
 </div>
@@ -135,8 +124,8 @@ Furthermore, we define the extend of the OSM data in meters in
 <code><a href="../reference/get_osmdata.html">get_osmdata()</a></code>. <code>y_distance</code> is calculated
 automatically using the output size aspect ratio.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_output_size.html">set_output_size</a></span><span class="op">(</span><span class="st">"A3"</span>, orientation <span class="op">=</span> <span class="st">"portrait"</span><span class="op">)</span></span>
-<span><span class="va">osm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span>lat <span class="op">=</span> <span class="fl">40.711</span>, lon <span class="op">=</span><span class="op">-</span><span class="fl">74.009</span>, x_distance <span class="op">=</span>  <span class="fl">1300</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_output_size.html">set_output_size</a></span><span class="op">(</span><span class="st">"A4"</span>, orientation <span class="op">=</span> <span class="st">"portrait"</span><span class="op">)</span></span>
+<span><span class="va">osm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span>sf <span class="op">=</span> <span class="va">soho_boundary</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot-the-map">Plot the map<a class="anchor" aria-label="anchor" href="#plot-the-map"></a>
@@ -146,25 +135,32 @@ the color theme set as parameter. That means that we can easily adjust
 the plot using <code>ggplot2</code> commands and also add new
 information to the map.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"metropolitan"</span><span class="op">)</span>  <span class="op">+</span></span>
-<span>  <span class="co"># add geom with crimes</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html" class="external-link">st_intersection</a></span><span class="op">(</span><span class="va">df_crime</span>, <span class="va">osm</span><span class="op">$</span><span class="va">bbox</span> <span class="op">|&gt;</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sfc.html" class="external-link">st_as_sfc</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">longitude</span>, y <span class="op">=</span> <span class="va">latitude</span>, shape <span class="op">=</span> <span class="va">type</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"#222424"</span>, size<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="../reference/theme_infomap_barlow.html">theme_infomap_barlow</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/crop.html">crop</a></span><span class="op">(</span><span class="va">soho_boundary</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"gray"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_infomap.html">theme_infomap_barlow</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  </span>
+<span>  <span class="co"># Add geom with crimes</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">crime</span>,</span>
+<span>             <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">longitude</span>, y <span class="op">=</span> <span class="va">latitude</span>, shape <span class="op">=</span> <span class="va">type</span><span class="op">)</span>, color<span class="op">=</span><span class="st">"#A72424"</span>, size<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  </span>
 <span>  <span class="co"># Set labels</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"NEW YORK CRIME (2023)"</span>,</span>
-<span>       shape <span class="op">=</span> <span class="st">"TYPE"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">p</span></span></code></pre></div>
-<p><img src="creating-an-annotated-map_files/figure-html/plot%20map-1.png" width="100%"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"CRIME IN SOHO"</span>,</span>
+<span>       shape <span class="op">=</span> <span class="st">"TYPE"</span><span class="op">)</span></span></code></pre></div>
+<p>Now we can plot the map by simply calling its print method
+implicity:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p</span></span></code></pre></div>
+<p align="center">
+<img src="https://github.com/da-wi/cartographr/raw/develop/png/plot%20the%20map-1.png" width="80%"></p>
 </div>
 <div class="section level2">
 <h2 id="save-map">Save map<a class="anchor" aria-label="anchor" href="#save-map"></a>
 </h2>
 <p><code><a href="../reference/save_map.html">save_map()</a></code> can be used to store the print-ready plot
 object to the disk as a drawn object in <code>pdf</code> format.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">p</span>, filename <span class="op">=</span> <span class="st">"~/ny_crime.pdf"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">p</span>, filename <span class="op">=</span> <span class="st">"ny_crime.pdf"</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

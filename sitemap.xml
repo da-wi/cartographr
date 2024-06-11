@@ -13,7 +13,7 @@
     <loc>https://da-wi.github.io/cartographr/articles/creating-an-annotated-map.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/articles/creating-posters.html</loc>
+    <loc>https://da-wi.github.io/cartographr/articles/exploring-palettes.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/articles/index.html</loc>
@@ -25,31 +25,13 @@
     <loc>https://da-wi.github.io/cartographr/index.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/add_attribution.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/adjust_viewport.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/cartographr_env.html</loc>
+    <loc>https://da-wi.github.io/cartographr/news/index.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/crime.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/crop.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/dot-plot_map.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/get_border.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/get_circle.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/get_hexagon.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/get_osmdata.html</loc>
@@ -59,6 +41,9 @@
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://da-wi.github.io/cartographr/reference/osm.html</loc>
   </url>
   <url>
     <loc>https://da-wi.github.io/cartographr/reference/plot_map.html</loc>
@@ -79,24 +64,12 @@
     <loc>https://da-wi.github.io/cartographr/reference/set_output_size.html</loc>
   </url>
   <url>
+    <loc>https://da-wi.github.io/cartographr/reference/soho_boundary.html</loc>
+  </url>
+  <url>
     <loc>https://da-wi.github.io/cartographr/reference/theme_infomap.html</loc>
   </url>
   <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_infomap_anton.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_infomap_barlow.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_infomap_poppins.html</loc>
-  </url>
-  <url>
     <loc>https://da-wi.github.io/cartographr/reference/theme_poster.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_poster_anton.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_poster_poppins.html</loc>
   </url>
 </urlset>

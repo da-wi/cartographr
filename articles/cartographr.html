@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cartographr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,8 +52,11 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/creating-an-annotated-map.html">Creating an annotated map</a>
-    <a class="dropdown-item" href="../articles/creating-posters.html">Creating multiple posters</a>
+    <a class="dropdown-item" href="../articles/exploring-palettes.html">Exploring palettes</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -88,67 +91,45 @@
 
     
     
-<div class="section level2">
-<h2 id="basic-workflow">Basic workflow<a class="anchor" aria-label="anchor" href="#basic-workflow"></a>
-</h2>
-<ol style="list-style-type: decimal">
-<li><p>Define the <a href="https://de.wikipedia.org/wiki/World_Geodetic_System_1984" class="external-link">WGS84</a>
-coordinates of the center, as well as the extend of the map in meters.
-As an example, we will create a plot of Vienna which has the
-geographical center of <code>latitude = 48.210</code> and
-<code>longitude = 16.371</code>. These coordinates can be found e.g. on
-the web.</p></li>
-<li><p>Typically, you will then set the (globally defined) output size
-as the scaling of text and linewidth of geometries in your map will be
-scaled according to the final output size of your map. This ensures that
-printing in different output sizes always scales lines and text
-proportionally.</p></li>
-</ol>
+<p>In this vignette, you will learn how to use the package functions
+step-by-step.</p>
+<p><em>Step 1:</em> Begin by determining the central point of your map
+using the <a href="https://de.wikipedia.org/wiki/World_Geodetic_System_1984" class="external-link">WGS84</a>
+coordinates. For our example, we’ll use Vienna’s center with a latitude
+of <code>48.210</code> and a longitude of <code>16.370</code>. You can
+easily find these coordinates online.</p>
+<p><em>Step 2:</em> Decide on the size of the printed map, such as A4.
+This will help scale the text and lines on the map proportionally, no
+matter the print size.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">cartographr</span><span class="fu">::</span><span class="fu"><a href="../reference/set_output_size.html">set_output_size</a></span><span class="op">(</span><span class="st">"A4"</span><span class="op">)</span></span></code></pre></div>
-<p>Next, we retrieve the openstreet map data with
-<code><a href="../reference/get_osmdata.html">get_osmdata()</a></code>. Here, a width of 1200 meters is set for the
-map with <code>x_distance</code> parameter. The height of the map is
-automatically calculated by the aspect ratio of the output size if it is
-omitted.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_output_size.html">set_output_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">300</span>,<span class="fl">300</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><em>Step 3:</em> Use the <code><a href="../reference/get_osmdata.html">get_osmdata()</a></code> function to
+collect OpenStreetMap data. Set the width of your map area in meters
+using the <code>x_distance</code> parameter. If you leave out the height
+(<code>y_distance</code>), it will be calculated based on the width and
+the aspect ratio of your chosen output size.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">osm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span><span class="fl">48.210</span>, <span class="fl">16.371</span>, x_distance <span class="op">=</span> <span class="fl">1200</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>osm</code> object is a list with all our geometrical shapes
-stored in it (buildings, rivers, parks, …). The map can be simply
-created using <code><a href="../reference/plot_map.html">plot_map()</a></code> function. Additionally, we can
-directly set the appearance of our map using themes. Here, we decide on
-making a poster of Vienna using the <code><a href="../reference/theme_poster.html">theme_poster()</a></code>. There
-are also different color palettes for the map, have a look at
-<code><a href="../reference/get_palette.html">get_palette()</a></code> to get an idea of which color palettes exist
-and how to create your own color palette.</p>
+<code class="sourceCode R"><span><span class="va">osm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span><span class="fl">48.210</span>, <span class="fl">16.370</span>, x_distance <span class="op">=</span> <span class="fl">1200</span><span class="op">)</span></span></code></pre></div>
+<p><em>Step 4:</em> The <code>osm</code> variable now contains all the
+geometric shapes (like buildings, rivers, parks) that will appear on
+your map. Generate the map with <code><a href="../reference/plot_map.html">plot_map()</a></code> and customize
+its look with themes and color palettes. For instance, create an infomap
+of Vienna using <code><a href="../reference/theme_infomap.html">theme_infomap()</a></code> and choose a color scheme
+(see <code><a href="../reference/get_palette.html">get_palette()</a></code>).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">plot_vienna</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"iberia"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="../reference/theme_poster_poppins.html">theme_poster_poppins</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title<span class="op">=</span><span class="st">"vienna"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot_vienna</span></span></code></pre></div>
-<p><img src="vienna_a4.png" width="100%" style="display: block; margin: auto;"></p>
-<p>Lastly, we can save the map ready-to-print as pdf using
-<code><a href="../reference/save_map.html">save_map()</a></code>.</p>
+<code class="sourceCode R"><span><span class="va">plot_vienna</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_infomap.html">theme_infomap</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"VIENNA"</span><span class="op">)</span></span></code></pre></div>
+<p><em>Step 5:</em> To view your map, simply call the print
+function.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot_vienna</span>, filename<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"vienna_a4.pdf"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="if-you-prefer-a-bitmap-format-you-can-also-directly-call-ggsave-from-the-ggplot2-package-">If you prefer a bitmap format, you can also directly call
-<code>ggsave()</code> from the <code>ggplot2()</code> package.<a class="anchor" aria-label="anchor" href="#if-you-prefer-a-bitmap-format-you-can-also-directly-call-ggsave-from-the-ggplot2-package-"></a>
-</h2>
+<code class="sourceCode R"><span><span class="va">plot_vienna</span></span></code></pre></div>
+<p><img src="https://github.com/da-wi/cartographr/raw/develop/png/vienna.png" width="100%"></p>
+<p><em>Step 6:</em> Finally, save your map as a PDF file, ready for
+printing.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">ggsave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"~/vienna_a4.png"</span><span class="op">)</span>,</span>
-<span>       plot <span class="op">=</span> <span class="va">plot_vienna</span>,</span>
-<span>       bg <span class="op">=</span> <span class="st">"white"</span>,</span>
-<span>       device <span class="op">=</span> <span class="st">"png"</span>,</span>
-<span>       dpi <span class="op">=</span> <span class="fl">96</span>,</span>
-<span>       width <span class="op">=</span> <span class="fl">148</span>,</span>
-<span>       height <span class="op">=</span> <span class="fl">210</span>,</span>
-<span>       units <span class="op">=</span> <span class="st">"mm"</span><span class="op">)</span></span></code></pre></div>
-</div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
-    </nav></aside>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot_vienna</span>, filename<span class="op">=</span><span class="st">"vienna.pdf"</span><span class="op">)</span></span></code></pre></div>
+  </main>
 </div>
 
 
