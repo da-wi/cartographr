@@ -1,4 +1,4 @@
-# cartographr (development version)
+# cartographr 0.2.0
 
 cartographr 0.1
 ============================
