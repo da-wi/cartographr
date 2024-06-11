@@ -44,18 +44,18 @@ test_that("preprocess_map does not modify the input object", {
 test_that("crop function sets crop variable correctly", {
   data("osm")
   data("soho_boundary")
-  result_rect <- crop(osm, boundary = "rect")
+  osmp <- preprocess_map(osm)
+  result_rect <- crop(osmp, boundary = "rect")
   expect_equal(result_rect$crop, "rect")
   expect_true(all(c(-74.02,  40.71, -73.99,  40.73 ) == round(result_rect$bbox,2)))
 
-  result_circle <- crop(osm, boundary = "circle")
+  result_circle <- crop(osmp, boundary = "circle")
   expect_equal(result_circle$crop, "circle")
 
-  result_hex <- crop(osm, boundary = "hex")
+  result_hex <- crop(osmp, boundary = "hex")
   expect_equal(result_hex$crop, "hex")
 
-
-  result_custom_sf <- crop(osm, boundary = soho_boundary)
+  result_custom_sf <- crop(osmp, boundary = soho_boundary)
   expect_equal(result_custom_sf$crop, "sf")
 })
 
