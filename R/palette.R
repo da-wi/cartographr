@@ -107,7 +107,7 @@ get_palette = function(palette) {
   }
 
   if (!(palette %in% c( "alphabet", "arctic","autumn", "bw","dotted",
-                        "desert","evening", "gray", "iberia", "imhof","lines","midnight",
+                        "desert","evening", "gray","grey", "iberia", "imhof","lines","midnight",
                         "mikimal","minimal","metropolitan","swiss","tropical")))
     stop(cli::cli_abort(paste(palette,"is not a predefined palette.")))
 
@@ -198,7 +198,7 @@ get_palette = function(palette) {
     )
   }
 
-  if (palette == "gray") {
+  if (palette %in% c("gray","grey")) {
     color <- list(
       palette_building = c("#d9d9d9", "#d9d9d9", "#d9d9d9"),
       building_border = "#bdbdbd",

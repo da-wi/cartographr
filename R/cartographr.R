@@ -134,6 +134,7 @@ preprocess_map = function(osm) {
   osm$sf_green_combined <- combine_list(list(osm$sf_green$osm_polygons, osm$sf_green$osm_multipolygons))
 
   osm$crop <- NA
+  osm$crop_extent <- sf::st_bbox(osm$bbox) |> sf::st_as_sfc()
   osm$preprocessed <- TRUE
   return(osm)
 }
@@ -153,6 +154,8 @@ preprocess_map = function(osm) {
 #' @noRd
 #' @keywords internal
 .create_hatch_pattern <- function(boundary, type = "points", n_points = 200, n_lines = 100)  {
+
+  suppressMessages(sf::sf_use_s2(FALSE))
 
   # union to multipolygon if listtools:
   if (!is.null(nrow(boundary))) {
@@ -203,6 +206,8 @@ preprocess_map = function(osm) {
       ]
       endsf = sf::st_line_merge(sf::st_union(endsf))
     }))
+
+    suppressMessages(sf::sf_use_s2(TRUE))
 
     return(endsf)
   }
@@ -278,11 +283,7 @@ crop = function(osm, boundary = "rect") {
     }
   }
 
-
   osm$bbox <- sf::st_bbox(crop_extent)
-
-  print("Here is osm_lines")
-  print(osm$sf_street$osm_lines)
 
   # streets
   if(!is.null(osm$sf_street$osm_lines) & length(osm$sf_street$osm_lines) > 0) osm$sf_street$osm_lines <- suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_lines), crop_extent ))
@@ -368,22 +369,21 @@ plot_map <- function(...) {
   osm_object <- osm
 
   if (color$hatch_water) {
-      # water can extend a lot outside of bbox.. so we crop it for convencience
-      pattern_water <- .create_hatch_pattern(boundary = suppressMessages(sf::st_crop(osm_object$sf_water_combined |> sf::st_make_valid(),osm_object$bbox)),
+    pattern_water <- .create_hatch_pattern(boundary = suppressMessages(sf::st_intersection(osm_object$sf_water_combined |> sf::st_make_valid(),osm_object$crop_extent)),
                                             type = color$hatch_water_type,
                                             n_points = color$hatch_water_npoints,
                                             n_lines  = color$hatch_water_nlines)
   }
 
   if (color$hatch_buildings) {
-    pattern_buildings <- .create_hatch_pattern( suppressMessages(sf::st_crop(osm_object$sf_buildings_combined |> sf::st_make_valid(),osm_object$bbox)),
+    pattern_buildings <- .create_hatch_pattern( suppressMessages(sf::st_intersection(osm_object$sf_buildings_combined |> sf::st_make_valid(),osm_object$crop_extent)),
                                               type = color$hatch_buildings_type,
                                               n_points = color$hatch_buildings_npoints,
                                               n_lines  = color$hatch_buildings_nlines)
   }
 
   if (color$hatch_green) {
-    pattern_green <- .create_hatch_pattern(suppressMessages(sf::st_crop(osm_object$sf_green_combined |> sf::st_make_valid(),osm_object$bbox)),
+    pattern_green <- .create_hatch_pattern(suppressMessages(sf::st_intersection(osm_object$sf_green_combined |> sf::st_make_valid(),osm_object$crop_extent)),
                                           type = color$hatch_green_type,
                                           n_points = color$hatch_green_npoints,
                                           n_lines  = color$hatch_green_nlines)
