@@ -247,59 +247,66 @@ crop = function(osm, boundary = "rect") {
 
   options(warn=-1)
 
-  osm_object <- osm
-
-  if (is.null(osm_object$preprocessed)) {
-    osm_object <- preprocess_map(osm_object)
+  if (is.null(osm$preprocessed)) {
+    osm <- preprocess_map(osm)
   }
+
 
   if (inherits(boundary, "sf") | inherits(boundary, "sfc")) {
     crop_extent = boundary
-    osm_object$crop <- "sf"
+    osm$crop <- "sf"
   }
 
   if (is.character(boundary)) {
+    if (!(boundary %in% c("circle", "hex", "rect")))
+      stop(cli::cli_abort('{.arg boundary} must be one of "circle", "hex", "rect"'))
+
     if (boundary == "circle") {
-      crop_extent <- get_circle(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
-      osm_object$crop <- "circle"
+      crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+      osm$crop <- "circle"
     }
 
     if (boundary == "hex") {
-      crop_extent <- get_hexagon(osm_object$lat,osm_object$lon,osm_object$y_distance,osm_object$x_distance)
-      osm_object$crop <- "hex"
+      crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+      osm$crop <- "hex"
     }
 
     if (boundary == "rect") {
-      crop_extent <- osm_object$bbox |> sf::st_as_sfc()
-      osm_object$crop <- "rect"
+      print("get rect")
+      crop_extent <- osm$bbox |> sf::st_as_sfc()
+      osm$crop <- "rect"
     }
   }
 
-  osm_object$bbox <- sf::st_bbox(crop_extent)
+
+  osm$bbox <- sf::st_bbox(crop_extent)
+
+  print("Here is osm_lines")
+  print(osm$sf_street$osm_lines)
 
   # streets
-  if(!is.null(osm_object$sf_street$osm_lines)) osm_object$sf_street$osm_lines <- suppressMessages(sf::st_intersection(osm_object$sf_street$osm_lines, crop_extent ))
-  if(!is.null(osm_object$sf_street$osm_points)) osm_object$sf_street$osm_points <- suppressMessages(sf::st_intersection(osm_object$sf_street$osm_points, crop_extent ))
+  if(!is.null(osm$sf_street$osm_lines) & length(osm$sf_street$osm_lines) > 0) osm$sf_street$osm_lines <- suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_lines), crop_extent ))
+  if(!is.null(osm$sf_street$osm_points) & length(osm$sf_street$osm_points) > 0) osm$sf_street$osm_points <- suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_points), crop_extent ))
 
   # buildings
-  if(!is.null(osm_object$sf_buildings_combined)) osm_object$sf_buildings_combined <- suppressMessages(osm_object$sf_buildings_combined |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm$sf_buildings_combined)) osm$sf_buildings_combined <- suppressMessages(osm$sf_buildings_combined |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
   # water
-  if(!is.null(osm_object$sf_water_combined)) osm_object$sf_water_combined <- suppressMessages(osm_object$sf_water_combined |> sf::st_intersection(x=_, crop_extent)  |>  sf::st_make_valid())
+  if(!is.null(osm$sf_water_combined)) osm$sf_water_combined <- suppressMessages(osm$sf_water_combined |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent)  |>  sf::st_make_valid())
 
   # green
-  if(!is.null(osm_object$sf_green$osm_multipolygons)) suppressMessages(osm_object$sf_green$osm_multipolygons <-  osm_object$sf_green$osm_multipolygons |> sf::st_intersection(x=_, crop_extent ))
-  if(!is.null(osm_object$sf_green$osm_polygons)) suppressMessages(osm_object$sf_green$osm_polygons <-  osm_object$sf_green$osm_polygons |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm$sf_green$osm_multipolygons)) suppressMessages(osm$sf_green$osm_multipolygons <-  osm$sf_green$osm_multipolygons |>  sf::st_make_valid() |>sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm$sf_green$osm_polygons)) suppressMessages(osm$sf_green$osm_polygons <-  osm$sf_green$osm_polygons |>  sf::st_make_valid() |>sf::st_intersection(x=_, crop_extent ))
 
-  if(!is.null(osm_object$sf_beach$osm_multipolygons)) suppressMessages(osm_object$sf_beach$osm_multipolygons <-  osm_object$sf_beach$osm_multipolygons  |> sf::st_intersection(x=_, crop_extent ))
-  if(!is.null(osm_object$sf_parking$osm_multipolygons)) suppressMessages(osm_object$sf_parking$osm_multipolygons <-  osm_object$sf_parking$osm_multipolygons |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm$sf_beach$osm_multipolygons)) suppressMessages(osm$sf_beach$osm_multipolygons <-  osm$sf_beach$osm_multipolygons  |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm$sf_parking$osm_multipolygons)) suppressMessages(osm$sf_parking$osm_multipolygons <-  osm$sf_parking$osm_multipolygons |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if(!is.null(osm_object$sf_railway$osm_lines))  suppressMessages(osm_object$sf_railway$osm_lines <- osm_object$sf_railway$osm_lines |>  sf::st_intersection(x=_, crop_extent ))
+  if(!is.null(osm$sf_railway$osm_lines))  suppressMessages(osm$sf_railway$osm_lines <- osm$sf_railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if (!is.null(crop_extent)) osm_object$crop_extent <- crop_extent
+  if (!is.null(crop_extent)) osm$crop_extent <- crop_extent
 
   options(warn=1)
-  return(osm_object)
+  return(osm)
 }
 
 
