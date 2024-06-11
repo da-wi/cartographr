@@ -18,7 +18,8 @@ Additional arguments are passed on to the preprocessing and plotting functions.
 A \code{ggplot} object representing the map with the chosen palette.
 }
 \description{
-This function takes an 'osmdata' (osm) object and a palette name, preprocesses the map data if not already done, and plots the map using 'ggplot2' with the specified color palette.
+This function takes an 'osmdata' (osm) object and a palette name, preprocesses the
+map data if not already done, and plots the map using 'ggplot2' with the specified color palette.
 }
 \examples{
 data("osm")

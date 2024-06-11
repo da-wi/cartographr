@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{crop}
 \alias{crop}
-\title{Crop a preprocessed OpenStreetMap}
+\title{Crop a preprocessed map}
 \usage{
 crop(osm, boundary = "rect")
 }
@@ -24,21 +24,13 @@ or a custom boundary provided as an 'sf' object.
 }
 \details{
 If the OSM object has not been preprocessed, the function will call \code{preprocess_map()}
-to preprocess the data before applying the cropping. The function sets global warning options
-to suppress warnings during processing. The type of preprocessing applied is stored in the
-OSM object's metadata.
+to preprocess the data before applying the cropping. The type of preprocessing applied
+is stored in the OSM object's metadata.
 }
 \examples{
 \donttest{
 data("osm")
 # Apply a circular crop
 osm_circle_cropped <- osm |> crop(boundary = "circle")
-
-# Apply a hexagonal crop
-osm_hex_cropped <- osm |> crop(boundary = "hex")
-
-# Apply a custom 'sf' boundary crop
-data("soho_boundary")
-osm_sf_cropped <- osm |> crop(boundary = soho_boundary)
 }
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cartographr.R
 \name{get_osmdata}
 \alias{get_osmdata}
-\title{Retrieve OpenStreetMap data for a specified location}
+\title{Retrieve OpenStreetMap Data}
 \usage{
 get_osmdata(
   lat = NULL,
@@ -12,31 +12,28 @@ get_osmdata(
   aspect_ratio = NULL,
   bbox = NULL,
   sf = NULL,
-  quiet = F
+  quiet = F,
+  keep = F
 )
 }
 \arguments{
-\item{lat}{Optional numeric, the latitude of the center point for the OSM data retrieval.}
+\item{lat}{Latitude of the center point (optional if bbox or sf is provided).}
 
-\item{lon}{Optional numeric, the longitude of the center point for the OSM data retrieval.}
+\item{lon}{Longitude of the center point (optional if bbox or sf is provided).}
 
-\item{x_distance}{Optional numeric, the distance in meters from the center point
-to the edge of the area in the x direction (longitude). Default is NULL.}
+\item{x_distance}{Distance in the x-direction from the center point (optional).}
 
-\item{y_distance}{Optional numeric, the distance in meters from the center point
-to the edge of the area in the y direction (latitude). Default is NULL.}
+\item{y_distance}{Distance in the y-direction from the center point (optional).}
 
-\item{aspect_ratio}{Optional numeric, the ratio of x_distance to y_distance.
-Default is NULL.}
+\item{aspect_ratio}{Aspect ratio of the x and y distances (optional).}
 
-\item{bbox}{Optional bbox of the map boundary.
-Default is NULL.}
+\item{bbox}{A bounding box to define the area of interest (optional if lat, lon, and distances are provided).}
 
-\item{sf}{Optional sf of the map boundary.
-Default is NULL.}
+\item{sf}{An sf object to define the area of interest (optional if bbox is provided).}
 
-\item{quiet}{Logical, whether to suppress informational messages during execution.
-Default is FALSE.}
+\item{quiet}{Logical flag to suppress progress messages.}
+
+\item{keep}{Logical flag if additional OSM data should be kept.}
 }
 \value{
 A list containing various elements of the OSM data, including street networks,
@@ -44,14 +41,39 @@ buildings, water bodies, green areas, beaches, parking areas, railways, and the
 bounding box of the retrieved area.
 }
 \description{
-This function fetches OpenStreetMap (OSM) data for a specified latitude and longitude,
-within a given distance range. It allows the user to specify distances in the x and y
-directions, an aspect ratio, or a combination of these to define the area for which
-OSM data is retrieved. The function ensures that only two of the three parameters
-(x_distance, y_distance, aspect_ratio) are provided to define the area.
+This function retrieves OpenStreetMap (OSM) data based on geographic coordinates or a bounding box.
+It allows for the specification of distances and aspect ratios to define the area of interest.
+The function can return data in simple features (sf) format and has options to operate quietly.
 }
+\details{
+The function performs checks to ensure the correct combination of parameters is provided.
+It calculates the bounding box if not provided and retrieves various OSM features within the specified area.
+}
+\section{Exported Features}{
+
+The following table lists the OSM features that are retrieved by the function:\tabular{ll}{
+   Feature Type \tab OSM Tags \cr
+   highway \tab motorway, motorway_link, trunk, trunk_link, primary, secondary, \cr
+    \tab tertiary, unclassified, residential, living_street, street_lamp, pedestrian \cr
+   water \tab * \cr
+   building \tab * \cr
+   natural \tab beach, water, strait, bay, island, wood \cr
+   amenity \tab parking \cr
+   man made \tab pier \cr
+   railway \tab rail \cr
+   place \tab sea, ocean \cr
+   boundary \tab maritime \cr
+   waterway \tab stream \cr
+   landuse \tab forest, grass, orchard, recreation_ground \cr
+   leisure \tab park \cr
+}
+
+
+Note: * all tags are retrieved
+}
+
 \examples{
 \donttest{
-osm_data <- get_osmdata(lat = 48.2082, lon = 16.3738, x_distance = 1000)
+osm_data <- get_osmdata(lat=44.568611, lon=15.331389, x_distance=100)
 }
 }

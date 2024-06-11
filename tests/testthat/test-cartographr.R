@@ -8,17 +8,17 @@ test_that("preprocess_map returns a list", {
 # Test that preprocess_map returns an object with expected names
 test_that("preprocess_map returns an object with expected names", {
   result <- preprocess_map(osm)
-  expected_names <- c('x','x.street', 'x.building', 'x.water', 'x.sea', 'x.green', 'x.beach',
-                      'x.parking', 'x.railway', 'bbox', 'y_distance', 'x_distance',
-                      'lat', 'lon', 'water.dis','buildings.dis','green.dis', 'crop', 'preprocessed')
+  expected_names <- c('x','sf_street', 'sf_building', 'sf_water', 'sf_sea', 'sf_green', 'sf_beach',
+                      'sf_parking', 'sf_railway', 'bbox', 'y_distance', 'x_distance',
+                      'lat', 'lon', 'sf_water_combined','sf_buildings_combined','sf_green_combined', 'crop', 'preprocessed')
   expect_named(result, expected_names, ignore.case = T, ignore.order = T)
 })
 
 # Test that water bodies and buildings are correctly preprocessed
 test_that("water bodies and buildings are correctly preprocessed", {
   result <- preprocess_map(osm)
-  expect_true(!is.null(result$water))
-  expect_true(!is.null(result$buildings.dis))
+  expect_true(!is.null(result$sf_water_combined))
+  expect_true(!is.null(result$sf_buildings_combined))
 })
 
 # Test that preprocessing information is added

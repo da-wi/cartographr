@@ -17,7 +17,8 @@ save_map(plot, filename, device = "pdf")
 The function saves the plot to a file and does not return anything.
 }
 \description{
-This function saves a ggplot object to a file using the specified filename. It checks for the orientation setting and warns if the scale factor has changed after the plot was created.
+This function saves a ggplot object to a file using the specified filename.
+It checks for the orientation setting and warns if the scale factor has changed after the plot was created.
 }
 \examples{
 \donttest{
