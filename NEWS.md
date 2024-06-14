@@ -1,4 +1,4 @@
-# cartographr (development version)
+# cartographr 0.2.1
 * New palette and minor bug fixes
 * Timeout issues in get_osmdata() fixed
 
