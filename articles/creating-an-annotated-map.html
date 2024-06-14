@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">cartographr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,8 +101,7 @@ Here, we retrieve a map of Manhattan, NYC.</p>
 <p>First, we load the locations of crimes in Manhattan.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"crime"</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"soho_boundary"</span><span class="op">)</span> </span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"osm"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"soho_boundary"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="convert-longitude-latitude-into-a-sf">Convert longitude / latitude into a <code>sf</code><a class="anchor" aria-label="anchor" href="#convert-longitude-latitude-into-a-sf"></a>
 </h2>
@@ -137,7 +136,7 @@ information to the map.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/crop.html">crop</a></span><span class="op">(</span><span class="va">soho_boundary</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"gray"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"alphabet"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_infomap.html">theme_infomap_barlow</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  </span>
 <span>  <span class="co"># Add geom with crimes</span></span>
