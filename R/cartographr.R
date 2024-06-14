@@ -39,8 +39,10 @@ preprocess_map = function(osm) {
 
   # Streets
   osm$sf_street <- list()
-  if(!is.null(osm$x$osm_lines)) osm$sf_street$osm_lines <- subset(osm$x$osm_lines, osm$x$osm_lines$highway %in%  c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary", "tertiary", "unclassified", "residential","living_street","street_lamp", "pedestrian"))
-  if(!is.null(osm$x$osm_points)) osm$sf_street$osm_points <-osm$x$osm_points
+  if(!is.null(osm$x$osm_lines)) osm$sf_street$osm_lines <- subset(osm$x$osm_lines, osm$x$osm_lines$highway %in%  c("motorway","motorway_link","trunk","trunk_link", "primary",
+                                                                                                                   "secondary", "tertiary", "unclassified", "residential",
+                                                                                                                   "living_street","street_lamp", "pedestrian","track","path","steps"))
+  if(!is.null(osm$x$osm_points)) osm$sf_street$osm_points <- subset(osm$x$osm_points, osm$x$osm_points$highway %in%  c("street_lamp"))
 
   # Railway
   osm$sf_railway <- list()
@@ -63,6 +65,7 @@ preprocess_map = function(osm) {
 
   subset_sea <- function(x) {
     tmp <- c()
+    if(!(is.null(x$leisure))) { a <- subset(x,x$leisure %in% c("swimming_pool")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$place))) { a <- subset(x,x$place %in% c("sea","ocean")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$natural))) { a <- subset(x,x$natural %in% c("water","strait","bay")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$boundary))) { a <- subset(x,x$boundary %in% c("maritime")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
@@ -72,7 +75,10 @@ preprocess_map = function(osm) {
 
   osm$sf_water <- list()
   osm$sf_sea <- list()
-  if(!is.null(osm$x$osm_lines)) osm$sf_water$osm_lines <- subset_water(osm$x$osm_lines)
+  if(!is.null(osm$x$osm_lines)) {
+    osm$sf_water$osm_lines <- subset_water(osm$x$osm_lines)
+    osm$sf_sea$osm_lines <- subset_sea(osm$x$osm_lines)
+  }
   if(!is.null(osm$x$osm_polygons)) {
     osm$sf_water$osm_polygons <- subset_water(osm$x$osm_polygons)
     osm$sf_sea$osm_polygons <- subset_sea(osm$x$osm_polygons)
@@ -85,8 +91,8 @@ preprocess_map = function(osm) {
   # Green
   subset_green <- function(x) {
     tmp <- c()
-    if(!(is.null(x$landuse))) { a <- subset(x,x$landuse %in% c("forest","grass","orchard","recreation_ground")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
-    if(!(is.null(x$leisure))) { a <- subset(x,x$leisure %in% c("park")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$landuse))) { a <- subset(x,x$landuse %in% c("forest","allotments","farmland","grass","orchard","recreation_ground","vineyard","cemetery","meadow")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
+    if(!(is.null(x$leisure))) { a <- subset(x,x$leisure %in% c("park","garden","nature_reserve")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$natural))) { a <- subset(x,x$natural %in% c("island", "wood")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     return(tmp)
   }
@@ -125,7 +131,7 @@ preprocess_map = function(osm) {
 
   # water
   osm$sf_water_combined <- combine_list(list(osm$sf_water$osm_lines, osm$sf_water$osm_polygons, osm$sf_water$osm_multipolygons,
-                                     osm$sf_sea$osm_multipolygons, osm$sf_sea$osm_polygons))
+                                             osm$sf_sea$osm_lines, osm$sf_sea$osm_multipolygons, osm$sf_sea$osm_polygons))
 
   # buildings
   osm$sf_buildings_combined <- combine_list(list(osm$sf_building$osm_polygons, osm$sf_building$osm_multipolygons))
@@ -277,7 +283,6 @@ crop = function(osm, boundary = "rect") {
     }
 
     if (boundary == "rect") {
-      print("get rect")
       crop_extent <- osm$bbox |> sf::st_as_sfc()
       osm$crop <- "rect"
     }
@@ -511,19 +516,20 @@ plot_map <- function(...) {
 #'
 #' | Feature Type | OSM Tags |
 #' |--------------|----------|
-#' | highway      | motorway, motorway_link, trunk, trunk_link, primary, secondary, |
-#' |              | tertiary, unclassified, residential, living_street, street_lamp, pedestrian |
+#' | highway      | motorway, motorway_link, trunk, trunk_link, primary, secondary, tertiary, |
+#' |              | unclassified, residential, living_street, street_lamp, pedestrian, track, path, steps |
 #' | water        | * |
 #' | building     | * |
 #' | natural      | beach, water, strait, bay, island, wood |
 #' | amenity      | parking |
-#' | man made     | pier |
+#' | man_made     | pier |
 #' | railway      | rail |
 #' | place        | sea, ocean |
 #' | boundary     | maritime |
 #' | waterway     | stream |
-#' | landuse      | forest, grass, orchard, recreation_ground |
-#' | leisure      | park |
+#' | landuse      | forest, farmland, grass, orchard, allotments, recreation_ground, vineyard, cemetery, meadow |
+#' | leisure      | swimming_pool, pitch, nature_reserve, garden, park |
+#' | natural      | bay, island, wood |
 #'
 #' Note: * all tags are retrieved
 #'
@@ -606,11 +612,11 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
   }
 
-  query <- osmdata::opq(bbox = place) |>
+  query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>
     osmdata::add_osm_features(list("highway" =
                                      c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
                                        "tertiary", "unclassified", "residential",
-                                       "living_street","street_lamp", "pedestrian"),
+                                       "living_street","street_lamp", "pedestrian", "track", "path","steps"),
                                    "water" = c(),
                                    "building" = c(),
                                    "natural" = "beach",
@@ -621,13 +627,22 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
                                    "place" = "ocean",
                                    "natural"= "water",
                                    "natural" = "strait",
+                                   "leisure" = "swimming_pool",
                                    "natural" = "bay",
                                    "boundary" = "maritime",
                                    "waterway" = "stream",
                                    "landuse"="forest",
+                                   "landuse"="farmland",
                                    "landuse"="grass",
                                    "landuse"="orchard",
+                                   "landuse"="allotments",
+                                   "leisure"="pitch",
                                    "landuse"="recreation_ground",
+                                   "landuse"="vineyard",
+                                   "landuse"="cemetery",
+                                   "landuse"="meadow",
+                                   "leisure"="nature_reserve",
+                                   "leisure"="garden",
                                    "leisure"="park",
                                    "natural"="island",
                                    "natural"="wood"))
@@ -648,11 +663,16 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
   # remove columns that are not needed
   if (keep == FALSE) {
-    if(!is.null(osm$x$osm_points)) osm$x$osm_points <- subset(osm$x$osm_points, select="geometry")
-    if(!is.null(osm$x$osm_lines)) osm$x$osm_lines <- subset(osm$x$osm_lines, select=intersect(colnames(osm$x$osm_lines),c("geometry","railway", "highway", "water")))
+    #print(colnames(osm$x$osm_points))
+    if(!is.null(osm$x$osm_points))
+      if(!is.null(osm$x$osm_points$highway))
+        osm$x$osm_points <- subset(osm$x$osm_points, select=c("geometry", "highway"))
+
+    if(!is.null(osm$x$osm_lines)) osm$x$osm_lines <- subset(osm$x$osm_lines, select=intersect(colnames(osm$x$osm_lines),c("geometry","railway", "highway", "water", "waterway")))
     if(!is.null(osm$x$osm_multilines)) osm$x$osm_multilines <- subset(osm$x$osm_multilines, select="geometry")
     if(!is.null(osm$x$osm_polygons)) osm$x$osm_polygons <- subset(osm$x$osm_polygons, select=intersect(colnames(osm$x$osm_polygons),c("geometry", "building","water","waterway","place","natural","boundary","landuse","leisure")))
-    if(!is.null(osm$x$osm_multipolygons)) osm$x$osm_multipolygons <- subset(osm$x$osm_multipolygons, select=intersect(colnames(osm$x$osm_multipolygons),c("geometry", "amenity","man_made", "building","water","waterway","place","natural","boundary","landuse","leisure")))
+    if(!is.null(osm$x$osm_multipolygons)) osm$x$osm_multipolygons <- subset(osm$x$osm_multipolygons, select=intersect(colnames(osm$x$osm_multipolygons),c("geometry", "amenity","man_made", "building","water",
+                                                                                                                                                          "waterway","place","natural","boundary","landuse","leisure")))
   }
 
   osm$bbox <- bbox

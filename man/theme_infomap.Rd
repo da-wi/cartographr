@@ -4,6 +4,7 @@
 \alias{theme_infomap}
 \alias{theme_infomap_anton}
 \alias{theme_infomap_poppins}
+\alias{theme_infomap_cinzel}
 \alias{theme_infomap_barlow}
 \title{Apply infomap theme with specified font}
 \usage{
@@ -12,6 +13,8 @@ theme_infomap(font = "Poppins")
 theme_infomap_anton()
 
 theme_infomap_poppins()
+
+theme_infomap_cinzel()
 
 theme_infomap_barlow()
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/palette.R
 \name{get_palette}
 \alias{get_palette}
-\title{Create a color theme for maps}
+\title{Create a palette for maps}
 \usage{
 get_palette(palette)
 }
@@ -25,7 +25,6 @@ The color moods for the predefined palettes are described as follows:
 \item \strong{Arctic}: A palette that reflects the clear and bright qualities of Arctic landscapes.
 \item \strong{Autumn}: A palette with the warm and varied hues typical of the fall season.
 \item \strong{BW}: A classic black and white palette with a hint of warmth for a traditional feel.
-\item \strong{Desert}: A palette that captures the earthy and natural tones found in desert environments.
 \item \strong{Evening}: A palette that embodies the quiet and contemplative nature of dusk.
 \item \strong{Gray}: A balanced palette that provides a composed and refined look.
 \item \strong{Iberia}: A palette that reflects the warm and diverse tones associated with the Iberian landscape.
@@ -34,9 +33,22 @@ The color moods for the predefined palettes are described as follows:
 \item \strong{Metropolitan}: A palette with understated tones that suggest urban sophistication.
 \item \strong{Midnight}: A palette that conveys the depth and tranquility of the night.
 \item \strong{Minimal}: A palette focused on minimalism, utilizing primarily whites and light grays.
+\item \strong{Serene}: A palette that embodies peace and simplicity, utilizing a soft color scheme with gentle contrasts.
 \item \strong{Swiss}: A palette that emphasizes cleanliness and precision, reminiscent of Swiss design.
 \item \strong{Tropical}: A lively palette with the bright and bold colors characteristic of tropical areas.
 }
+
+In addition, you can customize other settings:
+\itemize{
+\item \code{border_color}: The color of the borders, set to a dark shade "#121212".
+\item \code{border_width}: The width of the borders, set to a very fine line of 0.001 units.
+\item \code{linewidth_buildings}: The line width for building outlines, set to 0.05 units.
+\item \code{linewidth_motorway}, \code{linewidth_trunk}, \code{linewidth_primary}, \code{linewidth_secondary}, \code{linewidth_tertiary}, \code{linewidth_unclassified}, \code{linewidth_residential}: The line widths for various types of roads, ranging from 6 units for motorways to 1 unit for pedestrian paths.
+\item \code{size_streetlamp}: The size representation for streetlamps, set to 0.2 units.
+\item \verb{hatch_*}: A series of settings for hatching patterns, which can be applied to water, buildings, and green spaces. These include toggles for hatching (\code{hatch_water}, \code{hatch_buildings}, \code{hatch_green}), the number of points or lines (\verb{hatch_*_npoints}, \verb{hatch_*_nlines}), the type of hatching pattern (\verb{hatch_*_type}), the size of the hatching elements (\verb{hatch_*_size}), and the transparency level (\verb{hatch_*_alpha}).
+}
+
+These settings allow for a high degree of customization when creating maps, providing users with the ability to fine-tune the appearance of their map elements according to their specific needs or preferences.
 }
 \examples{
 # Use predefined palette

@@ -58,3 +58,8 @@ publishing any derived datasets.
 If you encounter a clear bug, please file an issue with a minimal
 reproducible example on
 <a href="https://github.com/da-wi/cartographr/issues">GitHub</a>.
+
+## Credits
+
+The development of this project drew inspiration from the
+[prettymaps](https://github.com/marceloprates/prettymaps) project.

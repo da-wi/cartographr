@@ -4,6 +4,8 @@
 \alias{theme_poster}
 \alias{theme_poster_poppins}
 \alias{theme_poster_anton}
+\alias{theme_poster_cinzel}
+\alias{theme_poster_barlow}
 \title{Create a poster theme}
 \usage{
 theme_poster(font = "Poppins")
@@ -11,6 +13,10 @@ theme_poster(font = "Poppins")
 theme_poster_poppins()
 
 theme_poster_anton()
+
+theme_poster_cinzel()
+
+theme_poster_barlow()
 }
 \arguments{
 \item{font}{The font family to be used for text elements in the plot.

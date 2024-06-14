@@ -32,8 +32,7 @@ First, we load the locations of crimes in Manhattan.
 
 ```{r load crime locations, echo=T, message=F, eval = F}
 data("crime") 
-data("soho_boundary") 
-data("osm")
+data("soho_boundary")
 ```
 
 # Convert longitude / latitude into a `sf`
@@ -62,7 +61,7 @@ osm <- get_osmdata(sf = soho_boundary)
 ```{r create  map, message=FALSE, warning=FALSE, eval = F}
 p <- osm |> 
   crop(soho_boundary) |> 
-  plot_map(palette = "gray") +
+  plot_map(palette = "alphabet") +
   theme_infomap_barlow() + 
   
   # Add geom with crimes
@@ -90,4 +89,8 @@ p
 
 ```{r save map, eval=F}
 save_map(plot = p, filename = "ny_crime.pdf")
+```
+
+```{r save map as png, include = F, eval = F}
+ggsave("png/plot the map-1.png", plot = p, width = 210, height= 297, units = "mm", dpi = 96)
 ```

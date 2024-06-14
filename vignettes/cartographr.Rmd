@@ -38,7 +38,7 @@ osm <- get_osmdata(48.210, 16.370, x_distance = 1200)
 *Step 4:* The `osm` variable now contains all the geometric shapes (like buildings, rivers, parks) that will appear on your map. Generate the map with `plot_map()` and customize its look with themes and color palettes. For instance, create an infomap of Vienna using `theme_infomap()` and choose a color scheme (see `get_palette()`).
 
 ```{r eval=FALSE}
-plot_vienna <- osm |> plot_map(palette = "dotted") +
+plot_vienna <- osm |> plot_map(palette = "serene") +
   theme_infomap() +
   ggplot2::labs(title = "VIENNA")
 ```

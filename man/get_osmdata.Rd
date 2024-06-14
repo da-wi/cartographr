@@ -53,19 +53,20 @@ It calculates the bounding box if not provided and retrieves various OSM feature
 
 The following table lists the OSM features that are retrieved by the function:\tabular{ll}{
    Feature Type \tab OSM Tags \cr
-   highway \tab motorway, motorway_link, trunk, trunk_link, primary, secondary, \cr
-    \tab tertiary, unclassified, residential, living_street, street_lamp, pedestrian \cr
+   highway \tab motorway, motorway_link, trunk, trunk_link, primary, secondary, tertiary, \cr
+    \tab unclassified, residential, living_street, street_lamp, pedestrian, track, path, steps \cr
    water \tab * \cr
    building \tab * \cr
    natural \tab beach, water, strait, bay, island, wood \cr
    amenity \tab parking \cr
-   man made \tab pier \cr
+   man_made \tab pier \cr
    railway \tab rail \cr
    place \tab sea, ocean \cr
    boundary \tab maritime \cr
    waterway \tab stream \cr
-   landuse \tab forest, grass, orchard, recreation_ground \cr
-   leisure \tab park \cr
+   landuse \tab forest, farmland, grass, orchard, allotments, recreation_ground, vineyard, cemetery, meadow \cr
+   leisure \tab swimming_pool, pitch, nature_reserve, garden, park \cr
+   natural \tab bay, island, wood \cr
 }
 
 

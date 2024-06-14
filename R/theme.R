@@ -43,6 +43,18 @@ theme_poster_anton <- function() {
   return(theme_poster(font = "Anton"))
 }
 
+#' @rdname theme_poster
+#' @export
+theme_poster_cinzel <- function() {
+  return(theme_poster(font = "Cinzel"))
+}
+
+#' @rdname theme_poster
+#' @export
+theme_poster_barlow <- function() {
+  return(theme_poster(font = "Barlow"))
+}
+
 #' Apply infomap theme with specified font
 #'
 #' This function applies a custom theme for information maps, allowing the user to specify a font from a predefined list. It sets various ggplot2 theme elements such as the title, subtitle, caption, and legend to use the specified font and adjusts their appearance based on a scale factor.
@@ -90,6 +102,12 @@ theme_infomap_anton <- function() {
 #' @export
 theme_infomap_poppins <- function() {
   return(theme_infomap(font = "Poppins"))
+}
+
+#' @rdname theme_infomap
+#' @export
+theme_infomap_cinzel <- function() {
+  return(theme_infomap(font = "Cinzel"))
 }
 
 #' @rdname theme_infomap

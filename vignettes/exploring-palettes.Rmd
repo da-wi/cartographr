@@ -46,8 +46,8 @@ Here, we create a data frame `df_pal` that contains a list of palette names. We 
 
 ```{r load all palettes, eval = F}
 df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
-                        "desert","evening", "gray", "iberia", "imhof","lines","midnight",
-                        "minimal","metropolitan","swiss","tropical"),
+                        "evening", "gray", "iberia", "imhof","lines","midnight",
+                        "minimal","metropolitan","serene","swiss","tropical"),
                   hamburg = list(hamburg)) |>
   rowwise() |>
   mutate(p = list(hamburg |> plot_map(palettes) + theme_infomap() + labs(title = palettes)))
@@ -63,7 +63,7 @@ df_pal |> pull(p)
 
 
 ```{r save figures, eval = F, include = FALSE}
-df_pal |> ungroup() |> mutate(i = row_number(), filename = sprintf("png/plot palettes-%d.png",i)) |> rowwise() |> mutate(res = ggsave(p + theme(plot.title = element_text(size = 60)), filename = sprintf("png/plot palettes-%d.png",i), device = "png",width = 160,height = 160, units = "mm", dpi = 96))
+df_pal |> ungroup() |> mutate(i = row_number(), filename = sprintf("png/plot palettes-%d.png",i)) |> rowwise() |> mutate(res = ggsave(p + theme(plot.title = element_text(size = 60)), filename = sprintf("png/plot palettes-%d.png",i), device = "png",width = 160,height = 160, units = "mm", dpi = 112))
 ```
 
 <p align="center">

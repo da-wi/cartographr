@@ -1,4 +1,4 @@
-#' Create a color theme for maps
+#' Create a palette for maps
 #'
 #' This function creates a color theme to be used with `plot_map()`. It can accept a predefined palette name or a custom palette provided as a named list.
 #'
@@ -14,7 +14,6 @@
 #' - **Arctic**: A palette that reflects the clear and bright qualities of Arctic landscapes.
 #' - **Autumn**: A palette with the warm and varied hues typical of the fall season.
 #' - **BW**: A classic black and white palette with a hint of warmth for a traditional feel.
-#' - **Desert**: A palette that captures the earthy and natural tones found in desert environments.
 #' - **Evening**: A palette that embodies the quiet and contemplative nature of dusk.
 #' - **Gray**: A balanced palette that provides a composed and refined look.
 #' - **Iberia**: A palette that reflects the warm and diverse tones associated with the Iberian landscape.
@@ -23,8 +22,19 @@
 #' - **Metropolitan**: A palette with understated tones that suggest urban sophistication.
 #' - **Midnight**: A palette that conveys the depth and tranquility of the night.
 #' - **Minimal**: A palette focused on minimalism, utilizing primarily whites and light grays.
+#' - **Serene**: A palette that embodies peace and simplicity, utilizing a soft color scheme with gentle contrasts.
 #' - **Swiss**: A palette that emphasizes cleanliness and precision, reminiscent of Swiss design.
 #' - **Tropical**: A lively palette with the bright and bold colors characteristic of tropical areas.
+#'
+#' In addition, you can customize other settings:
+#' - `border_color`: The color of the borders, set to a dark shade "#121212".
+#' - `border_width`: The width of the borders, set to a very fine line of 0.001 units.
+#' - `linewidth_buildings`: The line width for building outlines, set to 0.05 units.
+#' - `linewidth_motorway`, `linewidth_trunk`, `linewidth_primary`, `linewidth_secondary`, `linewidth_tertiary`, `linewidth_unclassified`, `linewidth_residential`: The line widths for various types of roads, ranging from 6 units for motorways to 1 unit for pedestrian paths.
+#' - `size_streetlamp`: The size representation for streetlamps, set to 0.2 units.
+#' - `hatch_*`: A series of settings for hatching patterns, which can be applied to water, buildings, and green spaces. These include toggles for hatching (`hatch_water`, `hatch_buildings`, `hatch_green`), the number of points or lines (`hatch_*_npoints`, `hatch_*_nlines`), the type of hatching pattern (`hatch_*_type`), the size of the hatching elements (`hatch_*_size`), and the transparency level (`hatch_*_alpha`).
+#'
+#' These settings allow for a high degree of customization when creating maps, providing users with the ability to fine-tune the appearance of their map elements according to their specific needs or preferences.
 #'
 #' @examples
 #' # Use predefined palette
@@ -108,7 +118,7 @@ get_palette = function(palette) {
 
   if (!(palette %in% c( "alphabet", "arctic","autumn", "bw","dotted",
                         "desert","evening", "gray","grey", "iberia", "imhof","lines","midnight",
-                        "mikimal","minimal","metropolitan","swiss","tropical")))
+                        "mikimal","minimal","metropolitan","serene","swiss","tropical")))
     stop(cli::cli_abort(paste(palette,"is not a predefined palette.")))
 
 
@@ -167,20 +177,6 @@ get_palette = function(palette) {
       street = "#faf5eb",
       beach = "#faf5eb",
       parking = "#faf5eb"
-    )
-  }
-
-  if (palette == "desert") {
-    color <- list(
-      palette_building = c("#e8d9c3", "#e8d9c3", "#e8d9c3"),
-      building_border = "#d3c2a6",
-      water = "#c2b19d",
-      street = "#f0e8d7",
-      green = "#ded5c5",
-      background = "#f0e8d7",
-      parking = "#f0e8d7",
-      railway = "#b2a690",
-      beach = "#e8d9c3"
     )
   }
 
@@ -294,40 +290,28 @@ get_palette = function(palette) {
     )
   }
 
-  if (palette == "mikimal") {
-    color <- list(
-      palette_building = c("#fbfaf8", "#f3f3f1"),
-      building_border = "#adacaa",
-      water = "#cdd6d3",
-      street = "#f6f2ef",
-      green = "#d2caa5",
-      background = "#f6f2ef",
-      parking = "#f6f2ef",
-      railway = "#d0d0d0",
-      beach = "#dedfda",
-      hatch_green = T,
-      hatch_water = T
-    )
-  }
 
-  if (palette == "dotted") {
+  if (palette == "serene") {
     color <- list(
-      palette_building = "#ffffff",
-      building_border = "#adacaa",
-      water = "#cdcdd3",
+      palette_building = "#fefefd",
+      building_border = "#d7d7d7",
+      water = "#D5D5D9", #"#7a9aab",
       street = "#ffffff",
-      green = "#adadae",
-      background = "#ffffff",
-      parking = "#ffffff",
+      green = "#BCB9B0",#"#c8ddc7",
+      background = "#fbfbf9",
+      parking = "#d3d3d5",
       railway = "#cdcdd3",
       beach = "#ffffff",
       hatch_buildings = TRUE,
-      hatch_buildings_alpha = 0.1,
+      hatch_buildings_alpha = 0.66,
+      hatch_buildings_size = 0.00001,
       hatch_buildings_npoints = 280,
       hatch_buildings_nlines = 100,
       hatch_buildings_type = "points",
       hatch_green = TRUE,
-      hatch_green_nlines = 150,
+      hatch_green_type = "lines",
+      hatch_green_alpha = 0.75,
+      hatch_green_nlines = 125,
       hatch_green_size = 0.05
     )
   }
