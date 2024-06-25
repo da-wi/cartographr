@@ -1,3 +1,8 @@
+# cartographr 0.2.2
+* Rewrite of README.md to contain examples
+* Added images in png folder
+* Reorganized vignettes
+
 # cartographr 0.2.1
 * New palette and minor bug fixes
 * Timeout issues in get_osmdata() fixed
