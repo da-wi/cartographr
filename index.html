@@ -87,40 +87,43 @@
 </h2>
 <p>Simply install from github.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"da-wi/cartographr"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Install the latest version from github</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"da-wi/cartographr"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Alternatively, install from CRAN</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cartographr"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p><em>Step 1:</em> Begin by determining the central point of your map using the <a href="https://de.wikipedia.org/wiki/World_Geodetic_System_1984" class="external-link">WGS84</a> coordinates. For our example, we’ll use Vienna’s center with a latitude of <code>48.210</code> and a longitude of <code>16.370</code>. You can easily find these coordinates online.</p>
-<p><em>Step 2:</em> Decide on the size of the printed map, such as A4. This will help scale the text and lines on the map proportionally, no matter the print size.</p>
+<p>Begin by determining the central point of your map using the <a href="https://de.wikipedia.org/wiki/World_Geodetic_System_1984" class="external-link">WGS84</a> coordinates. For our example, we’ll use Vienna’s center with a latitude of <code>48.210</code> and a longitude of <code>16.370</code>. You can easily find these coordinates online.</p>
+<p>Decide on the size of the printed map, such as A4. This will help scale the text and lines on the map proportionally, no matter the print size.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/set_output_size.html">set_output_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">300</span>,<span class="fl">300</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><em>Step 3:</em> Use the <code><a href="reference/get_osmdata.html">get_osmdata()</a></code> function to collect OpenStreetMap data. Set the width of your map area in meters using the <code>x_distance</code> parameter. If you leave out the height (<code>y_distance</code>), it will be calculated based on the width and the aspect ratio of your chosen output size.</p>
+<p>Use the <code><a href="reference/get_osmdata.html">get_osmdata()</a></code> function to collect OpenStreetMap data. Set the width of your map area in meters using the <code>x_distance</code> parameter. If you leave out the height (<code>y_distance</code>), it will be calculated based on the width and the aspect ratio of your chosen output size.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">osm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span><span class="fl">48.210</span>, <span class="fl">16.370</span>, x_distance <span class="op">=</span> <span class="fl">1200</span><span class="op">)</span></span></code></pre></div>
-<p><em>Step 4:</em> The <code>osm</code> variable now contains all the geometric shapes (like buildings, rivers, parks) that will appear on your map. Generate the map with <code><a href="reference/plot_map.html">plot_map()</a></code> and customize its look with themes and color palettes. For instance, create an infomap of Vienna using <code><a href="reference/theme_infomap.html">theme_infomap()</a></code> and choose a color scheme (see <code><a href="reference/get_palette.html">get_palette()</a></code>).</p>
+<p>The <code>osm</code> variable now contains all the geometric shapes (like buildings, rivers, parks) that will appear on your map. Generate the map with <code><a href="reference/plot_map.html">plot_map()</a></code> and customize its look with themes and color palettes. For instance, create an infomap of Vienna using <code><a href="reference/theme_infomap.html">theme_infomap()</a></code> and choose a color scheme (see <code><a href="reference/get_palette.html">get_palette()</a></code>).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot_vienna</span> <span class="op">&lt;-</span> <span class="va">osm</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/plot_map.html">plot_map</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"serene"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="reference/theme_infomap.html">theme_infomap</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"VIENNA"</span><span class="op">)</span></span></code></pre></div>
-<p><em>Step 5:</em> To view your map, simply call the implicit print function.</p>
+<p>To view your map, simply call</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot_vienna</span></span></code></pre></div>
 <p><img src="https://github.com/da-wi/cartographr/raw/develop/png/vienna.png" width="100%"></p>
-<p><em>Step 6:</em> Finally, save your map as a PDF file, ready for printing.</p>
+<p>Finally, save your map as a PDF file, ready for printing.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/save_map.html">save_map</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot_vienna</span>, filename<span class="op">=</span><span class="st">"vienna.pdf"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="palette-overview">Palette overview<a class="anchor" aria-label="anchor" href="#palette-overview"></a>
 </h2>
-<p>Load OpenStreetMap (OSM) data for Hamburg, Germany.</p>
+<p>Several color palettes are provided by the package, however, you can easily create and use your own palette (see <code><a href="reference/get_palette.html">get_palette()</a></code>).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hamburg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span>lat <span class="op">=</span> <span class="fl">53.545</span>, lon <span class="op">=</span> <span class="fl">10.000</span>, x_distance <span class="op">=</span> <span class="fl">1200</span><span class="op">)</span></span></code></pre></div>
-<p>Create a tibble <code>df_pal</code> that contains a list of palette names. Then, use a row-wise operation to apply each palette to our map data (osm) and store the resulting plot object.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_pal</span> <span class="op">&lt;-</span> <span class="fu">tibble</span> <span class="op">(</span>palettes<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alphabet"</span>, <span class="st">"arctic"</span>,<span class="st">"autumn"</span>, <span class="st">"bw"</span>,</span>
+<code class="sourceCode R"><span><span class="va">hamburg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_osmdata.html">get_osmdata</a></span><span class="op">(</span>lat <span class="op">=</span> <span class="fl">53.545</span>, lon <span class="op">=</span> <span class="fl">10.000</span>, x_distance <span class="op">=</span> <span class="fl">1200</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df_pal</span> <span class="op">&lt;-</span> <span class="fu">tibble</span> <span class="op">(</span>palettes<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alphabet"</span>, <span class="st">"arctic"</span>,<span class="st">"autumn"</span>, <span class="st">"bw"</span>,</span>
 <span>                        <span class="st">"evening"</span>, <span class="st">"gray"</span>, <span class="st">"iberia"</span>, <span class="st">"imhof"</span>,<span class="st">"lines"</span>,<span class="st">"midnight"</span>,</span>
 <span>                        <span class="st">"minimal"</span>,<span class="st">"metropolitan"</span>,<span class="st">"serene"</span>,<span class="st">"swiss"</span>,<span class="st">"tropical"</span><span class="op">)</span>,</span>
 <span>                  hamburg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">hamburg</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
