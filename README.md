@@ -31,36 +31,38 @@ effective as possible.
 Simply install from github.
 
 ``` r
+# Install the latest version from github
 devtools::install_github("da-wi/cartographr")
+
+# Alternatively, install from CRAN
+install.packages("cartographr")
 ```
 
 ## Usage
 
-*Step 1:* Begin by determining the central point of your map using the
+Begin by determining the central point of your map using the
 [WGS84](https://de.wikipedia.org/wiki/World_Geodetic_System_1984)
 coordinates. For our example, we’ll use Vienna’s center with a latitude
 of `48.210` and a longitude of `16.370`. You can easily find these
 coordinates online.
 
-*Step 2:* Decide on the size of the printed map, such as A4. This will
-help scale the text and lines on the map proportionally, no matter the
-print size.
+Decide on the size of the printed map, such as A4. This will help scale
+the text and lines on the map proportionally, no matter the print size.
 
 ``` r
 set_output_size(c(300,300))
 ```
 
-*Step 3:* Use the `get_osmdata()` function to collect OpenStreetMap
-data. Set the width of your map area in meters using the `x_distance`
-parameter. If you leave out the height (`y_distance`), it will be
-calculated based on the width and the aspect ratio of your chosen output
-size.
+Use the `get_osmdata()` function to collect OpenStreetMap data. Set the
+width of your map area in meters using the `x_distance` parameter. If
+you leave out the height (`y_distance`), it will be calculated based on
+the width and the aspect ratio of your chosen output size.
 
 ``` r
 osm <- get_osmdata(48.210, 16.370, x_distance = 1200)
 ```
 
-*Step 4:* The `osm` variable now contains all the geometric shapes (like
+The `osm` variable now contains all the geometric shapes (like
 buildings, rivers, parks) that will appear on your map. Generate the map
 with `plot_map()` and customize its look with themes and color palettes.
 For instance, create an infomap of Vienna using `theme_infomap()` and
@@ -72,7 +74,7 @@ plot_vienna <- osm |> plot_map(palette = "serene") +
   ggplot2::labs(title = "VIENNA")
 ```
 
-*Step 5:* To view your map, simply call the implicit print function.
+To view your map, simply call
 
 ``` r
 plot_vienna
@@ -80,7 +82,7 @@ plot_vienna
 
 <img src='https://github.com/da-wi/cartographr/raw/develop/png/vienna.png' width='100%'>
 
-*Step 6:* Finally, save your map as a PDF file, ready for printing.
+Finally, save your map as a PDF file, ready for printing.
 
 ``` r
 save_map(plot = plot_vienna, filename="vienna.pdf")
@@ -88,17 +90,12 @@ save_map(plot = plot_vienna, filename="vienna.pdf")
 
 ## Palette overview
 
-Load OpenStreetMap (OSM) data for Hamburg, Germany.
+Several color palettes are provided by the package, however, you can
+easily create and use your own palette (see `get_palette()`).
 
 ``` r
 hamburg <- get_osmdata(lat = 53.545, lon = 10.000, x_distance = 1200)
-```
 
-Create a tibble `df_pal` that contains a list of palette names. Then,
-use a row-wise operation to apply each palette to our map data (osm) and
-store the resulting plot object.
-
-``` r
 df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
                         "evening", "gray", "iberia", "imhof","lines","midnight",
                         "minimal","metropolitan","serene","swiss","tropical"),
