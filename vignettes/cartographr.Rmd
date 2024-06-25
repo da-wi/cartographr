@@ -1,6 +1,9 @@
 ---
 title: "Introduction to cartographr"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    self_contained: yes
+    keep_md: yes
 vignette: >
   %\VignetteIndexEntry{Introduction to cartographr}
   %\VignetteEngine{knitr::rmarkdown}
@@ -8,7 +11,6 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-library(cartographr)
 knitr::opts_chunk$set(
   echo=TRUE,
   message=FALSE,
@@ -18,51 +20,80 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this vignette, you will learn how to use the package functions step-by-step.
+In this vignette, you will learn how to add new information to a map. Here, we retrieve a map of Manhattan, NYC. 
 
-*Step 1:* Begin by determining the central point of your map using the [WGS84](https://de.wikipedia.org/wiki/World_Geodetic_System_1984) coordinates. For our example, we’ll use Vienna’s center with a latitude of `48.210` and a longitude of `16.370`. You can easily find these coordinates online.
 
-*Step 2:* Decide on the size of the printed map, such as A4. This will help scale the text and lines on the map proportionally, no matter the print size.
-
-```{r eval=FALSE}
-set_output_size(c(300,300))
+```{r setup}
+library(cartographr)
+library(dplyr)
+library(ggplot2)
+library(sf)
 ```
 
-*Step 3:* Use the `get_osmdata()` function to collect OpenStreetMap data. Set the width of your map area in meters using the `x_distance` parameter. If you leave out the height (`y_distance`), it will be calculated based on the width and the aspect ratio of your chosen output size.
+First, we load the locations of crimes in Manhattan. 
 
 
-```{r eval=FALSE}
-osm <- get_osmdata(48.210, 16.370, x_distance = 1200)
+```{r load crime locations, echo=T, message=F, eval = F}
+data("crime") 
+data("soho_boundary")
 ```
 
-*Step 4:* The `osm` variable now contains all the geometric shapes (like buildings, rivers, parks) that will appear on your map. Generate the map with `plot_map()` and customize its look with themes and color palettes. For instance, create an infomap of Vienna using `theme_infomap()` and choose a color scheme (see `get_palette()`).
+# Convert longitude / latitude into a `sf`
 
-```{r eval=FALSE}
-plot_vienna <- osm |> plot_map(palette = "serene") +
-  theme_infomap() +
-  ggplot2::labs(title = "VIENNA")
+To add the crime locations in the dataset to our map, we harness the `sf` (simple features) package, which includes a lot of useful tools for working with geo data. To this end, we convert the dataset into a `sf` object using latitude and longitude.  
+
+```{r convert to sf, eval = F}
+crime |> head()
 ```
 
-*Step 5:* To view your map, simply call the print function.
+This can be achieved with the function `sf::st_as_sf()` using the coordinates from the dataset. 
 
-```{r eval=FALSE}
-plot_vienna
+# Setup the map parameters
+
+We have to provide `longitude`, `latitude` and `x_distance` (i.e., the width of the map in meters). Furthermore, we define the extend of the OSM data in meters in `get_osmdata()`. `y_distance` is calculated automatically using the output size aspect ratio. 
+
+```{r define bbox, eval = F}
+set_output_size("A4", orientation = "portrait")
+osm <- get_osmdata(sf = soho_boundary)
 ```
 
-<img src='https://github.com/da-wi/cartographr/raw/develop/png/vienna.png' width='100%'>
+# Plot the map
 
-```{r eval=FALSE, include  = FALSE}
-ggsave(plot_vienna + theme(plot.title = element_text(size = 60)), filename = "png/vienna.png", device = "png",width = 300,height = 300, units = "mm", dpi = 96, bg = "white" )
+`plot_map()` generates a `ggplot2` object using the color theme set as parameter. That means that we can easily adjust the plot using `ggplot2` commands and also add new information to the map.
+
+```{r create  map, message=FALSE, warning=FALSE, eval = F}
+p <- osm |> 
+  crop(soho_boundary) |> 
+  plot_map(palette = "alphabet") +
+  theme_infomap_barlow() + 
+  
+  # Add geom with crimes
+  geom_point(data = crime,
+             aes(x = longitude, y = latitude, shape = type), color="#A72424", size=2) + 
+  
+  # Set labels
+  labs(title = "CRIME IN SOHO",
+       shape = "TYPE")
 ```
 
-```{r echo=FALSE,include=FALSE,fig.align='center', fig.cap='',fig.dim=c(2.5,2.5), out.width='70%'}
-# knitr::include_graphics('vienna.png')
+Now we can plot the map by simply calling its print method implicity:
+
+```{r plot the map, eval = F, fig.dim=c(5.81,8.3), fig.dpi = 72, out.width="100%"}
+p
 ```
 
-*Step 6:* Finally, save your map as a PDF file, ready for printing.
+<p align="center">
+  <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot the map-1.png' width='80%'>
+</p>
 
-```{r eval=FALSE}
-save_map(plot = plot_vienna, filename="vienna.pdf")
+# Save map
+
+`save_map()` can be used to store the print-ready plot object to the disk as a drawn object in `pdf` format. 
+
+```{r save map, eval=F}
+save_map(plot = p, filename = "ny_crime.pdf")
 ```
 
-
+```{r save map as png, include = F, eval = F}
+ggsave("png/plot the map-1.png", plot = p, width = 210, height= 297, units = "mm", dpi = 96)
+```

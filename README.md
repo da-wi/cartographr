@@ -36,13 +36,104 @@ devtools::install_github("da-wi/cartographr")
 
 ## Usage
 
+*Step 1:* Begin by determining the central point of your map using the
+[WGS84](https://de.wikipedia.org/wiki/World_Geodetic_System_1984)
+coordinates. For our example, we’ll use Vienna’s center with a latitude
+of `48.210` and a longitude of `16.370`. You can easily find these
+coordinates online.
+
+*Step 2:* Decide on the size of the printed map, such as A4. This will
+help scale the text and lines on the map proportionally, no matter the
+print size.
+
 ``` r
-get_osmdata(lat = 53.543, lon = 10.000, x_distance = 1000) |> plot_map()
+set_output_size(c(300,300))
 ```
 
-For a step-by-step guide of the package’s basic features, please refer
-to the [introductory
-vignette](https://da-wi.github.io/cartographr/articles/cartographr.html).
+*Step 3:* Use the `get_osmdata()` function to collect OpenStreetMap
+data. Set the width of your map area in meters using the `x_distance`
+parameter. If you leave out the height (`y_distance`), it will be
+calculated based on the width and the aspect ratio of your chosen output
+size.
+
+``` r
+osm <- get_osmdata(48.210, 16.370, x_distance = 1200)
+```
+
+*Step 4:* The `osm` variable now contains all the geometric shapes (like
+buildings, rivers, parks) that will appear on your map. Generate the map
+with `plot_map()` and customize its look with themes and color palettes.
+For instance, create an infomap of Vienna using `theme_infomap()` and
+choose a color scheme (see `get_palette()`).
+
+``` r
+plot_vienna <- osm |> plot_map(palette = "serene") +
+  theme_infomap() +
+  ggplot2::labs(title = "VIENNA")
+```
+
+*Step 5:* To view your map, simply call the print function.
+
+``` r
+plot_vienna
+```
+
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/vienna.png' width='100%'>
+
+*Step 6:* Finally, save your map as a PDF file, ready for printing.
+
+``` r
+save_map(plot = plot_vienna, filename="vienna.pdf")
+```
+
+## Exploring Palettes
+
+We set the output size for our maps and prepare to load OpenStreetMap
+(OSM) data for Hamburg, Germany.
+
+``` r
+hamburg <- get_osmdata(lat = 53.545, lon = 10.000, x_distance = 1200)
+```
+
+Here, we create a data frame `df_pal` that contains a list of palette
+names. We then use a row-wise operation to apply each palette to our map
+data (osm) and store the resulting plot object. This allows us to see
+how each palette affects the map’s appearance.
+
+``` r
+df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
+                        "evening", "gray", "iberia", "imhof","lines","midnight",
+                        "minimal","metropolitan","serene","swiss","tropical"),
+                  hamburg = list(hamburg)) |>
+  rowwise() |>
+  mutate(p = list(hamburg |> plot_map(palettes) + theme_infomap() + labs(title = palettes)))
+```
+
+## Palette overview
+
+Finally, we extract and display all the map plots from `df_pal`.
+
+<p align="center">
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-1.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-2.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-3.png' width='30%'>
+<br>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-4.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-5.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-6.png' width='30%'>
+<br>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-7.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-8.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-9.png' width='30%'>
+<br>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-10.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-11.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-12.png' width='30%'>
+<br>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-13.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-14.png' width='30%'>
+<img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-15.png' width='30%'>
+</p>
 
 ## Data licensing
 
