@@ -72,7 +72,7 @@ plot_vienna <- osm |> plot_map(palette = "serene") +
   ggplot2::labs(title = "VIENNA")
 ```
 
-*Step 5:* To view your map, simply call the print function.
+*Step 5:* To view your map, simply call the implicit print function.
 
 ``` r
 plot_vienna
@@ -86,19 +86,17 @@ plot_vienna
 save_map(plot = plot_vienna, filename="vienna.pdf")
 ```
 
-## Exploring Palettes
+## Palette overview
 
-We set the output size for our maps and prepare to load OpenStreetMap
-(OSM) data for Hamburg, Germany.
+Load OpenStreetMap (OSM) data for Hamburg, Germany.
 
 ``` r
 hamburg <- get_osmdata(lat = 53.545, lon = 10.000, x_distance = 1200)
 ```
 
-Here, we create a data frame `df_pal` that contains a list of palette
-names. We then use a row-wise operation to apply each palette to our map
-data (osm) and store the resulting plot object. This allows us to see
-how each palette affects the map’s appearance.
+Create a tibble `df_pal` that contains a list of palette names. Then,
+use a row-wise operation to apply each palette to our map data (osm) and
+store the resulting plot object.
 
 ``` r
 df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
@@ -108,10 +106,6 @@ df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
   rowwise() |>
   mutate(p = list(hamburg |> plot_map(palettes) + theme_infomap() + labs(title = palettes)))
 ```
-
-## Palette overview
-
-Finally, we extract and display all the map plots from `df_pal`.
 
 <p align="center">
 <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-1.png' width='30%'>
