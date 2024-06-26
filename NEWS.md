@@ -1,4 +1,5 @@
 # cartographr 0.2.2
+* Released to cran
 * Rewrite of README.md to contain examples
 * Added images in png folder
 * Reorganized vignettes
