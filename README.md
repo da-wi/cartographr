@@ -8,23 +8,19 @@ coverage](https://codecov.io/gh/da-wi/cartographr/branch/develop/graph/badge.svg
 
 ## Overview
 
-Creating maps from OpenStreetMap data can be a complex and
-time-consuming process. The syntax for designing maps often lacks
-intuitiveness and can vary greatly, making it challenging for users to
-produce visually appealing, print-ready maps. Additionally, overlaying
-additional information layers while maintaining cartographic aesthetics
-requires a deep understanding of spatial data, which can detract from
-the storytelling aspect of map creation. `cartographr` addresses these
-issues by providing a lightweight and user-friendly interface between
-`osmdata` and `ggplot2`, streamlining the map-making process and
-allowing users to concentrate on the narrative conveyed by their maps.
-It offers a practical and adaptable solution for transforming geospatial
-data using simple features (`sf`) geometries into informative,
-high-quality visualizations, thereby improving the dissemination of
-spatial information. Whether you’re involved in urban planning,
-environmental studies, or need to create impactful public presentations,
-`cartographr` is designed to make your work as straightforward and
-effective as possible.
+Creating maps from OpenStreetMap data can be complex and time-consuming
+due to varying design syntax and the challenge of producing visually
+appealing, print-ready maps. Overlaying additional information layers
+while maintaining cartographic aesthetics also requires a deep
+understanding of spatial data. `cartographr` addresses these issues by
+providing a lightweight, user-friendly interface between `osmdata` and
+`ggplot2`, streamlining the map-making process and allowing users to
+focus on the narrative of their maps. It simplifies the transformation
+of geospatial data using simple features (`sf`) geometries into
+informative, high-quality visualizations, enhancing the dissemination of
+spatial information. Ideal for urban planning, environmental studies, or
+public presentations, `cartographr` aims to make map creation
+straightforward and effective.
 
 ## Installation
 
