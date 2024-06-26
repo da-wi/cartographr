@@ -1,6 +1,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# cartographr <a href='https://da-wi.github.io/cartographr'><img src="man/figures/logo.png" align="right" height="139" /></a>
+# cartographr <a href='https://da-wi.github.io/cartographr/'><img src="man/figures/logo.png" align="right" height="139" /></a>
 
 [![R-CMD-check](https://github.com/da-wi/cartographr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/da-wi/cartographr/actions/workflows/R-CMD-check.yaml)
 [![codecov test
@@ -126,7 +126,7 @@ df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
 
 All data that you access using `cartographr` and, in consequence,
 `osmdata` is licensed under OpenStreetMap’s license, the
-<a href="https://wiki.osmfoundation.org/wiki/Licence">Open Database
+<a href="https://osmfoundation.org/wiki/Licence">Open Database
 Licence</a>. Any derived data and products must also carry the same
 licence. You should make sure you understand that licence before
 publishing any derived datasets.

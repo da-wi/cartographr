@@ -4,7 +4,7 @@ Version: 0.2.2
 Authors@R: person("David", "Willinger", , "david.willinger@gmail.com", role = c("aut", "cre", "cph"))
 Description: Simplifying the creation of print-ready maps, this package offers a user-friendly interface derived from 'ggplot2' for handling OpenStreetMap data. It streamlines the map-making process, allowing users to focus on the story their maps tell. Transforming raw geospatial data into informative visualizations is made easy with simple features 'sf' geometries. Whether for urban planning, environmental studies, or impactful public presentations, this tool facilitates straightforward and effective map creation. Enhance the dissemination of spatial information with high-quality, narrative-driven visualizations!
 License: GPL (>= 3)
-URL: https://da-wi.github.io/cartographr, https://github.com/da-wi/cartographr
+URL: https://da-wi.github.io/cartographr/, https://github.com/da-wi/cartographr
 BugReports: https://github.com/da-wi/cartographr/issues
 Depends: 
 	R (>= 3.6)
