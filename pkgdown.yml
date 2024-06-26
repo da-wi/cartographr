@@ -3,7 +3,7 @@ pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   cartographr: cartographr.html
-last_built: 2024-06-26T12:02Z
+last_built: 2024-06-26T17:09Z
 urls:
   reference: https://da-wi.github.io/cartographr/reference
   article: https://da-wi.github.io/cartographr/articles
