@@ -27,7 +27,7 @@
 #' preprocessed_osm <- osm |> preprocess_map()
 #' @export
 preprocess_map = function(osm) {
-  options(warn=-1)
+
   if(is.null(osm)) {
     stop(cli::cli_abort("{.arg osm} is not a list of osm features."))
   }
@@ -189,7 +189,7 @@ preprocess_map = function(osm) {
     suppressWarnings(suppressMessages({
       fillgrid <- sf::st_make_grid(boundary,
                                    what = "polygons",
-                                   square = T, n = n_lines
+                                   square = TRUE, n = n_lines
       )
 
       direction = list( horizontal = c(1, 2),
@@ -256,62 +256,62 @@ crop = function(osm, boundary = "rect") {
     stop(cli::cli_abort("boundary is not a valid character or 'sf' object."))
   }
 
-  options(warn=-1)
+  suppressWarnings({
 
-  if (is.null(osm$preprocessed)) {
-    osm <- preprocess_map(osm)
-  }
-
-
-  if (inherits(boundary, "sf") | inherits(boundary, "sfc")) {
-    crop_extent = boundary
-    osm$crop <- "sf"
-  }
-
-  if (is.character(boundary)) {
-    if (!(boundary %in% c("circle", "hex", "rect")))
-      stop(cli::cli_abort('{.arg boundary} must be one of "circle", "hex", "rect"'))
-
-    if (boundary == "circle") {
-      crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
-      osm$crop <- "circle"
+    if (is.null(osm$preprocessed)) {
+      osm <- preprocess_map(osm)
     }
 
-    if (boundary == "hex") {
-      crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
-      osm$crop <- "hex"
+
+    if (inherits(boundary, "sf") | inherits(boundary, "sfc")) {
+      crop_extent = boundary
+      osm$crop <- "sf"
     }
 
-    if (boundary == "rect") {
-      crop_extent <- osm$bbox |> sf::st_as_sfc()
-      osm$crop <- "rect"
+    if (is.character(boundary)) {
+      if (!(boundary %in% c("circle", "hex", "rect")))
+        stop(cli::cli_abort('{.arg boundary} must be one of "circle", "hex", "rect"'))
+
+      if (boundary == "circle") {
+        crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        osm$crop <- "circle"
+      }
+
+      if (boundary == "hex") {
+        crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        osm$crop <- "hex"
+      }
+
+      if (boundary == "rect") {
+        crop_extent <- osm$bbox |> sf::st_as_sfc()
+        osm$crop <- "rect"
+      }
     }
-  }
 
-  osm$bbox <- sf::st_bbox(crop_extent)
+    osm$bbox <- sf::st_bbox(crop_extent)
 
-  # streets
-  if(!is.null(osm$sf_street$osm_lines) & length(osm$sf_street$osm_lines) > 0) osm$sf_street$osm_lines <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_lines), crop_extent )))
-  if(!is.null(osm$sf_street$osm_points) & length(osm$sf_street$osm_points) > 0) osm$sf_street$osm_points <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_points), crop_extent )))
+    # streets
+    if(!is.null(osm$sf_street$osm_lines) & length(osm$sf_street$osm_lines) > 0) osm$sf_street$osm_lines <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_lines), crop_extent )))
+    if(!is.null(osm$sf_street$osm_points) & length(osm$sf_street$osm_points) > 0) osm$sf_street$osm_points <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_points), crop_extent )))
 
-  # buildings
-  if(!is.null(osm$sf_buildings_combined)) osm$sf_buildings_combined <- suppressWarnings(suppressMessages(osm$sf_buildings_combined |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent )))
+    # buildings
+    if(!is.null(osm$sf_buildings_combined)) osm$sf_buildings_combined <- suppressWarnings(suppressMessages(osm$sf_buildings_combined |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent )))
 
-  # water
-  if(!is.null(osm$sf_water_combined)) osm$sf_water_combined <- suppressWarnings(suppressMessages(osm$sf_water_combined |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent)  |>  sf::st_make_valid()))
+    # water
+    if(!is.null(osm$sf_water_combined)) osm$sf_water_combined <- suppressWarnings(suppressMessages(osm$sf_water_combined |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent)  |>  sf::st_make_valid()))
 
-  # green
-  if(!is.null(osm$sf_green$osm_multipolygons)) suppressWarnings(suppressMessages(osm$sf_green$osm_multipolygons <-  osm$sf_green$osm_multipolygons |>  sf::st_make_valid() |>sf::st_intersection(x=_, crop_extent )))
-  if(!is.null(osm$sf_green$osm_polygons)) suppressMessages(osm$sf_green$osm_polygons <-  osm$sf_green$osm_polygons |>  sf::st_make_valid() |>sf::st_intersection(x=_, crop_extent ))
+    # green
+    if(!is.null(osm$sf_green$osm_multipolygons)) suppressWarnings(suppressMessages(osm$sf_green$osm_multipolygons <-  osm$sf_green$osm_multipolygons |>  sf::st_make_valid() |>sf::st_intersection(x=_, crop_extent )))
+    if(!is.null(osm$sf_green$osm_polygons)) suppressMessages(osm$sf_green$osm_polygons <-  osm$sf_green$osm_polygons |>  sf::st_make_valid() |>sf::st_intersection(x=_, crop_extent ))
 
-  if(!is.null(osm$sf_beach$osm_multipolygons)) suppressMessages(osm$sf_beach$osm_multipolygons <-  osm$sf_beach$osm_multipolygons  |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
-  if(!is.null(osm$sf_parking$osm_multipolygons)) suppressMessages(osm$sf_parking$osm_multipolygons <-  osm$sf_parking$osm_multipolygons |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+    if(!is.null(osm$sf_beach$osm_multipolygons)) suppressMessages(osm$sf_beach$osm_multipolygons <-  osm$sf_beach$osm_multipolygons  |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+    if(!is.null(osm$sf_parking$osm_multipolygons)) suppressMessages(osm$sf_parking$osm_multipolygons <-  osm$sf_parking$osm_multipolygons |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if(!is.null(osm$sf_railway$osm_lines))  suppressMessages(osm$sf_railway$osm_lines <- osm$sf_railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
+    if(!is.null(osm$sf_railway$osm_lines))  suppressMessages(osm$sf_railway$osm_lines <- osm$sf_railway$osm_lines |>  sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent ))
 
-  if (!is.null(crop_extent)) osm$crop_extent <- crop_extent
+    if (!is.null(crop_extent)) osm$crop_extent <- crop_extent
 
-  options(warn=1)
+  })
   return(osm)
 }
 
@@ -416,7 +416,7 @@ plot_map <- function(...) {
 
   # colors for buildings
   if(!is.null(osm_object$sf_buildings_combined)) {
-    osm_object$sf_buildings_combined$colors <- sample(color$palette_building,dim(osm_object$sf_buildings_combined)[1], replace = T)
+    osm_object$sf_buildings_combined$colors <- sample(color$palette_building,dim(osm_object$sf_buildings_combined)[1], replace = TRUE)
   }
 
 
@@ -463,7 +463,7 @@ plot_map <- function(...) {
     {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$sf_street$osm_points, color=color$lights, size=color$size_streetlamp*scale_factor)} +
 
     # buildings
-    ggplot2::geom_sf(data = osm_object$sf_buildings_combined, fill = osm_object$sf_buildings_combined$colors, show.legend = F, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$sf_buildings_combined, fill = osm_object$sf_buildings_combined$colors, show.legend = FALSE, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
     {if(!is.null(osm_object$sf_buildings_combined) && color$hatch_buildings == TRUE)  ggplot2::geom_sf(data = pattern_buildings, shape=18,fill="black", size = color$hatch_buildings_size*scale_factor,linewidth = color$hatch_buildings_size*scale_factor, alpha=color$hatch_buildings_alpha )}+
 
 
@@ -474,8 +474,6 @@ plot_map <- function(...) {
 
     # remove axes
     ggplot2::theme_void()
-
-    options(warn=0)
 
     # store scale_factor for check if output size has changed
     p$scale_factor <- scale_factor
@@ -542,13 +540,13 @@ plot_map <- function(...) {
 #' osm_data <- get_osmdata(lat=44.568611, lon=15.331389, x_distance=100)
 #' }
 #' @export
-get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = F, keep = F) {
+get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = TRUE, keep = TRUE) {
 
   if (is.null(lat) && is.null(lon) && is.null(x_distance) && is.null(y_distance) && is.null(aspect_ratio) && is.null(bbox) && is.null(sf)) {
     stop(cli::cli_abort("At least one argument must be set"))
   }
 
-  calculated_bbox <- T
+  calculated_bbox <- TRUE
 
   if (is.null(bbox) && is.null(sf)) {
     # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
@@ -592,7 +590,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
   # bbox explicitly given
   else {
-    calculated_bbox <- F
+    calculated_bbox <- FALSE
     if (is.null(sf)) {
       place <- bbox
     } else {
@@ -659,7 +657,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   }
 
   # Retrieve data (can last 30s)
-  osm$x <- query |> osmdata::osmdata_sf(quiet = T)
+  osm$x <- query |> osmdata::osmdata_sf(quiet = TRUE)
 
   # remove columns that are not needed
   if (keep == FALSE) {
