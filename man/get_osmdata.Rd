@@ -12,8 +12,8 @@ get_osmdata(
   aspect_ratio = NULL,
   bbox = NULL,
   sf = NULL,
-  quiet = F,
-  keep = F
+  quiet = TRUE,
+  keep = TRUE
 )
 }
 \arguments{
