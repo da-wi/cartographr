@@ -10,7 +10,7 @@ test_that("adjust_viewport returns correct ggplot2 coord_sf object", {
 test_that("add_attribution returns correct ggplot2 labs object", {
   cartographr_env$attribution <- TRUE
   result <- add_attribution()
-  expect_true(all(c("ggplot2::labels", "gg", "S7_object") %in% class(result)))
+  expect_true(inherits(result, c("ggplot2::labels", "labels")))
   expect_equal(result$caption, "CARTOGRAPHR   |   OPENSTREETMAP")
 })
 
