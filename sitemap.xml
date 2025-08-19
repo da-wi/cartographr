@@ -1,69 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://da-wi.github.io/cartographr/404.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/articles/cartographr.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/index.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/crime.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/crop.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/get_osmdata.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/get_palette.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/osm.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/plot_map.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/preprocess_map.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/print_config.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/save_map.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/set_attribution.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/set_output_size.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/soho_boundary.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_infomap.html</loc>
-  </url>
-  <url>
-    <loc>https://da-wi.github.io/cartographr/reference/theme_poster.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://da-wi.github.io/cartographr/404.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/LICENSE.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/articles/cartographr.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/articles/index.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/authors.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/index.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/news/index.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/crime.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/crop.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/get_osmdata.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/get_palette.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/index.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/osm.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/plot_map.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/preprocess_map.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/print_config.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/save_map.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/set_attribution.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/set_output_size.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/soho_boundary.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/theme_infomap.html</loc></url>
+<url><loc>https://da-wi.github.io/cartographr/reference/theme_poster.html</loc></url>
 </urlset>
+
