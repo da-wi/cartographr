@@ -84,7 +84,7 @@ test_that("crop function throws error for invalid osm input", {
 test_that("plot_map returns a plot object", {
   data("osm")
   result <- plot_map(osm)
-  expect_true(ggplot2::is.ggplot(result))
+  expect_true(ggplot2::is_ggplot(result))
 })
 
 test_that("plot_map stops with an error for incorrect input", {
