@@ -41,6 +41,22 @@ add_attribution <- function() {
   }
 }
 
+#' Choose local metric CRS
+#'
+#' This function returns the appropriate CRS
+#'
+#' @return A CRS
+#' @noRd
+#' @keywords internal
+.choose_local_metric_crs <- function(lat, lon) {
+  if (lat <= -80 || lat >= 84) {
+    return(sf::st_crs(if (lat >= 0) 32661 else 32761))  # UPS
+  }
+  zone <- floor((lon + 180) / 6) + 1L
+  epsg <- if (lat >= 0) 32600 + zone else 32700 + zone  # UTM N/S
+  sf::st_crs(epsg)
+}
+
 #' Generate bounding circle
 #'
 #' This function generates a bounding circle
@@ -52,12 +68,16 @@ add_attribution <- function() {
 #' @return The circle
 #' @noRd
 #' @keywords internal
-get_circle <- function(lat,lon,y_distance,x_distance) {
-  return(data.frame(lat = as.numeric(lat),  long = as.numeric(lon)) |>
-           sf::st_as_sf(coords = c("long", "lat"), crs = 4326) |>
-           sf::st_transform(crs = "+proj=utm +zone=33 +datum=WGS84") |>
-           sf::st_buffer(dist = min(y_distance,x_distance)) |>
-           sf::st_transform(crs = 4326))
+get_circle <- function(lat, lon, y_distance, x_distance) {
+  r <- min(as.numeric(y_distance), as.numeric(x_distance))
+  stopifnot(is.finite(r), r > 0)
+  crs_metric <- .choose_local_metric_crs(lat, lon)
+
+  sf::st_as_sf(data.frame(long = as.numeric(lon), lat = as.numeric(lat)),
+               coords = c("long", "lat"), crs = 4326) |>
+    sf::st_transform(crs_metric) |>
+    sf::st_buffer(dist = r) |>
+    sf::st_transform(4326)
 }
 
 #' Generate bounding hexagon
@@ -74,7 +94,7 @@ get_circle <- function(lat,lon,y_distance,x_distance) {
 #' @keywords internal
 get_hexagon <- function(lat, lon, y_distance, x_distance, orientation = "horizontal") {
   if(!(orientation %in% c("vertical","horizontal")))
-    stop(cli::cli_abort('{.arg orientation} must be either "vertical" or "horizontal"'))
+    cli::cli_abort('{.arg orientation} must be either "vertical" or "horizontal"')
 
   n_sides <- 6
   radius <- min(y_distance, x_distance)
@@ -140,7 +160,7 @@ get_border <- function(lat,lon,offlat,offlon) {
   de = offlon
 
   dLat = dn/R
-  dLon = de/(R*cos(3.1415*lat/180))
+  dLon = de/(R*cos(pi*lat/180))
 
   ymax = lat + dLat * 180/3.1415
   xmax = lon + dLon * 180/3.1415

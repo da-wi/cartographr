@@ -65,7 +65,7 @@ preprocess_map <- function(osm) {
 
   subset_water <- function(x) {
     if (!("water" %in% names(x))) return(NULL)
-    a <- subset(x, !is.na(water) & nzchar(water))
+    a <- subset(x, !is.na(x$water) & nzchar(x$water))
     if (nrow(a) > 0) a else NULL
   }
 
@@ -297,13 +297,21 @@ crop = function(osm, boundary = "rect") {
         cli::cli_abort('{.arg boundary} must be one of "circle", "hex", "rect"')
 
       if (boundary == "circle") {
-        crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        raw <- get_circle(osm$lat, osm$lon, osm$y_distance, osm$x_distance)
+        crop_extent <- sf::st_intersection(sf::st_geometry(raw), sf::st_as_sfc(osm$bbox))
+        crop_extent <- sf::st_sf(geometry = crop_extent)  # geometry-only
         osm$crop <- "circle"
+        #crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        #osm$crop <- "circle"
       }
 
       if (boundary == "hex") {
-        crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        raw <- get_hexagon(osm$lat, osm$lon, osm$y_distance, osm$x_distance)
+        crop_extent <- sf::st_intersection(sf::st_geometry(raw), sf::st_as_sfc(osm$bbox))
+        crop_extent <- sf::st_sf(geometry = crop_extent)
         osm$crop <- "hex"
+        #crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        #osm$crop <- "hex"
       }
 
       if (boundary == "rect") {
@@ -382,7 +390,7 @@ plot_map <- function(...) {
 #'
 #' @param osm OSM object to plot
 #' @param palette Color theme applied to the plot
-#' @return NULL
+#' @return A ggplot2 object
 #' @keywords internal
 #' @noRd
 .plot_map = function(osm, palette = "imhof") {
@@ -655,9 +663,9 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
       sf::st_as_sf(data.frame(x = (bbox[1]+bbox[3])/2, y = bbox[2]), coords = c("x","y"), crs = 4326),
       sf::st_as_sf(data.frame(x = (bbox[1]+bbox[3])/2, y = bbox[4]), coords = c("x","y"), crs = 4326)
     )
-    # optional: als numeric speichern
-    x_distance <- as.numeric(x_distance)
-    y_distance <- as.numeric(y_distance)
+
+    x_distance <- as.numeric(x_distance) / 2
+    y_distance <- as.numeric(y_distance) / 2
   }
 
   query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>

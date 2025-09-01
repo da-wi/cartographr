@@ -28,7 +28,7 @@ cartographr_env$attribution <- TRUE
 #' @export
 set_output_size <- function(size = NULL, orientation = "portrait") {
   if(!orientation %in% c('portrait','landscape'))
-    stop(cli::cli_abort('Orientation not recognized. Try "portrait" or "landscape"'))
+    cli::cli_abort('Orientation not recognized. Try "portrait" or "landscape"')
 
   if(is.null(size))
     return(cartographr_env$output_size)
@@ -48,7 +48,7 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
 
   if (is.character(size)) {
     if (!size %in% names(dims)) {
-      stop(cli::cli_abort('Format not recognized. Try: "A0", "A1", "A2", "A3", "A4", "A5", "A6", "small_poster", "medium_poster", "large_poster"'))
+      cli::cli_abort('Format not recognized. Try: "A0", "A1", "A2", "A3", "A4", "A5", "A6", "small_poster", "medium_poster", "large_poster"')
     }
     else {
       cartographr_env$output_size <- dims[[size]]
@@ -61,7 +61,7 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
 
   if (is.numeric(size) && !grid::is.unit(size)) {
     if (length(size) != 2) {
-      stop(cli::cli_abort("Lenght of vector 'format' must be exactly 2."))
+      cli::cli_abort("Lenght of vector 'format' must be exactly 2.")
     }
     else {
       cartographr_env$output_size <- size
@@ -72,7 +72,7 @@ set_output_size <- function(size = NULL, orientation = "portrait") {
 
   if (grid::is.unit(size)) {
     if (length(size) != 2) {
-      stop(cli::cli_abort("Lenght of vector 'format' must be exactly 2."))
+      cli::cli_abort("Lenght of vector 'format' must be exactly 2.")
     }
     else {
       cartographr_env$output_size <- as.numeric(grid::convertUnit(size, "mm"))
@@ -111,7 +111,7 @@ set_attribution <- function(attribution = NULL) {
   if (is.null(attribution))
     return(cartographr_env$attribution)
   if (!is.logical(attribution)) {
-    stop(cli::cli_abort("Argument must be type 'logical'"))
+    cli::cli_abort("Argument must be type 'logical'")
   }
   cartographr_env$attribution <- attribution
   invisible()
