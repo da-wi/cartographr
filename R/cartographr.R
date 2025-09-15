@@ -146,9 +146,19 @@ preprocess_map <- function(osm) {
   osm$sf_green_combined <- combine_list(list(osm$sf_green$osm_polygons, osm$sf_green$osm_multipolygons))
 
 
+  #only_polys <- function(x) {
+  #  if (is.null(x)) return(NULL)
+  #  keep <- sf::st_geometry_type(x, by_geometry = TRUE) %in% c("POLYGON", "MULTIPOLYGON")
+  #  x[keep, , drop = FALSE]
+  #}
   only_polys <- function(x) {
     if (is.null(x)) return(NULL)
+    if (!inherits(x, "sf") || nrow(x) == 0) return(NULL)
+    geom_col <- attr(x, "sf_column", exact = TRUE)
+    if (is.null(geom_col) || is.null(x[[geom_col]])) return(NULL)
+
     keep <- sf::st_geometry_type(x, by_geometry = TRUE) %in% c("POLYGON", "MULTIPOLYGON")
+    if (all(!keep)) return(NULL)
     x[keep, , drop = FALSE]
   }
   osm$sf_water_combined <- only_polys(osm$sf_water_combined)
@@ -244,6 +254,7 @@ preprocess_map <- function(osm) {
   }
 }
 
+
 #' Crop a preprocessed map
 #'
 #' This function crops an OpenStreetMap (OSM) object that has been preprocessed.
@@ -280,7 +291,7 @@ crop = function(osm, boundary = "rect") {
     cli::cli_abort("boundary is not a valid character or 'sf' object.")
   }
 
-  suppressWarnings({
+  suppressWarnings(suppressMessages({
 
     if (is.null(osm$preprocessed)) {
       osm <- preprocess_map(osm)
@@ -343,8 +354,8 @@ crop = function(osm, boundary = "rect") {
 
     if (!is.null(crop_extent)) osm$crop_extent <- crop_extent
 
-  })
-  return(osm)
+  }))
+  return(invisible(osm))
 }
 
 
@@ -399,6 +410,10 @@ plot_map <- function(...) {
     osm <- preprocess_map(osm)
   }
 
+  if(is.null(osm$crop) | is.na(osm$crop)) {
+    osm <- crop(osm)
+  }
+
   color = get_palette(palette)
 
   scale_factor <- cartographr_env$scale_factor
@@ -431,22 +446,38 @@ plot_map <- function(...) {
   if (is.null(osm_object$crop_extent))
     osm_object$crop_extent <- osm_object$bbox |> sf::st_as_sfc()
 
+  # frame <- NULL
+  # if (!is.null(color$border_color)) {
+  #   suppressWarnings({
+  #     width = ifelse(is.null(color$border_width),0.001,color$border_width)
+  #
+  #     zone <- floor((osm$lon + 180)/6) + 1L  # derive from center lon
+  #     utm  <- paste0("+proj=utm +zone=", zone, " +datum=WGS84")
+  #     projected_shape <- sf::st_transform(osm_object$crop_extent, crs = utm)
+  #
+  #     buffered_projected_shape <- sf::st_buffer(projected_shape, dist = sqrt((sf::st_bbox(projected_shape)[3]-sf::st_bbox(projected_shape)[1])^2+
+  #                                                                              (sf::st_bbox(projected_shape)[4]-sf::st_bbox(projected_shape)[2])^2)*width)
+  #     buffered_shape <- sf::st_transform(buffered_projected_shape, crs = sf::st_crs(osm_object$crop_extent))
+  #     frame <- suppressMessages(sf::st_difference(buffered_shape, osm_object$crop_extent))
+  #   })
+  #   # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
+  # }
   frame <- NULL
-  if (!is.null(color$border_color)) {
+  if (!is.null(color$border_color) && !is.na(color$border_color)) {
+    # allow optional color$border_width_unit; default "rel"
+    unit <- if (is.null(color$border_width_unit)) "rel" else color$border_width_unit
+    bw   <- if (is.null(color$border_width)) 0.001 else color$border_width
     suppressWarnings({
-      width = ifelse(is.null(color$border_width),0.001,color$border_width)
-
-      zone <- floor((osm$lon + 180)/6) + 1L  # derive from center lon
-      utm  <- paste0("+proj=utm +zone=", zone, " +datum=WGS84")
-      projected_shape <- sf::st_transform(osm_object$crop_extent, crs = utm)
-
-      buffered_projected_shape <- sf::st_buffer(projected_shape, dist = sqrt((sf::st_bbox(projected_shape)[3]-sf::st_bbox(projected_shape)[1])^2+
-                                                                               (sf::st_bbox(projected_shape)[4]-sf::st_bbox(projected_shape)[2])^2)*width)
-      buffered_shape <- sf::st_transform(buffered_projected_shape, crs = sf::st_crs(osm_object$crop_extent))
-      frame <- suppressMessages(sf::st_difference(buffered_shape, osm_object$crop_extent))
-    })
-    # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
+    frame <- .make_border_ring(
+      crop_extent = if (is.null(osm_object$crop_extent)) sf::st_as_sfc(osm_object$bbox) else osm_object$crop_extent,
+      lat = osm$lat %||% NULL,
+      lon = osm$lon %||% NULL,
+      border_width = bw,
+      width_unit = unit
+    ) })
   }
+
+
   ###########
 
   # colors for buildings
@@ -483,18 +514,18 @@ plot_map <- function(...) {
                        color=color$railway, linewidth = 2*scale_factor)} +
 
     # streets
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "trunk") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "trunk_link") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "motorway") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "motorway_link") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "primary") , color=color$street, linewidth=color$linewidth_primary*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "secondary") , color=color$street, linewidth=color$linewidth_secondary*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "tertiary") , color=color$street, linewidth=color$linewidth_tertiary*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "unclassified") , color=color$street, linewidth=color$linewidth_unclassified*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "residential") , color=color$street, linewidth=color$linewidth_residential*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=color$linewidth_pedestrian*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "service") , color=color$street, linewidth=color$linewidth_service*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "living_street"), color=color$street, linewidth=color$linewidth_living_street*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "trunk") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "trunk_link") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "motorway") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "motorway_link") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "primary") , color=color$street, linewidth=color$linewidth_primary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "secondary") , color=color$street, linewidth=color$linewidth_secondary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "tertiary") , color=color$street, linewidth=color$linewidth_tertiary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "unclassified") , color=color$street, linewidth=color$linewidth_unclassified*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "residential") , color=color$street, linewidth=color$linewidth_residential*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=color$linewidth_pedestrian*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "service") , color=color$street, linewidth=color$linewidth_service*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "living_street"), color=color$street, linewidth=color$linewidth_living_street*scale_factor) +
     {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$sf_street$osm_points, color=color$lights, size=color$size_streetlamp*scale_factor)} +
 
     # buildings
@@ -503,7 +534,7 @@ plot_map <- function(...) {
 
 
     # border
-    ggplot2::geom_sf(data=frame, fill = "black", color = NA) +
+    ggplot2::geom_sf(data=frame, fill = color$border_color, color = NA) +
 
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
@@ -577,11 +608,33 @@ plot_map <- function(...) {
 #' @export
 get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = TRUE, keep = TRUE) {
 
-  if (is.null(lat) && is.null(lon) && is.null(x_distance) && is.null(y_distance) && is.null(aspect_ratio) && is.null(bbox) && is.null(sf)) {
+  if (is.null(lat) && is.null(lon) &&
+      is.null(x_distance) && is.null(y_distance) &&
+      is.null(aspect_ratio) && is.null(bbox) &&
+      is.null(sf)) {
     cli::cli_abort("At least one argument must be set")
   }
 
+  if (!is.null(bbox) & !inherits(bbox, "bbox")) {
+    cli::cli_abort("`bbox` is not a valid bbox object")
+  }
+
+  osm <- c()
+
+  if (!curl::has_internet()) {
+    cli::cli_alert_danger("No internet connection; cannot reach Overpass API.")
+    osm$bbox <- bbox
+    osm$y_distance <- y_distance
+    osm$x_distance <- x_distance
+    osm$aspect_ratio <- aspect_ratio
+    osm$lat <- lat
+    osm$lon <- lon
+    osm$x <- empty_osmdata_sf()
+    return(invisible(osm))  # empty container
+  }
+
   calculated_bbox <- TRUE
+
 
   if (is.null(bbox) && is.null(sf)) {
     # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
@@ -653,7 +706,6 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     lon <- (bbox$xmin + bbox$xmax) / 2
     lat <- (bbox$ymin + bbox$ymax) / 2
 
-    # Distanzen in Metern ellipsoidisch (S2 an)
     old <- sf::sf_use_s2(); on.exit(sf::sf_use_s2(old), add = TRUE); sf::sf_use_s2(TRUE)
     x_distance <- sf::st_distance(
       sf::st_as_sf(data.frame(x = bbox[1], y = (bbox[2]+bbox[4])/2), coords = c("x","y"), crs = 4326),
@@ -669,41 +721,62 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   }
 
   query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>
-    osmdata::add_osm_features(list("highway" =
-                                     c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
-                                       "tertiary", "unclassified", "residential",
-                                       "living_street","street_lamp", "pedestrian", "track", "path","steps"),
-                                   "water" = c(),
-                                   "building" = c(),
-                                   "natural" = "beach",
-                                   "amenity" = "parking",
-                                   "man_made" = "pier",
-                                   "railway" = "rail",
-                                   "place" = "sea",
-                                   "place" = "ocean",
-                                   "natural"= "water",
-                                   "natural" = "strait",
-                                   "leisure" = "swimming_pool",
-                                   "natural" = "bay",
-                                   "boundary" = "maritime",
-                                   "waterway" = "stream",
-                                   "landuse"="forest",
-                                   "landuse"="farmland",
-                                   "landuse"="grass",
-                                   "landuse"="orchard",
-                                   "landuse"="allotments",
-                                   "leisure"="pitch",
-                                   "landuse"="recreation_ground",
-                                   "landuse"="vineyard",
-                                   "landuse"="cemetery",
-                                   "landuse"="meadow",
-                                   "leisure"="nature_reserve",
-                                   "leisure"="garden",
-                                   "leisure"="park",
-                                   "natural"="island",
-                                   "natural"="wood"))
+    osmdata::add_osm_features(list(
+      highway = c(
+        "motorway","motorway_link","trunk","trunk_link",
+        "primary","secondary","tertiary","unclassified","residential",
+        "living_street","street_lamp","pedestrian","track","path","steps"
+      ),
+      water     = c(),
+      building  = c(),
+      natural   = c("beach","water","strait","bay","island","wood"),
+      amenity   = "parking",
+      man_made  = "pier",
+      railway   = "rail",
+      place     = c("sea","ocean"),
+      boundary  = "maritime",
+      waterway  = "stream",
+      landuse   = c("forest","farmland","grass","orchard","allotments",
+                    "recreation_ground","vineyard","cemetery","meadow"),
+      leisure   = c("swimming_pool","pitch","nature_reserve","garden","park")
+    ))
 
-  osm <- c()
+  # query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>
+  #   osmdata::add_osm_features(list("highway" =
+  #                                    c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
+  #                                      "tertiary", "unclassified", "residential",
+  #                                      "living_street","street_lamp", "pedestrian", "track", "path","steps"),
+  #                                  "water" = c(),
+  #                                  "building" = c(),
+  #                                  "natural" = "beach",
+  #                                  "amenity" = "parking",
+  #                                  "man_made" = "pier",
+  #                                  "railway" = "rail",
+  #                                  "place" = "sea",
+  #                                  "place" = "ocean",
+  #                                  "natural"= "water",
+  #                                  "natural" = "strait",
+  #                                  "leisure" = "swimming_pool",
+  #                                  "natural" = "bay",
+  #                                  "boundary" = "maritime",
+  #                                  "waterway" = "stream",
+  #                                  "landuse"="forest",
+  #                                  "landuse"="farmland",
+  #                                  "landuse"="grass",
+  #                                  "landuse"="orchard",
+  #                                  "landuse"="allotments",
+  #                                  "leisure"="pitch",
+  #                                  "landuse"="recreation_ground",
+  #                                  "landuse"="vineyard",
+  #                                  "landuse"="cemetery",
+  #                                  "landuse"="meadow",
+  #                                  "leisure"="nature_reserve",
+  #                                  "leisure"="garden",
+  #                                  "leisure"="park",
+  #                                  "natural"="island",
+  #                                  "natural"="wood"))
+  #
+  #
 
   if(!quiet) cli::cli_alert_info("Retrieving data, be patient, on public servers it can last up to one minute")
 
@@ -715,7 +788,13 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   }
 
   # Retrieve data (can last 30s)
-  osm$x <- query |> osmdata::osmdata_sf(quiet = TRUE)
+  osm$x <- tryCatch(query |> osmdata::osmdata_sf(quiet = TRUE), error = function(e) e)
+
+  if (inherits(osm$x, "error")) {
+    msg <- paste0("Overpass query failed: ", conditionMessage(osm$x))
+    cli::cli_abort(msg)
+  }
+
 
   # remove columns that are not needed
   if (keep == FALSE) {

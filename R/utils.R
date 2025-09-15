@@ -1,6 +1,6 @@
 #' Adjust the viewport for map visualization
 #'
-#' This internal function adjusts the viewport for map visualization using ggplot2.
+#' This function adjusts the viewport for map visualization using ggplot2.
 #' It modifies the x and y limits based on the bounding box (bbox) of the OpenStreetMap (OSM) object.
 #'
 #' @param osm_object An OSM object containing a bbox attribute.
@@ -11,15 +11,19 @@
 #' The function calculates new x and y limits by adding and subtracting a twentieth of the bbox's width and height
 #' from the respective minimum and maximum x and y values. This removes the margin around the map, enhancing visibility.
 #'
-#' @noRd
-#' @keywords internal
+#' @export
 adjust_viewport <- function(osm_object) {
+  # return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1] +(osm_object$bbox[3]-osm_object$bbox[1])/22,
+  #                                   osm_object$bbox[3] -(osm_object$bbox[3]-osm_object$bbox[1])/22),
+  #                          ylim = c(osm_object$bbox[2] +(osm_object$bbox[4]-osm_object$bbox[2])/22,
+  #                                   osm_object$bbox[4] -(osm_object$bbox[4]-osm_object$bbox[2])/22),
+  #                          clip = "off", expand = FALSE))
+  return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1] ,
+                                    osm_object$bbox[3] ),
+                            ylim = c(osm_object$bbox[2] ,
+                                     osm_object$bbox[4]) ,
+                            clip = "off", expand = FALSE))
 
-  return(ggplot2::coord_sf(xlim = c(osm_object$bbox[1] +(osm_object$bbox[3]-osm_object$bbox[1])/22,
-                                    osm_object$bbox[3] -(osm_object$bbox[3]-osm_object$bbox[1])/22),
-                           ylim = c(osm_object$bbox[2] +(osm_object$bbox[4]-osm_object$bbox[2])/22,
-                                    osm_object$bbox[4] -(osm_object$bbox[4]-osm_object$bbox[2])/22),
-                           clip = "on"))
 }
 
 #' Add attribution caption to plots
@@ -48,7 +52,7 @@ add_attribution <- function() {
 #' @return A CRS
 #' @noRd
 #' @keywords internal
-.choose_local_metric_crs <- function(lat, lon) {
+choose_local_metric_crs <- function(lat, lon) {
   if (lat <= -80 || lat >= 84) {
     return(sf::st_crs(if (lat >= 0) 32661 else 32761))  # UPS
   }
@@ -71,7 +75,7 @@ add_attribution <- function() {
 get_circle <- function(lat, lon, y_distance, x_distance) {
   r <- min(as.numeric(y_distance), as.numeric(x_distance))
   stopifnot(is.finite(r), r > 0)
-  crs_metric <- .choose_local_metric_crs(lat, lon)
+  crs_metric <- choose_local_metric_crs(lat, lon)
 
   sf::st_as_sf(data.frame(long = as.numeric(lon), lat = as.numeric(lat)),
                coords = c("long", "lat"), crs = 4326) |>
@@ -169,3 +173,100 @@ get_border <- function(lat,lon,offlat,offlon) {
 
   return(c(xmin,ymin,xmax,ymax))
 }
+
+#' Construct an empty osmdata sf container
+#' @param crs EPSG code for the geometry columns (default 4326)
+#' @return An object of class c("osmdata", "osmdata_sf") with empty layers
+#' @noRd
+#' @keywords internal
+empty_osmdata_sf <- function(crs = 4326) {
+  empty_sf <- function() sf::st_sf(geometry = sf::st_sfc(crs = sf::st_crs(crs)))[0, ]
+
+  out <- list(
+    bbox               = sf::st_bbox(c(xmin = NA_real_, ymin = NA_real_,
+                                       xmax = NA_real_, ymax = NA_real_),
+                                     crs = sf::st_crs(crs)),
+    overpass_call      = list(url = NA_character_),
+    osm_points         = empty_sf(),
+    osm_lines          = empty_sf(),
+    osm_polygons       = empty_sf(),
+    osm_multilines     = empty_sf(),
+    osm_multipolygons  = empty_sf()
+  )
+  class(out) <- c("osmdata", "osmdata_sf")
+  out
+}
+
+# Skip online tests on CRAN or when Overpass is unreachable
+#' @noRd
+#' @keywords internal
+skip_if_no_overpass <- function() {
+  testthat::skip_on_cran()              # never hit the network on CRAN
+  if (!curl::has_internet()) {
+    testthat::skip("No internet; skipping online tests.")
+  }
+  ok <- tryCatch({
+    httr2::request("https://overpass-api.de/api/status") |>
+      httr2::req_timeout(5) |>
+      httr2::req_perform()
+    TRUE
+  }, error = function(e) FALSE)
+  if (!ok) testthat::skip("Overpass API not reachable; skipping.")
+}
+
+#' Build a border ring around crop_extent
+#' @keywords internal
+.make_border_ring <- function(crop_extent, lat = NULL, lon = NULL,
+                              border_width = 0.001,
+                              width_unit = c("rel", "m", "mm")) {
+  width_unit <- match.arg(width_unit)
+  if (is.null(crop_extent)) return(NULL)
+
+  # Derive center if lat/lon not provided
+  if (is.null(lat) || is.null(lon)) {
+    ctr <- try(suppressWarnings(sf::st_coordinates(sf::st_centroid(sf::st_as_sfc(sf::st_bbox(crop_extent)))[1])), silent = TRUE)
+    if (!inherits(ctr, "try-error")) {
+      lon <- ctr[1]; lat <- ctr[2]
+    } else {
+      lon <- 0; lat <- 0  # harmless fallback
+    }
+  }
+
+  # Choose a local metric CRS (UTM/UPS)
+  crs_metric <- choose_local_metric_crs(lat, lon)
+
+  # Project to metric, compute diag length in meters
+  ce_g <- sf::st_geometry(crop_extent)           # geometry only
+  ce_p <- sf::st_transform(ce_g, crs_metric)
+  bb   <- sf::st_bbox(ce_p)
+  diag_m <- sqrt((bb$xmax - bb$xmin)^2 + (bb$ymax - bb$ymin)^2)
+
+  # Compute buffer in meters
+  width_m <- switch(
+    width_unit,
+    rel = as.numeric(border_width) * diag_m,
+    m   = as.numeric(border_width),
+    mm  = {
+      # convert mm on output device to meters on map
+      out_mm <- cartographr_env$output_size
+      # pick the larger dimension to be conservative
+      plot_mm <- max(out_mm)
+      # map-width in meters:
+      map_w_m <- (bb$xmax - bb$xmin)
+      (as.numeric(border_width) / plot_mm) * map_w_m
+    }
+  )
+  if (!is.finite(width_m) || width_m <= 0) return(NULL)
+
+  # Build ring and return geometry-only sf
+  buffered <- suppressWarnings(sf::st_buffer(ce_p, dist = width_m))
+  ring_p   <- suppressWarnings(sf::st_difference(buffered, ce_p))
+  if (sf::st_is_empty(ring_p)) return(NULL)
+
+  ring_ll  <- sf::st_transform(ring_p, sf::st_crs(crop_extent))
+  ring_ll  <- suppressWarnings(sf::st_cast(ring_ll, "MULTIPOLYGON", warn = FALSE))
+  ring_sf  <- sf::st_sf(geometry = sf::st_geometry(ring_ll))
+  sf::st_agr(ring_sf) <- "constant"
+  ring_sf
+}
+

@@ -4,5 +4,5 @@
 
 ## Resubmission
 
-* This is a resubmission to adjust tests for ggplot2’s move of `labels` to S7.
-* No functional changes; only tests updated to use `inherits()` compatible with S3/S7.
+* This update fixes the previous ERROR from Overpass API timeouts.
+* Functions now fail gracefully with an informative message when the API is unavailable, and network-dependent tests are skipped on CRAN.
