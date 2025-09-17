@@ -202,6 +202,8 @@ empty_osmdata_sf <- function(crs = 4326) {
 #' @keywords internal
 skip_if_no_overpass <- function() {
   testthat::skip_on_cran()              # never hit the network on CRAN
+  testthat::skip_on_ci()
+
   if (!curl::has_internet()) {
     testthat::skip("No internet; skipping online tests.")
   }
