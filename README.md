@@ -5,6 +5,11 @@
 [![R-CMD-check](https://github.com/da-wi/cartographr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/da-wi/cartographr/actions/workflows/R-CMD-check.yaml)
 [![codecov test
 coverage](https://codecov.io/gh/da-wi/cartographr/branch/develop/graph/badge.svg)](https://app.codecov.io/gh/da-wi/cartographr?branch=develop)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![License:
+GPL3](https://img.shields.io/badge/license-GPL3.0-yellow)](https://opensource.org/license/gpl-3-0)
+[![](https://cranlogs.r-pkg.org/badges/cartographr)](https://cran.rstudio.com/web/packages/cartographr/index.html)
 
 ## Overview
 
@@ -101,6 +106,7 @@ df_pal <- tibble (palettes= c("alphabet", "arctic","autumn", "bw",
 ```
 
 <p align="center">
+
 <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-1.png' width='30%'>
 <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-2.png' width='30%'>
 <img src='https://github.com/da-wi/cartographr/raw/develop/png/plot palettes-3.png' width='30%'>
