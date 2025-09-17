@@ -26,14 +26,14 @@
 #' data("osm")
 #' preprocessed_osm <- osm |> preprocess_map()
 #' @export
-preprocess_map = function(osm) {
+preprocess_map <- function(osm) {
 
   if(is.null(osm)) {
-    stop(cli::cli_abort("{.arg osm} is not a list of osm features."))
+    cli::cli_abort("{.arg osm} is not a list of osm features.")
   }
 
   if(is.list(osm) & length(osm) == 0) {
-    stop(cli::cli_abort("{.arg osm} is an empty list."))
+    cli::cli_abort("{.arg osm} is an empty list.")
   }
 
 
@@ -57,14 +57,20 @@ preprocess_map = function(osm) {
     (\(x) if(!is.null(x$tunnel)) x[is.na(x$tunnel), ] else x)()
 
   # Water
+  #subset_water <- function(x) {
+  #  tmp <- NULL
+  #  if(!(is.null(x$water))) { a <- subset(x, x$water != "" ); if(nrow(a) > 0) tmp <- tmp |> rbind(a) }
+  #  return(tmp)
+  #}
+
   subset_water <- function(x) {
-    tmp <- c()
-    if(!(is.null(x$water))) { a <- subset(x, x$water != "" ); if(nrow(a) > 0) tmp <- tmp |> rbind(a) }
-    return(tmp)
+    if (!("water" %in% names(x))) return(NULL)
+    a <- subset(x, !is.na(x$water) & nzchar(x$water))
+    if (nrow(a) > 0) a else NULL
   }
 
   subset_sea <- function(x) {
-    tmp <- c()
+    tmp <- NULL
     if(!(is.null(x$leisure))) { a <- subset(x,x$leisure %in% c("swimming_pool")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$place))) { a <- subset(x,x$place %in% c("sea","ocean")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$natural))) { a <- subset(x,x$natural %in% c("water","strait","bay")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
@@ -90,7 +96,7 @@ preprocess_map = function(osm) {
 
   # Green
   subset_green <- function(x) {
-    tmp <- c()
+    tmp <- NULL
     if(!(is.null(x$landuse))) { a <- subset(x,x$landuse %in% c("forest","allotments","farmland","grass","orchard","recreation_ground","vineyard","cemetery","meadow")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$leisure))) { a <- subset(x,x$leisure %in% c("park","garden","nature_reserve")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$natural))) { a <- subset(x,x$natural %in% c("island", "wood")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
@@ -103,12 +109,12 @@ preprocess_map = function(osm) {
 
   # Beach
   osm$sf_beach <- list()
-  if(!is.null(osm$x$osm_multipolygons)) osm$sf_beach$osm_multipolygons <- subset(osm$sf_beach$osm_multipolygons,osm$sf_beach$osm_multipolygons$natural %in% c("beach"))
+  if(!is.null(osm$x$osm_multipolygons)) osm$sf_beach$osm_multipolygons <- subset(osm$x$osm_multipolygons,osm$x$osm_multipolygons$natural %in% c("beach"))
 
   # Parking
   osm$sf_parking <- list()
   subset_parking <- function(x) {
-    tmp <- c()
+    tmp <- NULL
     if(!(is.null(x$amenity))) { a <- subset(x,x$amenity %in% c("parking")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$highway))) { a <- subset(x,x$highway %in% c("pedestrian")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
     if(!(is.null(x$man_made))) { a <- subset(x,x$man_made %in% c("pier")); if (nrow(a) > 0) tmp <- tmp |> rbind(a) }
@@ -124,7 +130,7 @@ preprocess_map = function(osm) {
     if (length(x) > 1) {
       dis <- do.call(rbind, lapply(x, function(df) df[, Reduce(intersect, lapply(x, colnames))]))
     } else {
-        if (length(x) == 1) dis <- x[[1]]
+      if (length(x) == 1) dis <- x[[1]]
     }
     return(dis)
   }
@@ -138,6 +144,26 @@ preprocess_map = function(osm) {
 
   # green
   osm$sf_green_combined <- combine_list(list(osm$sf_green$osm_polygons, osm$sf_green$osm_multipolygons))
+
+
+  #only_polys <- function(x) {
+  #  if (is.null(x)) return(NULL)
+  #  keep <- sf::st_geometry_type(x, by_geometry = TRUE) %in% c("POLYGON", "MULTIPOLYGON")
+  #  x[keep, , drop = FALSE]
+  #}
+  only_polys <- function(x) {
+    if (is.null(x)) return(NULL)
+    if (!inherits(x, "sf") || nrow(x) == 0) return(NULL)
+    geom_col <- attr(x, "sf_column", exact = TRUE)
+    if (is.null(geom_col) || is.null(x[[geom_col]])) return(NULL)
+
+    keep <- sf::st_geometry_type(x, by_geometry = TRUE) %in% c("POLYGON", "MULTIPOLYGON")
+    if (all(!keep)) return(NULL)
+    x[keep, , drop = FALSE]
+  }
+  osm$sf_water_combined <- only_polys(osm$sf_water_combined)
+  osm$sf_buildings_combined <- only_polys(osm$sf_buildings_combined)
+  osm$sf_green_combined <- only_polys(osm$sf_green_combined)
 
   osm$crop <- NA
   osm$crop_extent <- sf::st_bbox(osm$bbox) |> sf::st_as_sfc()
@@ -161,7 +187,9 @@ preprocess_map = function(osm) {
 #' @keywords internal
 .create_hatch_pattern <- function(boundary, type = "points", n_points = 200, n_lines = 100)  {
 
-  suppressMessages(sf::sf_use_s2(FALSE))
+  suppressWarnings(suppressMessages(old_s2 <- sf::sf_use_s2()))
+  on.exit(suppressWarnings(suppressMessages(sf::sf_use_s2(old_s2))), add = TRUE)
+  suppressWarnings(suppressMessages(sf::sf_use_s2(FALSE)))
 
   # union to multipolygon if listtools:
   if (!is.null(nrow(boundary))) {
@@ -194,8 +222,8 @@ preprocess_map = function(osm) {
 
       direction = list( horizontal = c(1, 2),
                         vertical = c(1, 4),
-                        left2right = c(2, 4),
-                        right2left = c(1, 3)
+                        right2left = c(1, 3),
+                        left2right = c(2, 4)
       )
 
       endsf = lapply(1:length(fillgrid), function(j)
@@ -204,16 +232,23 @@ preprocess_map = function(osm) {
             fillgrid[j])[direction[[3]], 1:2]
         )
       )
-      endsf = sf::st_sfc(endsf, crs = sf::st_crs(boundary))
 
-      endsf = sf::st_intersection(endsf,boundary)
-      endsf = endsf[sf::st_geometry_type(endsf)
-                    %in% c("LINESTRING", "MULTILINESTRING")
-      ]
-      endsf = sf::st_line_merge(sf::st_union(endsf))
+        endsf = sf::st_sfc(endsf, crs = sf::st_crs(boundary))
+
+        #endsf = sf::st_intersection(endsf,boundary)
+
+        endsf <- sf::st_intersection(endsf, sf::st_geometry(boundary))  # no attrs copied
+        endsf <- sf::st_line_merge(sf::st_union(endsf))
+        endsf <- sf::st_sf(geometry = endsf)
+        sf::st_agr(endsf) <- "constant"
+
+
+        endsf = endsf[sf::st_geometry_type(endsf)
+                      %in% c("LINESTRING", "MULTILINESTRING")
+        ]
+        #endsf = sf::st_line_merge(sf::st_union(endsf))
+
     }))
-
-    suppressMessages(sf::sf_use_s2(TRUE))
 
     return(endsf)
   }
@@ -249,14 +284,14 @@ preprocess_map = function(osm) {
 crop = function(osm, boundary = "rect") {
 
   if (is.null(osm)) {
-    stop(cli::cli_abort("'osm' is not a valid object."))
+    cli::cli_abort("'osm' is not a valid object.")
   }
 
   if (is.null(boundary)) {
-    stop(cli::cli_abort("boundary is not a valid character or 'sf' object."))
+    cli::cli_abort("boundary is not a valid character or 'sf' object.")
   }
 
-  suppressWarnings({
+  suppressWarnings(suppressMessages({
 
     if (is.null(osm$preprocessed)) {
       osm <- preprocess_map(osm)
@@ -270,16 +305,24 @@ crop = function(osm, boundary = "rect") {
 
     if (is.character(boundary)) {
       if (!(boundary %in% c("circle", "hex", "rect")))
-        stop(cli::cli_abort('{.arg boundary} must be one of "circle", "hex", "rect"'))
+        cli::cli_abort('{.arg boundary} must be one of "circle", "hex", "rect"')
 
       if (boundary == "circle") {
-        crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        raw <- get_circle(osm$lat, osm$lon, osm$y_distance, osm$x_distance)
+        crop_extent <- sf::st_intersection(sf::st_geometry(raw), sf::st_as_sfc(osm$bbox))
+        crop_extent <- sf::st_sf(geometry = crop_extent)  # geometry-only
         osm$crop <- "circle"
+        #crop_extent <- get_circle(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        #osm$crop <- "circle"
       }
 
       if (boundary == "hex") {
-        crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        raw <- get_hexagon(osm$lat, osm$lon, osm$y_distance, osm$x_distance)
+        crop_extent <- sf::st_intersection(sf::st_geometry(raw), sf::st_as_sfc(osm$bbox))
+        crop_extent <- sf::st_sf(geometry = crop_extent)
         osm$crop <- "hex"
+        #crop_extent <- get_hexagon(osm$lat,osm$lon,osm$y_distance,osm$x_distance)
+        #osm$crop <- "hex"
       }
 
       if (boundary == "rect") {
@@ -291,8 +334,8 @@ crop = function(osm, boundary = "rect") {
     osm$bbox <- sf::st_bbox(crop_extent)
 
     # streets
-    if(!is.null(osm$sf_street$osm_lines) & length(osm$sf_street$osm_lines) > 0) osm$sf_street$osm_lines <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_lines), crop_extent )))
-    if(!is.null(osm$sf_street$osm_points) & length(osm$sf_street$osm_points) > 0) osm$sf_street$osm_points <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_points), crop_extent )))
+    if(!is.null(osm$sf_street$osm_lines) & nrow(osm$sf_street$osm_lines) > 0) osm$sf_street$osm_lines <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_lines), crop_extent )))
+    if(!is.null(osm$sf_street$osm_points) & nrow(osm$sf_street$osm_points) > 0) osm$sf_street$osm_points <- suppressWarnings(suppressMessages(sf::st_intersection(sf::st_make_valid(osm$sf_street$osm_points), crop_extent )))
 
     # buildings
     if(!is.null(osm$sf_buildings_combined)) osm$sf_buildings_combined <- suppressWarnings(suppressMessages(osm$sf_buildings_combined |> sf::st_make_valid() |> sf::st_intersection(x=_, crop_extent )))
@@ -311,8 +354,8 @@ crop = function(osm, boundary = "rect") {
 
     if (!is.null(crop_extent)) osm$crop_extent <- crop_extent
 
-  })
-  return(osm)
+  }))
+  return(invisible(osm))
 }
 
 
@@ -340,7 +383,7 @@ plot_map <- function(...) {
   } else if (is.list(args[[1]])) {
     osm <- args[[1]]
   } else {
-    stop(cli::cli_abort("Input should be a list or contain a named argument 'osm'."))
+    cli::cli_abort("Input should be a list or contain a named argument 'osm'.")
   }
 
   plot <- .plot_map(...)
@@ -358,13 +401,17 @@ plot_map <- function(...) {
 #'
 #' @param osm OSM object to plot
 #' @param palette Color theme applied to the plot
-#' @return NULL
+#' @return A ggplot2 object
 #' @keywords internal
 #' @noRd
 .plot_map = function(osm, palette = "imhof") {
 
   if (is.null(osm$preprocessed)) {
     osm <- preprocess_map(osm)
+  }
+
+  if(is.null(osm$crop) | is.na(osm$crop)) {
+    osm <- crop(osm)
   }
 
   color = get_palette(palette)
@@ -374,24 +421,24 @@ plot_map <- function(...) {
   osm_object <- osm
 
   if (color$hatch_water) {
-    pattern_water <- .create_hatch_pattern(boundary = suppressMessages(sf::st_intersection(osm_object$sf_water_combined |> sf::st_make_valid(),osm_object$crop_extent)),
-                                            type = color$hatch_water_type,
-                                            n_points = color$hatch_water_npoints,
-                                            n_lines  = color$hatch_water_nlines)
+    pattern_water <- .create_hatch_pattern(boundary = suppressWarnings(suppressMessages(sf::st_intersection(osm_object$sf_water_combined |> sf::st_make_valid(),osm_object$crop_extent))),
+                                           type = color$hatch_water_type,
+                                           n_points = color$hatch_water_npoints,
+                                           n_lines  = color$hatch_water_nlines)
   }
 
   if (color$hatch_buildings) {
-    pattern_buildings <- .create_hatch_pattern( suppressMessages(sf::st_intersection(osm_object$sf_buildings_combined |> sf::st_make_valid(),osm_object$crop_extent)),
-                                              type = color$hatch_buildings_type,
-                                              n_points = color$hatch_buildings_npoints,
-                                              n_lines  = color$hatch_buildings_nlines)
+    pattern_buildings <- .create_hatch_pattern( suppressWarnings(suppressMessages(sf::st_intersection(osm_object$sf_buildings_combined |> sf::st_make_valid(),osm_object$crop_extent))),
+                                                type = color$hatch_buildings_type,
+                                                n_points = color$hatch_buildings_npoints,
+                                                n_lines  = color$hatch_buildings_nlines)
   }
 
   if (color$hatch_green) {
-    pattern_green <- .create_hatch_pattern(suppressMessages(sf::st_intersection(osm_object$sf_green_combined |> sf::st_make_valid(),osm_object$crop_extent)),
-                                          type = color$hatch_green_type,
-                                          n_points = color$hatch_green_npoints,
-                                          n_lines  = color$hatch_green_nlines)
+    pattern_green <- .create_hatch_pattern(suppressWarnings(suppressMessages(sf::st_intersection(osm_object$sf_green_combined |> sf::st_make_valid(),osm_object$crop_extent))),
+                                           type = color$hatch_green_type,
+                                           n_points = color$hatch_green_npoints,
+                                           n_lines  = color$hatch_green_nlines)
   }
 
   ########
@@ -399,19 +446,38 @@ plot_map <- function(...) {
   if (is.null(osm_object$crop_extent))
     osm_object$crop_extent <- osm_object$bbox |> sf::st_as_sfc()
 
+  # frame <- NULL
+  # if (!is.null(color$border_color)) {
+  #   suppressWarnings({
+  #     width = ifelse(is.null(color$border_width),0.001,color$border_width)
+  #
+  #     zone <- floor((osm$lon + 180)/6) + 1L  # derive from center lon
+  #     utm  <- paste0("+proj=utm +zone=", zone, " +datum=WGS84")
+  #     projected_shape <- sf::st_transform(osm_object$crop_extent, crs = utm)
+  #
+  #     buffered_projected_shape <- sf::st_buffer(projected_shape, dist = sqrt((sf::st_bbox(projected_shape)[3]-sf::st_bbox(projected_shape)[1])^2+
+  #                                                                              (sf::st_bbox(projected_shape)[4]-sf::st_bbox(projected_shape)[2])^2)*width)
+  #     buffered_shape <- sf::st_transform(buffered_projected_shape, crs = sf::st_crs(osm_object$crop_extent))
+  #     frame <- suppressMessages(sf::st_difference(buffered_shape, osm_object$crop_extent))
+  #   })
+  #   # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
+  # }
   frame <- NULL
-  if (!is.null(color$border_color)) {
+  if (!is.null(color$border_color) && !is.na(color$border_color)) {
+    # allow optional color$border_width_unit; default "rel"
+    unit <- if (is.null(color$border_width_unit)) "rel" else color$border_width_unit
+    bw   <- if (is.null(color$border_width)) 0.001 else color$border_width
     suppressWarnings({
-    width = ifelse(is.null(color$border_width),0.001,color$border_width)
-    projected_shape <- sf::st_transform(osm_object$crop_extent, crs = "+proj=utm +zone=33 +datum=WGS84")
-
-    buffered_projected_shape <- sf::st_buffer(projected_shape, dist = sqrt((sf::st_bbox(projected_shape)[3]-sf::st_bbox(projected_shape)[1])^2+
-                                                                             (sf::st_bbox(projected_shape)[4]-sf::st_bbox(projected_shape)[2])^2)*width)
-    buffered_shape <- sf::st_transform(buffered_projected_shape, crs = sf::st_crs(osm_object$crop_extent))
-    frame <- suppressMessages(sf::st_difference(buffered_shape, osm_object$crop_extent))
-    })
-    # set p <- sf::st_bbox(frame) at the end to adjust_viewport() correctly
+    frame <- .make_border_ring(
+      crop_extent = if (is.null(osm_object$crop_extent)) sf::st_as_sfc(osm_object$bbox) else osm_object$crop_extent,
+      lat = osm$lat %||% NULL,
+      lon = osm$lon %||% NULL,
+      border_width = bw,
+      width_unit = unit
+    ) })
   }
+
+
   ###########
 
   # colors for buildings
@@ -434,10 +500,10 @@ plot_map <- function(...) {
     {if(!is.null(osm_object$sf_water_combined) && color$hatch_water == TRUE)  ggplot2::geom_sf( data=pattern_water, shape=18,fill="black", size = color$hatch_water_size*scale_factor, alpha=color$hatch_water_alpha )}+
 
     # green, beach & parking
-    ggplot2::geom_sf(data =osm_object$sf_beach$osm_multipolygons, fill = color$beach, color= NA, linewidth=0.05) +
-    ggplot2::geom_sf(data =osm_object$sf_parking$osm_multipolygons, fill = color$parking, color= NA, linewidth=0.05) +
-    ggplot2::geom_sf(data =osm_object$sf_green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05) +
-    ggplot2::geom_sf(data =osm_object$sf_green$osm_polygons, fill = color$green, color= NA, linewidth=0.05) +
+    ggplot2::geom_sf(data =osm_object$sf_beach$osm_multipolygons, fill = color$beach, color= NA, linewidth=0.05,shape = NA) +
+    ggplot2::geom_sf(data =osm_object$sf_parking$osm_multipolygons, fill = color$parking, color= NA, linewidth=0.05,shape = NA) +
+    ggplot2::geom_sf(data =osm_object$sf_green$osm_multipolygons, fill = color$green, color=NA , linewidth=0.05,shape = NA) +
+    ggplot2::geom_sf(data =osm_object$sf_green$osm_polygons, fill = color$green, color= NA, linewidth=0.05,shape = NA) +
 
     {if(!is.null(osm_object$sf_green_combined) && color$hatch_green == TRUE)  ggplot2::geom_sf( data=pattern_green, shape=18,fill="black", size = color$hatch_green_size*scale_factor,linewidth = color$hatch_green_size*scale_factor, alpha=color$hatch_green_alpha )}+
 
@@ -448,44 +514,44 @@ plot_map <- function(...) {
                        color=color$railway, linewidth = 2*scale_factor)} +
 
     # streets
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "trunk") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "trunk_link") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "motorway") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "motorway_link") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "primary") , color=color$street, linewidth=color$linewidth_primary*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "secondary") , color=color$street, linewidth=color$linewidth_secondary*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "tertiary") , color=color$street, linewidth=color$linewidth_tertiary*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "unclassified") , color=color$street, linewidth=color$linewidth_unclassified*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "residential") , color=color$street, linewidth=color$linewidth_residential*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=color$linewidth_pedestrian*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "service") , color=color$street, linewidth=color$linewidth_service*scale_factor) +
-    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm$sf_street$osm_lines$highway == "living_street"), color=color$street, linewidth=color$linewidth_living_street*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "trunk") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "trunk_link") , color=color$street, linewidth=color$linewidth_trunk*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "motorway") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "motorway_link") , color=color$street, linewidth=color$linewidth_motorway*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "primary") , color=color$street, linewidth=color$linewidth_primary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "secondary") , color=color$street, linewidth=color$linewidth_secondary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "tertiary") , color=color$street, linewidth=color$linewidth_tertiary*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "unclassified") , color=color$street, linewidth=color$linewidth_unclassified*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "residential") , color=color$street, linewidth=color$linewidth_residential*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "pedestrian") , color=color$street, linewidth=color$linewidth_pedestrian*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "service") , color=color$street, linewidth=color$linewidth_service*scale_factor) +
+    ggplot2::geom_sf(data = subset(osm_object$sf_street$osm_lines, osm_object$sf_street$osm_lines$highway == "living_street"), color=color$street, linewidth=color$linewidth_living_street*scale_factor) +
     {if(!is.null(color$lights)) ggplot2::geom_sf(data = osm_object$sf_street$osm_points, color=color$lights, size=color$size_streetlamp*scale_factor)} +
 
     # buildings
-    ggplot2::geom_sf(data = osm_object$sf_buildings_combined, fill = osm_object$sf_buildings_combined$colors, show.legend = FALSE, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor)+
+    ggplot2::geom_sf(data = osm_object$sf_buildings_combined, fill = osm_object$sf_buildings_combined$colors, show.legend = FALSE, color = ifelse(is.null(color$building_border), NA, color$building_border), linewidth =0.05*scale_factor,shape = NA)+
     {if(!is.null(osm_object$sf_buildings_combined) && color$hatch_buildings == TRUE)  ggplot2::geom_sf(data = pattern_buildings, shape=18,fill="black", size = color$hatch_buildings_size*scale_factor,linewidth = color$hatch_buildings_size*scale_factor, alpha=color$hatch_buildings_alpha )}+
 
 
     # border
-    ggplot2::geom_sf(data=frame, fill = "black", color = NA) +
+    ggplot2::geom_sf(data=frame, fill = color$border_color, color = NA) +
 
     ggplot2::scale_fill_manual(values=color$palette_building)+
 
     # remove axes
     ggplot2::theme_void()
 
-    # store scale_factor for check if output size has changed
-    p$scale_factor <- scale_factor
+  # store scale_factor for check if output size has changed
+  p$scale_factor <- scale_factor
 
-    # store bbox for adjust_viewport()
-    if(is.null(frame))
-      p$bbox <- osm_object$bbox
-    else
-      p$bbox <- sf::st_bbox(frame)
+  # store bbox for adjust_viewport()
+  if(is.null(frame))
+    p$bbox <- osm_object$bbox
+  else
+    p$bbox <- sf::st_bbox(frame)
 
 
-    return(p)
+  return(p)
 }
 
 
@@ -542,11 +608,33 @@ plot_map <- function(...) {
 #' @export
 get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = NULL, aspect_ratio = NULL, bbox = NULL, sf = NULL, quiet = TRUE, keep = TRUE) {
 
-  if (is.null(lat) && is.null(lon) && is.null(x_distance) && is.null(y_distance) && is.null(aspect_ratio) && is.null(bbox) && is.null(sf)) {
-    stop(cli::cli_abort("At least one argument must be set"))
+  if (is.null(lat) && is.null(lon) &&
+      is.null(x_distance) && is.null(y_distance) &&
+      is.null(aspect_ratio) && is.null(bbox) &&
+      is.null(sf)) {
+    cli::cli_abort("At least one argument must be set")
+  }
+
+  if (!is.null(bbox) & !inherits(bbox, "bbox")) {
+    cli::cli_abort("`bbox` is not a valid bbox object")
+  }
+
+  osm <- c()
+
+  if (!curl::has_internet()) {
+    cli::cli_alert_danger("No internet connection; cannot reach Overpass API.")
+    osm$bbox <- bbox
+    osm$y_distance <- y_distance
+    osm$x_distance <- x_distance
+    osm$aspect_ratio <- aspect_ratio
+    osm$lat <- lat
+    osm$lon <- lon
+    osm$x <- empty_osmdata_sf()
+    return(invisible(osm))  # empty container
   }
 
   calculated_bbox <- TRUE
+
 
   if (is.null(bbox) && is.null(sf)) {
     # Check the number of non-NULL arguments provided for y_distance, x_distance, and aspect_ratio
@@ -554,7 +642,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 
     # If all three are provided, stop the function
     if (num_args_provided > 2) {
-      stop(cli::cli_abort("Only two of 'y_distance', 'x_distance', and 'aspect_ratio' should be provided."))
+      cli::cli_abort("Only two of 'y_distance', 'x_distance', and 'aspect_ratio' should be provided.")
     }
 
     # If only two are provided, calculate the third variable
@@ -578,7 +666,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
           y_distance <- x_distance / aspect_ratio
         }
       } else {
-        stop(cli::cli_abort("`set_output_size()` must return a vector of length 2 to calculate aspect_ratio."))
+        cli::cli_abort("`set_output_size()` must return a vector of length 2 to calculate aspect_ratio.")
       }
     }
 
@@ -591,61 +679,104 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   # bbox explicitly given
   else {
     calculated_bbox <- FALSE
-    if (is.null(sf)) {
-      place <- bbox
+
+    if (!is.null(sf)) {
+      # transformiere sf robust nach 4326 und nimm deren bbox
+      place <- sf::st_bbox(sf::st_transform(sf, 4326))
+      bbox  <- place
     } else {
-      if (is.null(bbox)) {
-        place <- sf::st_bbox(sf)
-        bbox <- place
+      # bbox → sfc → transform → bbox
+      if (is.null(sf::st_crs(bbox))) {
+        cli::cli_abort("bbox has no CRS; supply a CRS or WGS84 bbox.")
       }
+      #place <- to_wgs84_bbox(bbox)
+      if (inherits(bbox, "bbox")) {
+        s <- sf::st_as_sfc(bbox, crs = sf::st_crs(bbox))
+        if (is.na(sf::st_crs(s))) {
+          cli::cli_abort("bbox has no CRS; please supply a CRS or a WGS84 bbox.")
+        }
+        place <- sf::st_bbox(sf::st_transform(s, 4326))
+      }
+      if (inherits(bbox, c("sf","sfc"))) {
+        place <- sf::st_bbox(sf::st_transform(sf::st_as_sfc(bbox), 4326))
+      }
+      bbox  <- place
     }
 
     lon <- (bbox$xmin + bbox$xmax) / 2
     lat <- (bbox$ymin + bbox$ymax) / 2
 
-    suppressWarnings(suppressMessages(sf::sf_use_s2(TRUE)))
-    x_distance <- sf::st_distance(sf::st_as_sf(data.frame(x = bbox[1], y = bbox[2]+(bbox[4]-bbox[2])/2), coords = c("x", "y"), crs = 4326), sf::st_as_sf(data.frame(x = bbox[3], y = bbox[2]+(bbox[4]-bbox[2])/2), coords = c("x", "y"), crs = 4326))
-    y_distance <- sf::st_distance(sf::st_as_sf(data.frame(x = bbox[2], y = bbox[1]+(bbox[3]-bbox[1])/2), coords = c("y", "x"), crs = 4326), sf::st_as_sf(data.frame(x = bbox[4], y = bbox[1]+(bbox[3]-bbox[1])/2), coords = c("y", "x"), crs = 4326))
-    suppressWarnings(suppressMessages(sf::sf_use_s2(FALSE)))
+    old <- sf::sf_use_s2(); on.exit(sf::sf_use_s2(old), add = TRUE); sf::sf_use_s2(TRUE)
+    x_distance <- sf::st_distance(
+      sf::st_as_sf(data.frame(x = bbox[1], y = (bbox[2]+bbox[4])/2), coords = c("x","y"), crs = 4326),
+      sf::st_as_sf(data.frame(x = bbox[3], y = (bbox[2]+bbox[4])/2), coords = c("x","y"), crs = 4326)
+    )
+    y_distance <- sf::st_distance(
+      sf::st_as_sf(data.frame(x = (bbox[1]+bbox[3])/2, y = bbox[2]), coords = c("x","y"), crs = 4326),
+      sf::st_as_sf(data.frame(x = (bbox[1]+bbox[3])/2, y = bbox[4]), coords = c("x","y"), crs = 4326)
+    )
 
+    x_distance <- as.numeric(x_distance) / 2
+    y_distance <- as.numeric(y_distance) / 2
   }
 
   query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>
-    osmdata::add_osm_features(list("highway" =
-                                     c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
-                                       "tertiary", "unclassified", "residential",
-                                       "living_street","street_lamp", "pedestrian", "track", "path","steps"),
-                                   "water" = c(),
-                                   "building" = c(),
-                                   "natural" = "beach",
-                                   "amenity" = "parking",
-                                   "man_made" = "pier",
-                                   "railway" = "rail",
-                                   "place" = "sea",
-                                   "place" = "ocean",
-                                   "natural"= "water",
-                                   "natural" = "strait",
-                                   "leisure" = "swimming_pool",
-                                   "natural" = "bay",
-                                   "boundary" = "maritime",
-                                   "waterway" = "stream",
-                                   "landuse"="forest",
-                                   "landuse"="farmland",
-                                   "landuse"="grass",
-                                   "landuse"="orchard",
-                                   "landuse"="allotments",
-                                   "leisure"="pitch",
-                                   "landuse"="recreation_ground",
-                                   "landuse"="vineyard",
-                                   "landuse"="cemetery",
-                                   "landuse"="meadow",
-                                   "leisure"="nature_reserve",
-                                   "leisure"="garden",
-                                   "leisure"="park",
-                                   "natural"="island",
-                                   "natural"="wood"))
+    osmdata::add_osm_features(list(
+      highway = c(
+        "motorway","motorway_link","trunk","trunk_link",
+        "primary","secondary","tertiary","unclassified","residential",
+        "living_street","street_lamp","pedestrian","track","path","steps"
+      ),
+      water     = c(),
+      building  = c(),
+      natural   = c("beach","water","strait","bay","island","wood"),
+      amenity   = "parking",
+      man_made  = "pier",
+      railway   = "rail",
+      place     = c("sea","ocean"),
+      boundary  = "maritime",
+      waterway  = "stream",
+      landuse   = c("forest","farmland","grass","orchard","allotments",
+                    "recreation_ground","vineyard","cemetery","meadow"),
+      leisure   = c("swimming_pool","pitch","nature_reserve","garden","park")
+    ))
 
-  osm <- c()
+  # query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>
+  #   osmdata::add_osm_features(list("highway" =
+  #                                    c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
+  #                                      "tertiary", "unclassified", "residential",
+  #                                      "living_street","street_lamp", "pedestrian", "track", "path","steps"),
+  #                                  "water" = c(),
+  #                                  "building" = c(),
+  #                                  "natural" = "beach",
+  #                                  "amenity" = "parking",
+  #                                  "man_made" = "pier",
+  #                                  "railway" = "rail",
+  #                                  "place" = "sea",
+  #                                  "place" = "ocean",
+  #                                  "natural"= "water",
+  #                                  "natural" = "strait",
+  #                                  "leisure" = "swimming_pool",
+  #                                  "natural" = "bay",
+  #                                  "boundary" = "maritime",
+  #                                  "waterway" = "stream",
+  #                                  "landuse"="forest",
+  #                                  "landuse"="farmland",
+  #                                  "landuse"="grass",
+  #                                  "landuse"="orchard",
+  #                                  "landuse"="allotments",
+  #                                  "leisure"="pitch",
+  #                                  "landuse"="recreation_ground",
+  #                                  "landuse"="vineyard",
+  #                                  "landuse"="cemetery",
+  #                                  "landuse"="meadow",
+  #                                  "leisure"="nature_reserve",
+  #                                  "leisure"="garden",
+  #                                  "leisure"="park",
+  #                                  "natural"="island",
+  #                                  "natural"="wood"))
+  #
+  #
 
   if(!quiet) cli::cli_alert_info("Retrieving data, be patient, on public servers it can last up to one minute")
 
@@ -657,7 +788,13 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   }
 
   # Retrieve data (can last 30s)
-  osm$x <- query |> osmdata::osmdata_sf(quiet = TRUE)
+  osm$x <- tryCatch(query |> osmdata::osmdata_sf(quiet = TRUE), error = function(e) e)
+
+  if (inherits(osm$x, "error")) {
+    msg <- paste0("Overpass query failed: ", conditionMessage(osm$x))
+    cli::cli_abort(msg)
+  }
+
 
   # remove columns that are not needed
   if (keep == FALSE) {
@@ -708,7 +845,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
 #' @export
 save_map <- function(plot, filename, device = "pdf") {
   if(!cartographr_env$orientation %in% c('portrait','landscape'))
-    stop(cli::cli_abort('Orientation not recognized. Try "portrait" or "landscape"'))
+    cli::cli_abort('Orientation not recognized. Try "portrait" or "landscape"')
 
   # if scale factors do not match anymore, we have to redraw the plot
   if (plot$scale_factor != cartographr_env$scale_factor) {
