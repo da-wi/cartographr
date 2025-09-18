@@ -9,7 +9,7 @@ coverage](https://codecov.io/gh/da-wi/cartographr/branch/develop/graph/badge.svg
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License:
 GPL3](https://img.shields.io/badge/license-GPL3.0-yellow)](https://opensource.org/license/gpl-3-0)
-[![](https://cranlogs.r-pkg.org/badges/cartographr)](https://cran.rstudio.com/web/packages/cartographr/index.html)
+[![](https://cranlogs.r-pkg.org/badges/cartographr)](https://CRAN.R-project.org/package=cartographr)
 
 ## Overview
 
