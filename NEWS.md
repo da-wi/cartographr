@@ -1,3 +1,7 @@
+# cartographr 0.2.5
+
+* Fixed a bug where get_osmdata() would crash if the Overpass API timed out or was unavailable. The function now handles connection failures and server-side errors gracefully by issuing a message and returning an empty dataset.
+
 # cartographr 0.2.4
 
 * Functions using the Overpass API now fail gracefully with an informative message; network-dependent tests are skipped on CRAN or when the API is unavailable.

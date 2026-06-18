@@ -272,3 +272,30 @@ skip_if_no_overpass <- function() {
   ring_sf
 }
 
+#' Safe OSM Data Query
+#'
+#' Wraps osmdata::osmdata_sf to gracefully handle API timeouts and errors
+#' to comply with CRAN policies.
+#' @param query An osmdata query object.
+#' @param quiet Logical flag to suppress progress messages.
+#' @return An osmdata object, or NULL if the API fails.
+#' @keywords internal
+#' @noRd
+safe_osmdata_sf <- function(query, quiet = TRUE) {
+  tryCatch(
+    {
+      # Attempt to fetch the data
+      res <- osmdata::osmdata_sf(query, quiet = quiet)
+      return(res)
+    },
+    error = function(e) {
+      # CRAN requires a graceful message, NOT an error
+      message("Overpass API query failed or is unavailable: ", e$message)
+      return(NULL)
+    },
+    warning = function(w) {
+      message("Overpass API query returned a warning: ", w$message)
+      return(NULL)
+    }
+  )
+}

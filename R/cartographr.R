@@ -619,7 +619,7 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     cli::cli_abort("`bbox` is not a valid bbox object")
   }
 
-  osm <- c()
+  osm <- list()
 
   if (!curl::has_internet()) {
     cli::cli_alert_danger("No internet connection; cannot reach Overpass API.")
@@ -689,7 +689,6 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
       if (is.null(sf::st_crs(bbox))) {
         cli::cli_abort("bbox has no CRS; supply a CRS or WGS84 bbox.")
       }
-      #place <- to_wgs84_bbox(bbox)
       if (inherits(bbox, "bbox")) {
         s <- sf::st_as_sfc(bbox, crs = sf::st_crs(bbox))
         if (is.na(sf::st_crs(s))) {
@@ -741,43 +740,6 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
       leisure   = c("swimming_pool","pitch","nature_reserve","garden","park")
     ))
 
-  # query <- osmdata::opq(bbox = place, timeout = 120, memsize = 134217728) |>
-  #   osmdata::add_osm_features(list("highway" =
-  #                                    c("motorway","motorway_link","trunk","trunk_link", "primary", "secondary",
-  #                                      "tertiary", "unclassified", "residential",
-  #                                      "living_street","street_lamp", "pedestrian", "track", "path","steps"),
-  #                                  "water" = c(),
-  #                                  "building" = c(),
-  #                                  "natural" = "beach",
-  #                                  "amenity" = "parking",
-  #                                  "man_made" = "pier",
-  #                                  "railway" = "rail",
-  #                                  "place" = "sea",
-  #                                  "place" = "ocean",
-  #                                  "natural"= "water",
-  #                                  "natural" = "strait",
-  #                                  "leisure" = "swimming_pool",
-  #                                  "natural" = "bay",
-  #                                  "boundary" = "maritime",
-  #                                  "waterway" = "stream",
-  #                                  "landuse"="forest",
-  #                                  "landuse"="farmland",
-  #                                  "landuse"="grass",
-  #                                  "landuse"="orchard",
-  #                                  "landuse"="allotments",
-  #                                  "leisure"="pitch",
-  #                                  "landuse"="recreation_ground",
-  #                                  "landuse"="vineyard",
-  #                                  "landuse"="cemetery",
-  #                                  "landuse"="meadow",
-  #                                  "leisure"="nature_reserve",
-  #                                  "leisure"="garden",
-  #                                  "leisure"="park",
-  #                                  "natural"="island",
-  #                                  "natural"="wood"))
-  #
-  #
-
   if(!quiet) cli::cli_alert_info("Retrieving data, be patient, on public servers it can last up to one minute")
 
   if (calculated_bbox) {
@@ -787,18 +749,25 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
     if(!quiet) cli::cli_alert_info(paste0("lat:",round(lat,2),", lon:",round(lon,2),", dy:",round(y_distance,2),", dx:", round(x_distance,2)))
   }
 
-  # Retrieve data (can last 30s)
-  osm$x <- tryCatch(query |> osmdata::osmdata_sf(quiet = TRUE), error = function(e) e)
+  osm_result <- safe_osmdata_sf(query, quiet = quiet)
 
-  if (inherits(osm$x, "error")) {
-    msg <- paste0("Overpass query failed: ", conditionMessage(osm$x))
-    cli::cli_abort(msg)
+  # Graceful exit if the API failed
+  if (is.null(osm_result)) {
+    osm$bbox <- bbox
+    osm$y_distance <- y_distance
+    osm$x_distance <- x_distance
+    osm$aspect_ratio <- aspect_ratio
+    osm$lat <- lat
+    osm$lon <- lon
+    osm$x <- empty_osmdata_sf()
+    return(invisible(osm))  # empty container
   }
 
+  # If API succeeded, map the result
+  osm$x <- osm_result
 
   # remove columns that are not needed
   if (keep == FALSE) {
-    #print(colnames(osm$x$osm_points))
     if(!is.null(osm$x$osm_points))
       if(!is.null(osm$x$osm_points$highway))
         osm$x$osm_points <- subset(osm$x$osm_points, select=c("geometry", "highway"))
@@ -818,7 +787,6 @@ get_osmdata <- function(lat = NULL, lon = NULL, x_distance = NULL, y_distance = 
   osm$lon <- lon
 
   if(!quiet) cli::cli_alert_success(crayon::blue("Complete."))
-
 
   return(osm)
 }
